@@ -10,7 +10,7 @@ services:
       - key: APP_ENV
         value: prod
       - key: APP_DEBUG
-        value: "0"
+        value: "1"
       - key: APP_SECRET
         generateValue: true
       - key: DEFAULT_URI

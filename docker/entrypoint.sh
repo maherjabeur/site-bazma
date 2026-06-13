@@ -34,8 +34,14 @@ if [ "${RUN_MIGRATIONS:-0}" = "1" ]; then
     php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
 fi
 
-php bin/console cache:clear --env=prod --no-debug --no-warmup
-php bin/console cache:warmup --env=prod --no-debug
+if [ "${APP_DEBUG:-0}" = "1" ] || [ "${APP_DEBUG:-0}" = "true" ]; then
+    CONSOLE_DEBUG_FLAG="--debug"
+else
+    CONSOLE_DEBUG_FLAG="--no-debug"
+fi
+
+php bin/console cache:clear --env="${APP_ENV:-prod}" "${CONSOLE_DEBUG_FLAG}" --no-warmup
+php bin/console cache:warmup --env="${APP_ENV:-prod}" "${CONSOLE_DEBUG_FLAG}"
 chown -R www-data:www-data var public/uploads
 
 exec "$@"
