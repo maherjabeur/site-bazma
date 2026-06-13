@@ -16,7 +16,10 @@ final class Version20260612183000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $this->addSql("UPDATE event SET featured = 0, position = position + 20 WHERE slug NOT IN ('actualite-photos-bazma', 'actualite-maison-jeunes-bazma', 'actualite-sport-bazma', 'actualite-associations-bazma')");
+        $this->addSql($this->isPostgreSql()
+            ? "UPDATE event SET featured = false, position = position + 20 WHERE slug NOT IN ('actualite-photos-bazma', 'actualite-maison-jeunes-bazma', 'actualite-sport-bazma', 'actualite-associations-bazma')"
+            : "UPDATE event SET featured = 0, position = position + 20 WHERE slug NOT IN ('actualite-photos-bazma', 'actualite-maison-jeunes-bazma', 'actualite-sport-bazma', 'actualite-associations-bazma')"
+        );
 
         $items = [
             [
@@ -91,9 +94,7 @@ final class Version20260612183000 extends AbstractMigration
 
         foreach ($items as $item) {
             $this->addSql(
-                "INSERT INTO event (title, slug, title_en, title_ar, event_date, location, category, source_url, image_url, excerpt, excerpt_en, excerpt_ar, featured, position, description, description_en, description_ar, published)
-                 VALUES (:title, :slug, :title_en, :title_ar, :event_date, :location, :category, NULL, :image_url, :excerpt, :excerpt_en, :excerpt_ar, 1, :position, :description, :description_en, :description_ar, 1)
-                 ON DUPLICATE KEY UPDATE title = VALUES(title), title_en = VALUES(title_en), title_ar = VALUES(title_ar), event_date = VALUES(event_date), location = VALUES(location), category = VALUES(category), image_url = VALUES(image_url), excerpt = VALUES(excerpt), excerpt_en = VALUES(excerpt_en), excerpt_ar = VALUES(excerpt_ar), featured = 1, position = VALUES(position), description = VALUES(description), description_en = VALUES(description_en), description_ar = VALUES(description_ar), published = 1",
+                $this->eventUpsertSql(),
                 $item
             );
         }
@@ -102,5 +103,23 @@ final class Version20260612183000 extends AbstractMigration
     public function down(Schema $schema): void
     {
         $this->addSql("DELETE FROM event WHERE slug IN ('actualite-photos-bazma', 'actualite-maison-jeunes-bazma', 'actualite-sport-bazma', 'actualite-associations-bazma')");
+    }
+
+    private function eventUpsertSql(): string
+    {
+        if ($this->isPostgreSql()) {
+            return "INSERT INTO event (title, slug, title_en, title_ar, event_date, location, category, source_url, image_url, excerpt, excerpt_en, excerpt_ar, featured, position, description, description_en, description_ar, published)
+                 VALUES (:title, :slug, :title_en, :title_ar, :event_date, :location, :category, NULL, :image_url, :excerpt, :excerpt_en, :excerpt_ar, true, :position, :description, :description_en, :description_ar, true)
+                 ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, title_en = EXCLUDED.title_en, title_ar = EXCLUDED.title_ar, event_date = EXCLUDED.event_date, location = EXCLUDED.location, category = EXCLUDED.category, image_url = EXCLUDED.image_url, excerpt = EXCLUDED.excerpt, excerpt_en = EXCLUDED.excerpt_en, excerpt_ar = EXCLUDED.excerpt_ar, featured = true, position = EXCLUDED.position, description = EXCLUDED.description, description_en = EXCLUDED.description_en, description_ar = EXCLUDED.description_ar, published = true";
+        }
+
+        return "INSERT INTO event (title, slug, title_en, title_ar, event_date, location, category, source_url, image_url, excerpt, excerpt_en, excerpt_ar, featured, position, description, description_en, description_ar, published)
+                 VALUES (:title, :slug, :title_en, :title_ar, :event_date, :location, :category, NULL, :image_url, :excerpt, :excerpt_en, :excerpt_ar, 1, :position, :description, :description_en, :description_ar, 1)
+                 ON DUPLICATE KEY UPDATE title = VALUES(title), title_en = VALUES(title_en), title_ar = VALUES(title_ar), event_date = VALUES(event_date), location = VALUES(location), category = VALUES(category), image_url = VALUES(image_url), excerpt = VALUES(excerpt), excerpt_en = VALUES(excerpt_en), excerpt_ar = VALUES(excerpt_ar), featured = 1, position = VALUES(position), description = VALUES(description), description_en = VALUES(description_en), description_ar = VALUES(description_ar), published = 1";
+    }
+
+    private function isPostgreSql(): bool
+    {
+        return str_contains($this->connection->getDatabasePlatform()::class, 'PostgreSQL');
     }
 }

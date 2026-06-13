@@ -12,11 +12,13 @@ RUN apt-get update \
         libicu-dev \
         libjpeg62-turbo-dev \
         libpng-dev \
+        libpq-dev \
         libwebp-dev \
         libzip-dev \
+        postgresql-client \
         unzip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
-    && docker-php-ext-install -j"$(nproc)" gd intl opcache pdo_mysql zip \
+    && docker-php-ext-install -j"$(nproc)" gd intl opcache pdo_mysql pdo_pgsql zip \
     && a2enmod rewrite headers expires \
     && rm -rf /var/lib/apt/lists/*
 

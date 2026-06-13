@@ -55,7 +55,7 @@ final class Version20260612170000 extends AbstractMigration
 
         foreach ($settings as $key => $value) {
             $this->addSql(
-                'INSERT INTO site_setting (setting_key, setting_value) VALUES (:setting_key, :setting_value) ON DUPLICATE KEY UPDATE setting_key = setting_key',
+                $this->settingInsertSql(),
                 ['setting_key' => $key, 'setting_value' => $value]
             );
         }
@@ -99,6 +99,20 @@ final class Version20260612170000 extends AbstractMigration
             'home_fact_4_label_ar',
         ];
 
-        $this->addSql('DELETE FROM site_setting WHERE setting_key IN (:keys)', ['keys' => $keys], ['keys' => \Doctrine\DBAL\Connection::PARAM_STR_ARRAY]);
+        $this->addSql('DELETE FROM site_setting WHERE setting_key IN (:keys)', ['keys' => $keys], ['keys' => \Doctrine\DBAL\ArrayParameterType::STRING]);
+    }
+
+    private function settingInsertSql(): string
+    {
+        if ($this->isPostgreSql()) {
+            return 'INSERT INTO site_setting (setting_key, setting_value) VALUES (:setting_key, :setting_value) ON CONFLICT (setting_key) DO NOTHING';
+        }
+
+        return 'INSERT INTO site_setting (setting_key, setting_value) VALUES (:setting_key, :setting_value) ON DUPLICATE KEY UPDATE setting_key = setting_key';
+    }
+
+    private function isPostgreSql(): bool
+    {
+        return str_contains($this->connection->getDatabasePlatform()::class, 'PostgreSQL');
     }
 }

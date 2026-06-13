@@ -11,12 +11,32 @@ if [ -n "${DB_HOSTPORT:-}" ]; then
     DB_PORT="${DB_HOSTPORT##*:}"
 fi
 
-if [ -n "${DB_HOST:-}" ]; then
-    DB_PORT="${DB_PORT:-3306}"
+if [ -n "${DATABASE_URL:-}" ]; then
+    case "${DATABASE_URL}" in
+        postgres://*|postgresql://*)
+            DB_SERVER_VERSION="${DB_SERVER_VERSION:-18.0.0}"
+            ;;
+        mysql://*|mariadb://*)
+            DB_SERVER_VERSION="${DB_SERVER_VERSION:-8.4.7}"
+            ;;
+    esac
+    export DB_SERVER_VERSION
+    echo "Using database from DATABASE_URL"
+elif [ -n "${DB_HOST:-}" ]; then
+    DB_DRIVER="${DB_DRIVER:-mysql}"
     DB_NAME="${DB_NAME:-bazma}"
     DB_USER="${DB_USER:-bazma}"
     DB_PASSWORD_ENCODED="$(php -r 'echo rawurlencode(getenv("DB_PASSWORD") ?: "");')"
-    export DATABASE_URL="mysql://${DB_USER}:${DB_PASSWORD_ENCODED}@${DB_HOST}:${DB_PORT}/${DB_NAME}?serverVersion=${DB_SERVER_VERSION:-8.4.7}&charset=utf8mb4"
+    if [ "${DB_DRIVER}" = "postgres" ] || [ "${DB_DRIVER}" = "postgresql" ]; then
+        DB_PORT="${DB_PORT:-5432}"
+        DB_SERVER_VERSION="${DB_SERVER_VERSION:-18.0.0}"
+        export DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD_ENCODED}@${DB_HOST}:${DB_PORT}/${DB_NAME}?serverVersion=${DB_SERVER_VERSION}&charset=utf8"
+    else
+        DB_PORT="${DB_PORT:-3306}"
+        DB_SERVER_VERSION="${DB_SERVER_VERSION:-8.4.7}"
+        export DATABASE_URL="mysql://${DB_USER}:${DB_PASSWORD_ENCODED}@${DB_HOST}:${DB_PORT}/${DB_NAME}?serverVersion=${DB_SERVER_VERSION}&charset=utf8mb4"
+    fi
+    export DB_SERVER_VERSION
     echo "Using database ${DB_HOST}:${DB_PORT}/${DB_NAME}"
 fi
 
@@ -26,13 +46,25 @@ fi
     printf 'SetEnv APP_SECRET "%s"\n' "${APP_SECRET:-}"
     printf 'SetEnv DEFAULT_URI "%s"\n' "${DEFAULT_URI:-https://www.bazma.tn}"
     printf 'SetEnv DATABASE_URL "%s"\n' "${DATABASE_URL:-}"
+    printf 'SetEnv DB_SERVER_VERSION "%s"\n' "${DB_SERVER_VERSION:-}"
 } > /etc/apache2/conf-available/app-env.conf
 a2enconf app-env >/dev/null
 
 mkdir -p var/cache var/log var/editor-video-chunks public/uploads
 chown -R www-data:www-data var public/uploads
 
-if [ -n "${DB_HOST:-}" ]; then
+if [ -n "${DB_HOST:-}" ] && { [ "${DB_DRIVER:-mysql}" = "postgres" ] || [ "${DB_DRIVER:-mysql}" = "postgresql" ]; }; then
+    echo "Waiting for PostgreSQL database ${DB_HOST}:${DB_PORT:-5432}..."
+    ATTEMPTS=0
+    until PGPASSWORD="${DB_PASSWORD:-}" pg_isready -h "${DB_HOST}" -p "${DB_PORT:-5432}" -U "${DB_USER:-bazma}" -d "${DB_NAME:-bazma}" >/dev/null 2>&1; do
+        ATTEMPTS=$((ATTEMPTS + 1))
+        if [ "$ATTEMPTS" -ge 60 ]; then
+            echo "PostgreSQL database is not reachable after 60 attempts."
+            exit 1
+        fi
+        sleep 2
+    done
+elif [ -n "${DB_HOST:-}" ]; then
     echo "Waiting for database ${DB_HOST}:${DB_PORT:-3306}..."
     ATTEMPTS=0
     until mysqladmin ping -h"${DB_HOST}" -P"${DB_PORT:-3306}" -u"${DB_USER:-bazma}" -p"${DB_PASSWORD:-}" --ssl=0 --silent; do

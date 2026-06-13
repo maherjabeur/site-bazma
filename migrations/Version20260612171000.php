@@ -96,7 +96,7 @@ final class Version20260612171000 extends AbstractMigration
 
         foreach ($settings as $key => $value) {
             $this->addSql(
-                'INSERT INTO site_setting (setting_key, setting_value) VALUES (:setting_key, :setting_value) ON DUPLICATE KEY UPDATE setting_key = setting_key',
+                $this->settingInsertSql(),
                 ['setting_key' => $key, 'setting_value' => $value]
             );
         }
@@ -104,6 +104,26 @@ final class Version20260612171000 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
+        if ($this->isPostgreSql()) {
+            $this->addSql("DELETE FROM site_setting WHERE setting_key ~ '^(brand|nav_|home_|read_more_|source_label_|news_source_label_|planned_label_|no_news_)'");
+
+            return;
+        }
+
         $this->addSql("DELETE FROM site_setting WHERE setting_key REGEXP '^(brand|nav_|home_|read_more_|source_label_|news_source_label_|planned_label_|no_news_)'");
+    }
+
+    private function settingInsertSql(): string
+    {
+        if ($this->isPostgreSql()) {
+            return 'INSERT INTO site_setting (setting_key, setting_value) VALUES (:setting_key, :setting_value) ON CONFLICT (setting_key) DO NOTHING';
+        }
+
+        return 'INSERT INTO site_setting (setting_key, setting_value) VALUES (:setting_key, :setting_value) ON DUPLICATE KEY UPDATE setting_key = setting_key';
+    }
+
+    private function isPostgreSql(): bool
+    {
+        return str_contains($this->connection->getDatabasePlatform()::class, 'PostgreSQL');
     }
 }

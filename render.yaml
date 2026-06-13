@@ -21,17 +21,9 @@ services:
         sync: false
       - key: PORT
         value: "10000"
-      - key: DB_HOST
-        sync: false
-      - key: DB_PORT
-        value: "3306"
-      - key: DB_NAME
-        sync: false
-      - key: DB_USER
-        sync: false
-      - key: DB_PASSWORD
+      - key: DATABASE_URL
         sync: false
       - key: DB_SERVER_VERSION
-        value: "8.4.7"
+        value: "18.0.0"
       - key: RUN_MIGRATIONS
         value: "1"

@@ -48,15 +48,24 @@ http://localhost:8000
 
 La base MySQL locale ecoute sur le port `3307` de la machine hote.
 
-Le conteneur web construit automatiquement `DATABASE_URL` a partir de `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` et `DB_SERVER_VERSION`.
+Le conteneur web construit automatiquement une URL MySQL locale a partir de `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` et `DB_SERVER_VERSION`.
 
 ## Deploiement Render
 
 Ce projet doit etre deploye sur Render avec le runtime `Docker`, pas avec un runtime natif. Le fichier `render.yaml` force Render a construire l'image depuis `Dockerfile`.
 
-Si un service Render existe deja avec un mauvais runtime, recreer le service en choisissant `Docker` dans le champ `Language`, puis renseigner les variables `DEFAULT_URI`, `DB_HOST`, `DB_NAME`, `DB_USER` et `DB_PASSWORD`.
+Si un service Render existe deja avec un mauvais runtime, recreer le service en choisissant `Docker` dans le champ `Language`.
 
-Si Render affiche `Invalid platform version "" specified`, verifier dans `Environment` que `DB_SERVER_VERSION` n'est pas vide. Pour MySQL 8, la valeur recommandee est `8.4.7`. Si `DATABASE_URL` est renseignee directement, elle doit contenir `serverVersion=8.4.7`, jamais `serverVersion=`.
+Pour une base PostgreSQL Render, renseigner:
+
+```text
+DATABASE_URL=<Internal Database URL de Render>
+DB_SERVER_VERSION=18.0.0
+```
+
+Utiliser l'`Internal Database URL` si le service web est aussi sur Render. L'`External Database URL` fonctionne aussi, mais elle passe par l'acces public.
+
+Si Render affiche `Invalid platform version "" specified`, verifier dans `Environment` que `DB_SERVER_VERSION` n'est pas vide. Pour PostgreSQL 18, la valeur recommandee est `18.0.0`. Si `DATABASE_URL` contient un parametre `serverVersion`, il doit etre `serverVersion=18.0.0`, jamais `serverVersion=`.
 
 ## Administration
 
