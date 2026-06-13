@@ -31,9 +31,9 @@ RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --no-
     && chown -R www-data:www-data var public/uploads
 
 COPY docker/apache/vhost.conf /etc/apache2/sites-available/000-default.conf.template
-COPY docker/entrypoint.sh /usr/local/bin/render-entrypoint
+COPY docker/entrypoint.sh /usr/local/bin/docker-entrypoint
 
-RUN chmod +x /usr/local/bin/render-entrypoint
+RUN chmod +x /usr/local/bin/docker-entrypoint
 
-ENTRYPOINT ["render-entrypoint"]
+ENTRYPOINT ["docker-entrypoint"]
 CMD ["apache2-foreground"]

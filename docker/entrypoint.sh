@@ -26,8 +26,8 @@ fi
     printf 'SetEnv APP_SECRET "%s"\n' "${APP_SECRET:-}"
     printf 'SetEnv DEFAULT_URI "%s"\n' "${DEFAULT_URI:-https://www.bazma.tn}"
     printf 'SetEnv DATABASE_URL "%s"\n' "${DATABASE_URL:-}"
-} > /etc/apache2/conf-available/render-env.conf
-a2enconf render-env >/dev/null
+} > /etc/apache2/conf-available/app-env.conf
+a2enconf app-env >/dev/null
 
 mkdir -p var/cache var/log var/editor-video-chunks public/uploads
 chown -R www-data:www-data var public/uploads
@@ -35,7 +35,7 @@ chown -R www-data:www-data var public/uploads
 if [ -n "${DB_HOST:-}" ]; then
     echo "Waiting for database ${DB_HOST}:${DB_PORT:-3306}..."
     ATTEMPTS=0
-    until mysqladmin ping -h"${DB_HOST}" -P"${DB_PORT:-3306}" -u"${DB_USER:-bazma}" -p"${DB_PASSWORD:-}" --silent; do
+    until mysqladmin ping -h"${DB_HOST}" -P"${DB_PORT:-3306}" -u"${DB_USER:-bazma}" -p"${DB_PASSWORD:-}" --ssl=0 --silent; do
         ATTEMPTS=$((ATTEMPTS + 1))
         if [ "$ATTEMPTS" -ge 60 ]; then
             echo "Database is not reachable after 60 attempts."
