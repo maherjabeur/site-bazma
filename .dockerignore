@@ -1,0 +1,11 @@
+.git
+.gitignore
+.dockerignore
+Dockerfile
+README.md
+var/
+vendor/
+node_modules/
+npm-debug.log
+yarn-error.log
+config/secrets/prod/prod.decrypt.private.php

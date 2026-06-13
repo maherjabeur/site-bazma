@@ -18,6 +18,12 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class PublicController extends AbstractController
 {
+    #[Route('/healthz', name: 'app_healthz')]
+    public function healthz(): Response
+    {
+        return new Response('ok', Response::HTTP_OK, ['Content-Type' => 'text/plain; charset=UTF-8']);
+    }
+
     #[Route('/', name: 'app_root')]
     public function root(): RedirectResponse
     {
