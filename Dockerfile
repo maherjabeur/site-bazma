@@ -2,8 +2,6 @@ FROM php:8.3-apache
 
 ENV APP_ENV=prod \
     APP_DEBUG=0 \
-    APP_SECRET=render-build-placeholder \
-    DEFAULT_URI=https://www.bazma.tn \
     COMPOSER_ALLOW_SUPERUSER=1
 
 RUN apt-get update \
@@ -28,7 +26,7 @@ WORKDIR /var/www/html
 
 COPY . .
 
-RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader \
+RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --no-scripts --optimize-autoloader \
     && mkdir -p var/cache var/log var/editor-video-chunks public/uploads \
     && chown -R www-data:www-data var public/uploads
 
