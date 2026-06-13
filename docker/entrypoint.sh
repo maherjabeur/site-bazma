@@ -14,7 +14,9 @@ fi
 if [ -n "${DATABASE_URL:-}" ]; then
     case "${DATABASE_URL}" in
         postgres://*|postgresql://*)
-            DB_SERVER_VERSION="${DB_SERVER_VERSION:-18.0.0}"
+            if [ -z "${DB_SERVER_VERSION:-}" ] || [ "${DB_SERVER_VERSION}" = "8.4.7" ]; then
+                DB_SERVER_VERSION="18.0.0"
+            fi
             ;;
         mysql://*|mariadb://*)
             DB_SERVER_VERSION="${DB_SERVER_VERSION:-8.4.7}"
@@ -29,7 +31,9 @@ elif [ -n "${DB_HOST:-}" ]; then
     DB_PASSWORD_ENCODED="$(php -r 'echo rawurlencode(getenv("DB_PASSWORD") ?: "");')"
     if [ "${DB_DRIVER}" = "postgres" ] || [ "${DB_DRIVER}" = "postgresql" ]; then
         DB_PORT="${DB_PORT:-5432}"
-        DB_SERVER_VERSION="${DB_SERVER_VERSION:-18.0.0}"
+        if [ -z "${DB_SERVER_VERSION:-}" ] || [ "${DB_SERVER_VERSION}" = "8.4.7" ]; then
+            DB_SERVER_VERSION="18.0.0"
+        fi
         export DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD_ENCODED}@${DB_HOST}:${DB_PORT}/${DB_NAME}?serverVersion=${DB_SERVER_VERSION}&charset=utf8"
     else
         DB_PORT="${DB_PORT:-3306}"
