@@ -3,6 +3,11 @@ set -eu
 
 APP_PORT="${PORT:-10000}"
 
+APP_ENV="${APP_ENV:-prod}"
+APP_DEBUG="${APP_DEBUG:-0}"
+DEFAULT_URI="${DEFAULT_URI:-https://www.bazma.tn}"
+export APP_ENV APP_DEBUG DEFAULT_URI
+
 echo "Listen ${APP_PORT}" > /etc/apache2/ports.conf
 sed "s/__PORT__/${APP_PORT}/g" /etc/apache2/sites-available/000-default.conf.template > /etc/apache2/sites-available/000-default.conf
 
@@ -45,10 +50,10 @@ elif [ -n "${DB_HOST:-}" ]; then
 fi
 
 {
-    printf 'SetEnv APP_ENV "%s"\n' "${APP_ENV:-prod}"
-    printf 'SetEnv APP_DEBUG "%s"\n' "${APP_DEBUG:-0}"
+    printf 'SetEnv APP_ENV "%s"\n' "${APP_ENV}"
+    printf 'SetEnv APP_DEBUG "%s"\n' "${APP_DEBUG}"
     printf 'SetEnv APP_SECRET "%s"\n' "${APP_SECRET:-}"
-    printf 'SetEnv DEFAULT_URI "%s"\n' "${DEFAULT_URI:-https://www.bazma.tn}"
+    printf 'SetEnv DEFAULT_URI "%s"\n' "${DEFAULT_URI}"
     printf 'SetEnv DATABASE_URL "%s"\n' "${DATABASE_URL:-}"
     printf 'SetEnv DB_SERVER_VERSION "%s"\n' "${DB_SERVER_VERSION:-}"
 } > /etc/apache2/conf-available/app-env.conf
@@ -85,14 +90,14 @@ if [ "${RUN_MIGRATIONS:-0}" = "1" ]; then
     php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
 fi
 
-if [ "${APP_DEBUG:-0}" = "1" ] || [ "${APP_DEBUG:-0}" = "true" ]; then
+if [ "${APP_DEBUG}" = "1" ] || [ "${APP_DEBUG}" = "true" ]; then
     CONSOLE_DEBUG_FLAG="--debug"
 else
     CONSOLE_DEBUG_FLAG="--no-debug"
 fi
 
-php bin/console cache:clear --env="${APP_ENV:-prod}" "${CONSOLE_DEBUG_FLAG}" --no-warmup
-php bin/console cache:warmup --env="${APP_ENV:-prod}" "${CONSOLE_DEBUG_FLAG}"
+php bin/console cache:clear --env="${APP_ENV}" "${CONSOLE_DEBUG_FLAG}" --no-warmup
+php bin/console cache:warmup --env="${APP_ENV}" "${CONSOLE_DEBUG_FLAG}"
 chown -R www-data:www-data var public/uploads
 
 exec "$@"

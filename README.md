@@ -59,8 +59,13 @@ Si un service Render existe deja avec un mauvais runtime, recreer le service en 
 Pour une base PostgreSQL Render, renseigner:
 
 ```text
+APP_ENV=prod
+APP_DEBUG=0
+APP_SECRET=<long-secret-aleatoire>
+DEFAULT_URI=https://ton-domaine-render-ou-ton-domaine-final
 DATABASE_URL=<Internal Database URL de Render>
 DB_SERVER_VERSION=18.0.0
+RUN_MIGRATIONS=1
 ```
 
 Utiliser l'`Internal Database URL` si le service web est aussi sur Render. L'`External Database URL` fonctionne aussi, mais elle passe par l'acces public.
