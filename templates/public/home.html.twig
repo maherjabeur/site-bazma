@@ -1,0 +1,172 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ settings.value('seo_title_' ~ locale, settings.value('site_title_' ~ locale, 'brand'|trans)) }}{% endblock %}
+{% block meta_description %}{{ settings.value('seo_description_' ~ locale, settings.value('site_intro_' ~ locale, 'meta.description'|trans)) }}{% endblock %}
+{% block canonical_url %}{{ url('app_home', {_locale: locale}) }}{% endblock %}
+{% block alternate_links %}
+    <link rel="alternate" hreflang="ar" href="{{ url('app_home', {_locale: 'ar'}) }}">
+    <link rel="alternate" hreflang="fr" href="{{ url('app_home', {_locale: 'fr'}) }}">
+    <link rel="alternate" hreflang="en" href="{{ url('app_home', {_locale: 'en'}) }}">
+    <link rel="alternate" hreflang="x-default" href="{{ url('app_home', {_locale: 'ar'}) }}">
+{% endblock %}
+{% block og_image %}{{ absolute_url(settings.value('og_image', '/assets/bazma-hero.webp')|webp_image) }}{% endblock %}
+
+{% block body %}
+<header class="site-header">
+    <a class="brand" href="{{ path('app_home', {_locale: locale}) }}">{{ settings.value('brand_' ~ locale, 'brand'|trans) }}</a>
+    <nav>
+        <a href="#decouvrir">{{ settings.value('nav_discover_' ~ locale, 'nav.discover'|trans) }}</a>
+        <a href="{{ path('app_gallery', {_locale: locale}) }}">{{ settings.value('nav_gallery_' ~ locale, 'nav.gallery'|trans) }}</a>
+        <a href="#associations">{{ settings.value('nav_associations_' ~ locale, 'nav.associations'|trans) }}</a>
+        <a href="#reseaux">{{ settings.value('nav_social_' ~ locale, 'nav.social'|trans) }}</a>
+        <a href="#actualites">{{ settings.value('nav_news_' ~ locale, 'nav.news'|trans) }}</a>
+        <span class="locale-switch">
+            <a class="{{ locale == 'ar' ? 'active' : '' }}" href="{{ path('app_home', {_locale: 'ar'}) }}">AR</a>
+            <a class="{{ locale == 'fr' ? 'active' : '' }}" href="{{ path('app_home', {_locale: 'fr'}) }}">FR</a>
+            <a class="{{ locale == 'en' ? 'active' : '' }}" href="{{ path('app_home', {_locale: 'en'}) }}">EN</a>
+        </span>
+    </nav>
+</header>
+
+<main>
+    {% set hero_primary_url = settings.value('hero_primary_url_' ~ locale, settings.value('hero_primary_url', '#decouvrir')) %}
+    {% set hero_secondary_url = settings.value('hero_secondary_url_' ~ locale, settings.value('hero_secondary_url', path('app_gallery', {_locale: locale}))) %}
+    <section class="hero" style="background-image: linear-gradient({{ locale == 'ar' ? '270deg' : '90deg' }}, rgba(22, 34, 30, .82), rgba(22, 34, 30, .28)), url('{{ settings.value('hero_image', '/assets/bazma-hero.webp')|webp_image }}')">
+        <div class="hero-content">
+            <p class="eyebrow">{{ settings.value('hero_eyebrow_' ~ locale, settings.value('hero_eyebrow', 'hero.eyebrow'|trans)) }}</p>
+            <h1>{{ settings.value('hero_title_' ~ locale, settings.value('site_title_' ~ locale, settings.value('site_title', 'Bazma, entre palmeraie et mémoire du Nefzaoua'))) }}</h1>
+            <p>{{ settings.value('hero_intro_' ~ locale, settings.value('site_intro_' ~ locale, settings.value('site_intro', 'Un site vitrine vivant pour raconter Bazma.'))) }}</p>
+            <div class="hero-actions">
+                <a class="button" href="{{ hero_primary_url }}">{{ settings.value('hero_primary_label_' ~ locale, settings.value('hero_primary_label', 'hero.explore'|trans)) }}</a>
+                <a class="button secondary" href="{{ hero_secondary_url }}">{{ settings.value('hero_secondary_label_' ~ locale, settings.value('hero_secondary_label', 'hero.images'|trans)) }}</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="facts">
+        <div><strong>{{ settings.value('home_fact_1_value_' ~ locale, settings.value('home_fact_1_value', '33.66583, 9.01167')) }}</strong><span>{{ settings.value('home_fact_1_label_' ~ locale, settings.value('home_fact_1_label', 'facts.coordinates'|trans)) }}</span></div>
+        <div><strong>{{ settings.value('home_fact_2_value_' ~ locale, settings.value('home_fact_2_value', '6-9 km')) }}</strong><span>{{ settings.value('home_fact_2_label_' ~ locale, settings.value('home_fact_2_label', 'facts.distance'|trans)) }}</span></div>
+        <div><strong>{{ settings.value('home_fact_3_value_' ~ locale, settings.value('home_fact_3_value', 'Oasis')) }}</strong><span>{{ settings.value('home_fact_3_label_' ~ locale, settings.value('home_fact_3_label', 'facts.oasis'|trans)) }}</span></div>
+        <div><strong>{{ settings.value('home_fact_4_value_' ~ locale, settings.value('home_fact_4_value', 'BWh')) }}</strong><span>{{ settings.value('home_fact_4_label_' ~ locale, settings.value('home_fact_4_label', 'facts.climate'|trans)) }}</span></div>
+    </section>
+
+    <section id="actualites" class="section news-band">
+        <div class="section-heading">
+            <p class="eyebrow">{{ settings.value('home_news_eyebrow_' ~ locale, 'section.cms_eyebrow'|trans) }}</p>
+            <h2>{{ settings.value('home_news_title_' ~ locale, 'section.cms_title'|trans) }}</h2>
+            <p>{{ settings.value('home_news_text_' ~ locale, 'section.cms_text'|trans) }}</p>
+        </div>
+        <div class="news-board">
+            {% for event in events %}
+                <article>
+                    {% if event.imageUrl %}
+                        <img src="{{ event.imageUrl|webp_image }}" alt="{{ event.localizedTitle(locale) }}">
+                    {% endif %}
+                    <span class="news-category">{{ event.category }}</span>
+                    <time>{{ event.eventDate ? event.eventDate|date('d/m/Y') : settings.value('planned_label_' ~ locale, 'planned'|trans) }}</time>
+                    <h3>{{ event.localizedTitle(locale) }}</h3>
+                    <p>{{ event.localizedExcerpt(locale) }}</p>
+                    <a href="{{ path('app_news_show', {_locale: locale, slug: event.slug}) }}">{{ settings.value('read_more_' ~ locale, 'read_more'|trans) }}</a>
+                </article>
+            {% else %}
+                <article><h3>{{ settings.value('no_news_' ~ locale, 'no_news'|trans) }}</h3></article>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section id="decouvrir" class="section">
+        <div class="section-heading">
+            <p class="eyebrow">{{ settings.value('home_discover_eyebrow_' ~ locale, 'section.discover_eyebrow'|trans) }}</p>
+            <h2>{{ settings.value('home_discover_title_' ~ locale, 'section.discover_title'|trans) }}</h2>
+        </div>
+        <div class="page-grid">
+            {% for page in pages %}
+                <article class="content-card">
+                    {% if page.imageUrl %}
+                        <img src="{{ page.imageUrl|webp_image }}" alt="{{ page.title }}">
+                    {% endif %}
+                    <div>
+                        <h3>{{ page.localizedTitle(locale) }}</h3>
+                        <p>{{ page.localizedSummary(locale) }}</p>
+                        <a href="{{ path('app_page', {_locale: locale, slug: page.slug}) }}">{{ settings.value('read_more_' ~ locale, 'read_more'|trans) }}</a>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="section gallery-band">
+        <div class="section-heading">
+            <p class="eyebrow">{{ settings.value('home_images_eyebrow_' ~ locale, 'section.images_eyebrow'|trans) }}</p>
+            <h2>{{ settings.value('home_images_title_' ~ locale, 'section.images_title'|trans) }}</h2>
+        </div>
+        <div class="gallery-strip">
+            {% for image in images %}
+                <figure>
+                    <img src="{{ image.imageUrl|webp_image }}" alt="{{ image.title }}">
+                    <figcaption>{{ image.localizedTitle(locale) }}</figcaption>
+                </figure>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section id="associations" class="section organizations-band">
+        <div class="section-heading">
+            <p class="eyebrow">{{ settings.value('home_associations_eyebrow_' ~ locale, 'section.associations_eyebrow'|trans) }}</p>
+            <h2>{{ settings.value('home_associations_title_' ~ locale, 'section.associations_title'|trans) }}</h2>
+            <p>{{ settings.value('home_associations_text_' ~ locale, 'section.associations_text'|trans) }}</p>
+        </div>
+        <div class="organization-grid">
+            {% for organization in organizations %}
+                <article class="organization-card">
+                    <img src="{{ organization.imageUrl|webp_image }}" alt="{{ organization.localizedName(locale) }}">
+                    <div>
+                        <span>{{ organization.type }}</span>
+                        <h3>{{ organization.localizedName(locale) }}</h3>
+                        <p>{{ organization.localizedDescription(locale) }}</p>
+                        {% if organization.url %}
+                            <a href="{{ organization.url }}" target="_blank" rel="noreferrer">{{ settings.value('source_label_' ~ locale, 'gallery.source'|trans) }}</a>
+                        {% endif %}
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section id="reseaux" class="section social-band">
+        <div class="section-heading">
+            <p class="eyebrow">{{ settings.value('home_social_eyebrow_' ~ locale, 'section.social_eyebrow'|trans) }}</p>
+            <h2>{{ settings.value('home_social_title_' ~ locale, 'section.social_title'|trans) }}</h2>
+            <p>{{ settings.value('home_social_text_' ~ locale, 'section.social_text'|trans) }}</p>
+        </div>
+        <div class="social-grid">
+            {% for link in socialLinks %}
+                <a class="social-card" href="{{ link.url }}" target="_blank" rel="noreferrer">
+                    <img src="{{ link.imageUrl|webp_image }}" alt="{{ link.localizedTitle(locale) }}">
+                    <div>
+                        <span>{{ link.platform }} &middot; {{ link.category }}</span>
+                        <h3>{{ link.localizedTitle(locale) }}</h3>
+                        <p>{{ link.localizedSummary(locale) }}</p>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div>
+        <strong>{{ settings.value('brand_' ~ locale, 'brand'|trans) }}</strong>
+        <p>{{ settings.value('footer_text_' ~ locale, 'footer.text'|trans) }}</p>
+    </div>
+    <nav class="footer-links">
+        <a href="{{ path('app_home', {_locale: locale}) }}">{{ settings.value('nav_home_' ~ locale, 'nav.home'|trans) }}</a>
+        <a href="{{ path('app_gallery', {_locale: locale}) }}">{{ settings.value('nav_gallery_' ~ locale, 'nav.gallery'|trans) }}</a>
+        <a href="#associations">{{ settings.value('nav_associations_' ~ locale, 'nav.associations'|trans) }}</a>
+        <a href="#reseaux">{{ settings.value('nav_social_' ~ locale, 'nav.social'|trans) }}</a>
+        <a class="{{ locale == 'ar' ? 'active' : '' }}" href="{{ path('app_home', {_locale: 'ar'}) }}">AR</a>
+        <a class="{{ locale == 'fr' ? 'active' : '' }}" href="{{ path('app_home', {_locale: 'fr'}) }}">FR</a>
+        <a class="{{ locale == 'en' ? 'active' : '' }}" href="{{ path('app_home', {_locale: 'en'}) }}">EN</a>
+    </nav>
+</footer>
+{% endblock %}

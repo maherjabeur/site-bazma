@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modérateurs - CMS Bazma{% endblock %}
+{% block html_lang %}fr{% endblock %}
+{% block html_dir %}ltr{% endblock %}
+{% block body_class %}admin-surface{% endblock %}
+{% block meta_robots %}noindex,nofollow{% endblock %}
+
+{% block body %}
+<header class="admin-header admin-header-pro">
+    <a class="brand" href="{{ path('admin_dashboard') }}">CMS Bazma</a>
+    <nav>
+        <a href="{{ path('admin_dashboard') }}">Dashboard</a>
+        <a href="{{ path('admin_user_new') }}">Ajouter</a>
+        <a href="{{ path('app_logout') }}">Déconnexion</a>
+    </nav>
+</header>
+
+<main class="admin-layout admin-workspace">
+    {% for message in app.flashes('success') %}<p class="success">{{ message }}</p>{% endfor %}
+    {% for message in app.flashes('error') %}<p class="alert">{{ message }}</p>{% endfor %}
+
+    <section class="admin-hero-panel">
+        <div>
+            <p class="admin-eyebrow">Équipe CMS</p>
+            <h1>Modérateurs et permissions.</h1>
+            <p>Créez des accès limités par section: actualités, pages, médiathèque, accueil, associations ou paramètres.</p>
+        </div>
+        <a class="button" href="{{ path('admin_user_new') }}">Nouveau modérateur</a>
+    </section>
+
+    <section class="admin-content-section">
+        <div class="admin-list">
+            {% for user in users %}
+                <article class="admin-item">
+                    <div class="admin-item-main">
+                        <span class="status-pill {{ user.active ? 'is-live' : 'is-draft' }}">{{ user.active ? 'Actif' : 'Désactivé' }}</span>
+                        <h3>{{ user.name ?: user.email }}</h3>
+                        <p>{{ user.email }}</p>
+                        <div class="permission-pills">
+                            {% for role in user.roles|filter(role => role != 'ROLE_CMS_ACCESS') %}
+                                <span>{{ role|replace({'ROLE_': '', '_': ' '})|lower }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="admin-item-actions">
+                        <a href="{{ path('admin_user_edit', {id: user.id}) }}">Modifier</a>
+                        <form method="post" action="{{ path('admin_user_delete', {id: user.id}) }}" onsubmit="return confirm('Supprimer ce modérateur ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_user_' ~ user.id) }}">
+                            <button class="link-danger" type="submit">Supprimer</button>
+                        </form>
+                    </div>
+                </article>
+            {% else %}
+                <p class="admin-empty">Aucun modérateur créé en base.</p>
+            {% endfor %}
+        </div>
+    </section>
+</main>
+{% endblock %}

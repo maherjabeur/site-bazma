@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion CMS - Bazma Kebili{% endblock %}
+{% block html_lang %}fr{% endblock %}
+{% block html_dir %}ltr{% endblock %}
+{% block body_class %}admin-surface{% endblock %}
+{% block meta_robots %}noindex,nofollow{% endblock %}
+
+{% block body %}
+<main class="login-panel">
+    <form method="post" class="panel">
+        <h1>Connexion CMS</h1>
+        {% if error %}
+            <p class="alert">{{ error.messageKey|trans(error.messageData, 'security') }}</p>
+        {% endif %}
+        <label>Email</label>
+        <input type="email" value="{{ last_username }}" name="_username" autocomplete="email" required autofocus>
+        <label>Mot de passe</label>
+        <input type="password" name="_password" autocomplete="current-password" required>
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+        <button type="submit">Entrer</button>
+    </form>
+</main>
+{% endblock %}

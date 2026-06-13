@@ -1,0 +1,98 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil - CMS Bazma{% endblock %}
+{% block html_lang %}fr{% endblock %}
+{% block html_dir %}ltr{% endblock %}
+{% block body_class %}admin-surface{% endblock %}
+{% block meta_robots %}noindex,nofollow{% endblock %}
+
+{% block body %}
+<header class="admin-header admin-header-pro">
+    <a class="brand" href="{{ path('admin_dashboard') }}">CMS Bazma</a>
+    <nav>
+        <a href="{{ path('admin_dashboard') }}">Dashboard</a>
+        <a href="{{ path('app_home', {_locale: 'fr'}) }}">Voir l’accueil</a>
+        <a href="{{ path('app_logout') }}">Déconnexion</a>
+    </nav>
+</header>
+
+<main class="admin-layout admin-editor-layout">
+    {% for message in app.flashes('success') %}<p class="success">{{ message }}</p>{% endfor %}
+    {% for message in app.flashes('error') %}<p class="alert">{{ message }}</p>{% endfor %}
+
+    <aside class="admin-editor-aside">
+        <p class="admin-eyebrow">Page d’accueil</p>
+        <h1>Grande image et textes du hero.</h1>
+        <p>Modifiez seulement ce que le visiteur voit en haut de la page: image, titre, introduction et boutons.</p>
+        <a href="{{ path('app_home', {_locale: 'fr'}) }}">Prévisualiser le site</a>
+    </aside>
+
+    <section class="admin-editor-panel">
+        <form class="admin-form" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="_token" value="{{ csrf_token('homepage_settings') }}">
+
+            <div class="homepage-preview">
+                <img src="{{ (values.hero_image ?: '/assets/bazma-hero.webp')|webp_image }}" alt="">
+                <div>
+                    <span>Aperçu de l’image actuelle</span>
+                    <strong>{{ values.hero_image ?: '/assets/bazma-hero.webp' }}</strong>
+                </div>
+            </div>
+
+            <div class="admin-form-grid">
+                <div class="admin-field admin-field-wide">
+                    <label for="hero_image">Grande image d’accueil</label>
+                    <input id="hero_image" name="hero_image" value="{{ values.hero_image }}" placeholder="/assets/bazma-hero.webp">
+                    <p class="field-help">Utilisez une image WebP large. Exemple: /assets/ma-photo.webp</p>
+                </div>
+                <div class="admin-field admin-field-wide upload-field">
+                    <label for="hero_image_file">Importer une nouvelle image</label>
+                    <input id="hero_image_file" name="hero_image_file" type="file" accept="image/jpeg,image/png,image/webp">
+                    <p class="field-help">JPG, PNG ou WebP accepté. Le CMS convertit automatiquement le fichier en WebP.</p>
+                </div>
+
+                {% set locales = {fr: 'Français', en: 'English', ar: 'العربية'} %}
+                {% for code, label in locales %}
+                    <fieldset class="locale-editor {{ code == 'ar' ? 'is-rtl' : '' }}">
+                        <legend>{{ label }}</legend>
+                        <div class="admin-field">
+                            <label for="hero_eyebrow_{{ code }}">Petit texte</label>
+                            <input id="hero_eyebrow_{{ code }}" name="hero_eyebrow_{{ code }}" value="{{ attribute(values, 'hero_eyebrow_' ~ code) }}" {{ code == 'ar' ? 'dir="rtl"' : '' }}>
+                        </div>
+                        <div class="admin-field">
+                            <label for="hero_title_{{ code }}">Grand titre</label>
+                            <textarea id="hero_title_{{ code }}" name="hero_title_{{ code }}" rows="2" {{ code == 'ar' ? 'dir="rtl"' : '' }}>{{ attribute(values, 'hero_title_' ~ code) }}</textarea>
+                        </div>
+                        <div class="admin-field">
+                            <label for="hero_intro_{{ code }}">Texte sous le titre</label>
+                            <textarea id="hero_intro_{{ code }}" name="hero_intro_{{ code }}" rows="4" {{ code == 'ar' ? 'dir="rtl"' : '' }}>{{ attribute(values, 'hero_intro_' ~ code) }}</textarea>
+                        </div>
+                        <div class="admin-field">
+                            <label for="hero_primary_label_{{ code }}">Bouton principal</label>
+                            <input id="hero_primary_label_{{ code }}" name="hero_primary_label_{{ code }}" value="{{ attribute(values, 'hero_primary_label_' ~ code) }}" {{ code == 'ar' ? 'dir="rtl"' : '' }}>
+                        </div>
+                        <div class="admin-field">
+                            <label for="hero_secondary_label_{{ code }}">Bouton secondaire</label>
+                            <input id="hero_secondary_label_{{ code }}" name="hero_secondary_label_{{ code }}" value="{{ attribute(values, 'hero_secondary_label_' ~ code) }}" {{ code == 'ar' ? 'dir="rtl"' : '' }}>
+                        </div>
+                    </fieldset>
+                {% endfor %}
+
+                <div class="admin-field">
+                    <label for="hero_primary_url">Lien du bouton principal</label>
+                    <input id="hero_primary_url" name="hero_primary_url" value="{{ values.hero_primary_url }}" placeholder="#decouvrir">
+                </div>
+                <div class="admin-field">
+                    <label for="hero_secondary_url">Lien du bouton secondaire</label>
+                    <input id="hero_secondary_url" name="hero_secondary_url" value="{{ values.hero_secondary_url }}" placeholder="/fr/gallery">
+                </div>
+            </div>
+
+            <div class="admin-submit-bar">
+                <a href="{{ path('admin_dashboard') }}">Annuler</a>
+                <button type="submit">Enregistrer l’accueil</button>
+            </div>
+        </form>
+    </section>
+</main>
+{% endblock %}

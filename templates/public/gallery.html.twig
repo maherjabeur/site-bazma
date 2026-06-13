@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'nav.gallery'|trans }} - {{ 'brand'|trans }}{% endblock %}
+{% block meta_description %}{{ 'gallery.meta_description'|trans }}{% endblock %}
+{% block canonical_url %}{{ url('app_gallery', {_locale: locale}) }}{% endblock %}
+{% block alternate_links %}
+    <link rel="alternate" hreflang="ar" href="{{ url('app_gallery', {_locale: 'ar'}) }}">
+    <link rel="alternate" hreflang="fr" href="{{ url('app_gallery', {_locale: 'fr'}) }}">
+    <link rel="alternate" hreflang="en" href="{{ url('app_gallery', {_locale: 'en'}) }}">
+{% endblock %}
+
+{% block body %}
+<header class="site-header compact">
+    <a class="brand" href="{{ path('app_home', {_locale: locale}) }}">{{ 'brand'|trans }}</a>
+    <nav>
+        <a href="{{ path('app_home', {_locale: locale}) }}">{{ 'nav.home'|trans }}</a>
+        <span class="locale-switch">
+            <a class="{{ locale == 'ar' ? 'active' : '' }}" href="{{ path('app_gallery', {_locale: 'ar'}) }}">AR</a>
+            <a class="{{ locale == 'fr' ? 'active' : '' }}" href="{{ path('app_gallery', {_locale: 'fr'}) }}">FR</a>
+            <a class="{{ locale == 'en' ? 'active' : '' }}" href="{{ path('app_gallery', {_locale: 'en'}) }}">EN</a>
+        </span>
+    </nav>
+</header>
+<main class="section">
+    <div class="section-heading">
+        <p class="eyebrow">{{ 'nav.gallery'|trans }}</p>
+        <h1>{{ 'gallery.title'|trans }}</h1>
+    </div>
+    <div class="gallery-grid">
+        {% for image in images %}
+            <figure>
+                <img src="{{ image.imageUrl|webp_image }}" alt="{{ image.title }}">
+                <figcaption>
+                    <strong>{{ image.localizedTitle(locale) }}</strong>
+                    {% if image.credit %}<span>{{ image.credit }}</span>{% endif %}
+                    {% if image.sourceUrl %}<a href="{{ image.sourceUrl }}" target="_blank" rel="noreferrer">{{ 'gallery.source'|trans }}</a>{% endif %}
+                </figcaption>
+            </figure>
+        {% endfor %}
+    </div>
+</main>
+{% endblock %}

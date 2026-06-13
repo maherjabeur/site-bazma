@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 650">
+  <rect width="900" height="650" fill="#dfeef0"/>
+  <rect x="80" y="150" width="740" height="390" rx="18" fill="#0f7b63"/>
+  <path d="M80 345h740M450 150v390" stroke="#ffffff" stroke-width="10" opacity=".7"/>
+  <circle cx="450" cy="345" r="86" fill="none" stroke="#ffffff" stroke-width="10" opacity=".7"/>
+  <circle cx="450" cy="345" r="42" fill="#f7f4ec"/>
+  <text x="266" y="92" fill="#13231d" font-family="Arial, sans-serif" font-size="56" font-weight="700">Bazma Sport</text>
+</svg>

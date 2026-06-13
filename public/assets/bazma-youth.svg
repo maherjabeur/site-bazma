@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 650">
+  <rect width="900" height="650" fill="#e7f1ed"/>
+  <circle cx="690" cy="150" r="96" fill="#d99a3a"/>
+  <rect x="110" y="240" width="680" height="250" rx="18" fill="#ffffff"/>
+  <rect x="160" y="300" width="140" height="135" rx="12" fill="#087c66"/>
+  <rect x="350" y="300" width="140" height="135" rx="12" fill="#9f5131"/>
+  <rect x="540" y="300" width="140" height="135" rx="12" fill="#13231d"/>
+  <text x="86" y="120" fill="#13231d" font-family="Arial, sans-serif" font-size="48" font-weight="700">Maison des jeunes</text>
+  <text x="315" y="570" fill="#087c66" font-family="Arial, sans-serif" font-size="54" font-weight="700">BAZMA</text>
+</svg>

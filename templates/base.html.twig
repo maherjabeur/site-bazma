@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="{% block html_lang %}{{ app.request.locale|default('ar') }}{% endblock %}" dir="{% block html_dir %}{{ app.request.locale|default('ar') == 'ar' ? 'rtl' : 'ltr' }}{% endblock %}">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{% block title %}{{ 'brand'|trans }}{% endblock %}</title>
+        <meta name="description" content="{% block meta_description %}{{ 'meta.description'|trans }}{% endblock %}">
+        <meta name="robots" content="{% block meta_robots %}index,follow,max-image-preview:large{% endblock %}">
+        <meta name="theme-color" content="#087c66">
+        <link rel="canonical" href="{% block canonical_url %}{{ app.request.uri }}{% endblock %}">
+        {% block alternate_links %}{% endblock %}
+        <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+        <meta property="og:site_name" content="{{ 'brand'|trans }}">
+        <meta property="og:title" content="{% block og_title %}{{ block('title') }}{% endblock %}">
+        <meta property="og:description" content="{% block og_description %}{{ block('meta_description') }}{% endblock %}">
+        <meta property="og:url" content="{{ app.request.uri }}">
+        <meta property="og:image" content="{% block og_image %}{{ absolute_url('/assets/bazma-hero.webp') }}{% endblock %}">
+        <meta name="twitter:card" content="summary_large_image">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Kufi+Arabic:wght@500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="{{ asset('assets/app.css') }}">
+        {% block stylesheets %}{% endblock %}
+        {% block javascripts %}{% endblock %}
+    </head>
+    <body class="{% block body_class %}{% endblock %}">
+        {% block body %}{% endblock %}
+    </body>
+</html>

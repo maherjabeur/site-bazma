@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ event.localizedTitle(locale) }} - Bazma Kebili{% endblock %}
+{% block meta_description %}{{ event.localizedExcerpt(locale) }}{% endblock %}
+{% block canonical_url %}{{ url('app_news_show', {_locale: locale, slug: event.slug}) }}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_image %}{{ absolute_url((event.imageUrl ?: '/assets/bazma-hero.webp')|webp_image) }}{% endblock %}
+
+{% block body %}
+<header class="site-header compact">
+    <a class="brand" href="{{ path('app_home', {_locale: locale}) }}">{{ 'brand'|trans }}</a>
+    <nav>
+        <a href="{{ path('app_home', {_locale: locale}) }}">{{ 'nav.home'|trans }}</a>
+        <a href="{{ path('app_gallery', {_locale: locale}) }}">{{ 'nav.gallery'|trans }}</a>
+    </nav>
+</header>
+
+<main class="article-page news-detail-page">
+    {% if event.imageUrl %}
+        <img class="article-hero" src="{{ event.imageUrl|webp_image }}" alt="{{ event.localizedTitle(locale) }}">
+    {% endif %}
+    <article class="article-body">
+        <p class="eyebrow">{{ event.category }}{% if event.eventDate %} · {{ event.eventDate|date('d/m/Y') }}{% endif %}</p>
+        <h1>{{ event.localizedTitle(locale) }}</h1>
+        <p class="lead">{{ event.localizedExcerpt(locale) }}</p>
+        <div class="rich-text">{{ event.localizedDescription(locale)|rich_content }}</div>
+        {% if event.sourceUrl %}
+            <p><a class="button" href="{{ event.sourceUrl }}" target="_blank" rel="noreferrer">{{ 'news.source'|trans }}</a></p>
+        {% endif %}
+    </article>
+</main>
+{% endblock %}

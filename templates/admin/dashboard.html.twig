@@ -1,0 +1,214 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}CMS professionnel - Bazma Kebili{% endblock %}
+{% block html_lang %}fr{% endblock %}
+{% block html_dir %}ltr{% endblock %}
+{% block body_class %}admin-surface{% endblock %}
+{% block meta_robots %}noindex,nofollow{% endblock %}
+
+{% block body %}
+<header class="admin-header admin-header-pro">
+    <a class="brand" href="{{ path('admin_dashboard') }}">CMS Bazma</a>
+    <nav>
+        <a href="{{ path('app_home', {_locale: 'ar'}) }}">Voir le site</a>
+        {% if is_granted('ROLE_HOME_MANAGER') %}<a href="{{ path('admin_home_settings') }}">Accueil</a>{% endif %}
+        {% if is_granted('ROLE_SETTINGS_MANAGER') %}<a href="{{ path('admin_settings') }}">SEO et paramètres</a>{% endif %}
+        {% if is_granted('ROLE_USER_MANAGER') %}<a href="{{ path('admin_users') }}">Modérateurs</a>{% endif %}
+        <a href="{{ path('app_logout') }}">Déconnexion</a>
+    </nav>
+</header>
+
+<main class="admin-layout admin-workspace">
+    {% for message in app.flashes('success') %}<p class="success">{{ message }}</p>{% endfor %}
+    {% for message in app.flashes('error') %}<p class="alert">{{ message }}</p>{% endfor %}
+
+    <section class="admin-hero-panel">
+        <div>
+            <p class="admin-eyebrow">Centre de contrôle</p>
+            <h1>Tout le contenu du site, simple à modifier.</h1>
+            <p>Pages, images, associations, réseaux sociaux, actualités et SEO sont regroupés dans une expérience claire pour publier vite et proprement.</p>
+        </div>
+        <div class="admin-quick-actions" aria-label="Actions rapides">
+            {% if is_granted('ROLE_HOME_MANAGER') %}<a class="button" href="{{ path('admin_home_settings') }}">Modifier l’accueil</a>{% endif %}
+            {% if is_granted('ROLE_PAGE_MANAGER') %}<a class="button" href="{{ path('admin_page_new') }}">Nouvelle page</a>{% endif %}
+            {% if is_granted('ROLE_MEDIA_MANAGER') %}<a class="button secondary-admin" href="{{ path('admin_image_new') }}">Ajouter une image</a>{% endif %}
+            {% if is_granted('ROLE_NEWS_MANAGER') %}<a class="button secondary-admin" href="{{ path('admin_event_new') }}">Publier une actualité</a>{% endif %}
+            {% if is_granted('ROLE_USER_MANAGER') %}<a class="button secondary-admin" href="{{ path('admin_users') }}">Gérer les modérateurs</a>{% endif %}
+        </div>
+    </section>
+
+    <section class="admin-kpis admin-kpis-pro" aria-label="Statistiques CMS">
+        <div><strong>{{ pages|length }}</strong><span>Pages</span></div>
+        <div><strong>{{ images|length }}</strong><span>Images WebP</span></div>
+        <div><strong>{{ organizations|length }}</strong><span>Associations</span></div>
+        <div><strong>{{ socialLinks|length }}</strong><span>Liens sociaux</span></div>
+        <div><strong>{{ events|length }}</strong><span>Actualités</span></div>
+        <div><strong>{{ users|length }}</strong><span>Modérateurs</span></div>
+    </section>
+
+    {% if is_granted('ROLE_PAGE_MANAGER') %}
+    <section class="admin-content-section" id="pages">
+        <div class="admin-section-head">
+            <div>
+                <p class="admin-eyebrow">Architecture</p>
+                <h2>Pages SEO</h2>
+            </div>
+            <a class="button small" href="{{ path('admin_page_new') }}">Ajouter</a>
+        </div>
+        <div class="admin-list">
+            {% for page in pages %}
+                <article class="admin-item">
+                    <div class="admin-item-main">
+                        <span class="status-pill {{ page.published ? 'is-live' : 'is-draft' }}">{{ page.published ? 'Publié' : 'Brouillon' }}</span>
+                        <h3>{{ page.title }}</h3>
+                        <p>/{{ page.slug }} · ordre {{ page.position }}</p>
+                    </div>
+                    <div class="admin-item-actions">
+                        <a href="{{ path('admin_page_edit', {id: page.id}) }}">Modifier</a>
+                        <form method="post" action="{{ path('admin_page_delete', {id: page.id}) }}" onsubmit="return confirm('Supprimer cette page ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_page_' ~ page.id) }}">
+                            <button class="link-danger" type="submit">Supprimer</button>
+                        </form>
+                    </div>
+                </article>
+            {% else %}
+                <p class="admin-empty">Aucune page pour le moment.</p>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if is_granted('ROLE_MEDIA_MANAGER') %}
+    <section class="admin-content-section" id="images">
+        <div class="admin-section-head">
+            <div>
+                <p class="admin-eyebrow">Médiathèque</p>
+                <h2>Images WebP</h2>
+            </div>
+            <a class="button small" href="{{ path('admin_image_new') }}">Ajouter</a>
+        </div>
+        <div class="admin-card-grid">
+            {% for image in images %}
+                <article class="admin-media-card">
+                    {% if image.imageUrl %}
+                        <img src="{{ image.imageUrl|webp_image }}" alt="">
+                    {% else %}
+                        <div class="admin-image-placeholder">Image à importer</div>
+                    {% endif %}
+                    <div>
+                        <span class="status-pill {{ image.featured ? 'is-live' : '' }}">{{ image.featured ? 'Mise en avant' : 'Galerie' }}</span>
+                        <h3>{{ image.title }}</h3>
+                        <p>{{ image.imageUrl }}</p>
+                        <div class="admin-item-actions">
+                            <a href="{{ path('admin_image_edit', {id: image.id}) }}">Modifier</a>
+                            <form method="post" action="{{ path('admin_image_delete', {id: image.id}) }}" onsubmit="return confirm('Supprimer cette image ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_image_' ~ image.id) }}">
+                                <button class="link-danger" type="submit">Supprimer</button>
+                            </form>
+                        </div>
+                    </div>
+                </article>
+            {% else %}
+                <p class="admin-empty">Aucune image pour le moment.</p>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if is_granted('ROLE_ORGANIZATION_MANAGER') %}
+    <section class="admin-content-section" id="organizations">
+        <div class="admin-section-head">
+            <div>
+                <p class="admin-eyebrow">Communauté</p>
+                <h2>Associations et structures</h2>
+            </div>
+            <a class="button small" href="{{ path('admin_organization_new') }}">Ajouter</a>
+        </div>
+        <div class="admin-list">
+            {% for organization in organizations %}
+                <article class="admin-item">
+                    <div class="admin-item-main">
+                        <span class="status-pill {{ organization.active ? 'is-live' : 'is-draft' }}">{{ organization.active ? 'Visible' : 'Masqué' }}</span>
+                        <h3>{{ organization.name }}</h3>
+                        <p>{{ organization.type }} · ordre {{ organization.position }}</p>
+                    </div>
+                    <div class="admin-item-actions">
+                        <a href="{{ path('admin_organization_edit', {id: organization.id}) }}">Modifier</a>
+                        <form method="post" action="{{ path('admin_organization_delete', {id: organization.id}) }}" onsubmit="return confirm('Supprimer cette structure ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_organization_' ~ organization.id) }}">
+                            <button class="link-danger" type="submit">Supprimer</button>
+                        </form>
+                    </div>
+                </article>
+            {% else %}
+                <p class="admin-empty">Aucune structure pour le moment.</p>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if is_granted('ROLE_SOCIAL_MANAGER') %}
+    <section class="admin-content-section" id="social">
+        <div class="admin-section-head">
+            <div>
+                <p class="admin-eyebrow">Présence digitale</p>
+                <h2>Réseaux sociaux</h2>
+            </div>
+            <a class="button small" href="{{ path('admin_social_new') }}">Ajouter</a>
+        </div>
+        <div class="admin-list">
+            {% for link in socialLinks %}
+                <article class="admin-item">
+                    <div class="admin-item-main">
+                        <span class="status-pill">{{ link.platform }} · {{ link.category }}</span>
+                        <h3>{{ link.title }}</h3>
+                        <p>{{ link.url }}</p>
+                    </div>
+                    <div class="admin-item-actions">
+                        <a href="{{ path('admin_social_edit', {id: link.id}) }}">Modifier</a>
+                        <form method="post" action="{{ path('admin_social_delete', {id: link.id}) }}" onsubmit="return confirm('Supprimer ce lien ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_social_' ~ link.id) }}">
+                            <button class="link-danger" type="submit">Supprimer</button>
+                        </form>
+                    </div>
+                </article>
+            {% else %}
+                <p class="admin-empty">Aucun lien social pour le moment.</p>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if is_granted('ROLE_NEWS_MANAGER') %}
+    <section class="admin-content-section" id="events">
+        <div class="admin-section-head">
+            <div>
+                <p class="admin-eyebrow">Editorial</p>
+                <h2>Actualités</h2>
+            </div>
+            <a class="button small" href="{{ path('admin_event_new') }}">Ajouter</a>
+        </div>
+        <div class="admin-list">
+            {% for event in events %}
+                <article class="admin-item">
+                    <div class="admin-item-main">
+                        <span class="status-pill {{ event.published ? 'is-live' : 'is-draft' }}">{{ event.published ? 'Publié' : 'Brouillon' }}</span>
+                        <h3>{{ event.title }}</h3>
+                        <p>{{ event.category }} · {{ event.eventDate ? event.eventDate|date('d/m/Y') : 'Sans date' }} · {{ event.location }}</p>
+                    </div>
+                    <div class="admin-item-actions">
+                        <a href="{{ path('admin_event_edit', {id: event.id}) }}">Modifier</a>
+                        <form method="post" action="{{ path('admin_event_delete', {id: event.id}) }}" onsubmit="return confirm('Supprimer cette actualité ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_event_' ~ event.id) }}">
+                            <button class="link-danger" type="submit">Supprimer</button>
+                        </form>
+                    </div>
+                </article>
+            {% else %}
+                <p class="admin-empty">Aucune actualité pour le moment.</p>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</main>
+{% endblock %}

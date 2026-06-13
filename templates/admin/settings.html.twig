@@ -1,0 +1,67 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paramètres CMS - Bazma Kebili{% endblock %}
+{% block html_lang %}fr{% endblock %}
+{% block html_dir %}ltr{% endblock %}
+{% block body_class %}admin-surface{% endblock %}
+{% block meta_robots %}noindex,nofollow{% endblock %}
+
+{% block body %}
+<header class="admin-header admin-header-pro">
+    <a class="brand" href="{{ path('admin_dashboard') }}">CMS Bazma</a>
+    <nav>
+        <a href="{{ path('admin_dashboard') }}">Dashboard</a>
+        <a href="{{ path('admin_home_settings') }}">Accueil</a>
+        <a href="{{ path('admin_setting_new') }}">Ajouter</a>
+        <a href="{{ path('app_logout') }}">Déconnexion</a>
+    </nav>
+</header>
+
+<main class="admin-layout admin-workspace">
+    {% for message in app.flashes('success') %}<p class="success">{{ message }}</p>{% endfor %}
+    {% for message in app.flashes('error') %}<p class="alert">{{ message }}</p>{% endfor %}
+
+    <section class="admin-hero-panel">
+        <div>
+            <p class="admin-eyebrow">SEO et global</p>
+            <h1>Paramètres avancés.</h1>
+            <p>Cette page sert aux réglages techniques: SEO, Open Graph, footer et clés globales. L’accueil a son écran simple dédié.</p>
+        </div>
+        <div class="admin-quick-actions">
+            <a class="button" href="{{ path('admin_home_settings') }}">Modifier l’accueil</a>
+            <a class="button secondary-admin" href="{{ path('admin_setting_new') }}">Nouveau paramètre</a>
+        </div>
+    </section>
+
+    <section class="admin-content-section">
+        <div class="admin-section-head">
+            <div>
+                <p class="admin-eyebrow">Clés utiles</p>
+                <h2>Configuration avancée</h2>
+            </div>
+        </div>
+        <div class="settings-hints">
+            <span>seo_title_ar/fr/en</span>
+            <span>seo_description_ar/fr/en</span>
+            <span>og_image</span>
+            <span>footer_text_ar/fr/en</span>
+        </div>
+        <div class="admin-list">
+            {% for setting in settings %}
+                <article class="admin-item">
+                    <div class="admin-item-main">
+                        <span class="status-pill">Paramètre</span>
+                        <h3>{{ setting.settingKey }}</h3>
+                        <p>{{ setting.settingValue|slice(0, 140) }}{% if setting.settingValue|length > 140 %}...{% endif %}</p>
+                    </div>
+                    <div class="admin-item-actions">
+                        <a href="{{ path('admin_setting_edit', {id: setting.id}) }}">Modifier</a>
+                    </div>
+                </article>
+            {% else %}
+                <p class="admin-empty">Aucun paramètre pour le moment.</p>
+            {% endfor %}
+        </div>
+    </section>
+</main>
+{% endblock %}

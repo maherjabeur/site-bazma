@@ -1,0 +1,480 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ context.title }} - CMS Bazma{% endblock %}
+{% block html_lang %}fr{% endblock %}
+{% block html_dir %}ltr{% endblock %}
+{% block body_class %}admin-surface{% endblock %}
+{% block meta_robots %}noindex,nofollow{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const richTextareas = document.querySelectorAll('textarea.wysiwyg-source');
+            const mediaUploadUrl = '{{ path('admin_editor_media_upload') }}';
+            const videoChunkUploadUrl = '{{ path('admin_editor_video_chunk_upload') }}';
+            const mediaUploadToken = '{{ csrf_token('editor_media_upload') }}';
+            const mediaLibrary = {{ editorMediaLibrary|default([])|json_encode|raw }};
+
+            const toHtml = (value) => {
+                if (/<[a-z][\s\S]*>/i.test(value)) {
+                    return value;
+                }
+
+                return value
+                    .split(/\n{2,}/)
+                    .map((paragraph) => paragraph.trim())
+                    .filter(Boolean)
+                    .map((paragraph) => `<p>${paragraph.replace(/\n/g, '<br>')}</p>`)
+                    .join('');
+            };
+
+            const escapeHtml = (value) => String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+
+            const escapeAttribute = (value) => escapeHtml(value).replace(/`/g, '&#096;');
+
+            richTextareas.forEach((textarea) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'wysiwyg';
+
+                const header = document.createElement('div');
+                header.className = 'wysiwyg-header';
+                header.innerHTML = `
+                    <div>
+                        <strong>Editeur de contenu</strong>
+                        <span>Texte, liens, listes, citations et medias</span>
+                    </div>
+                    <button type="button" data-source-toggle="true">HTML</button>
+                `;
+
+                const mediaOptions = document.createElement('div');
+                mediaOptions.className = 'wysiwyg-media-options';
+                mediaOptions.innerHTML = `
+                    <label>Largeur max <input type="number" min="200" max="3200" step="50" value="1600" data-media-width></label>
+                    <label>Hauteur max <input type="number" min="200" max="3200" step="50" value="1100" data-media-height></label>
+                    <span>Applique aux images uploadées. Les videos sont ajoutees sans conversion.</span>
+                `;
+
+                const resizeBar = document.createElement('div');
+                resizeBar.className = 'wysiwyg-resize-bar';
+                resizeBar.hidden = true;
+                resizeBar.innerHTML = `
+                    <strong>Media selectionne</strong>
+                    <button type="button" data-media-size="25">25%</button>
+                    <button type="button" data-media-size="50">50%</button>
+                    <button type="button" data-media-size="75">75%</button>
+                    <button type="button" data-media-size="100">100%</button>
+                    <span class="wysiwyg-separator"></span>
+                    <button type="button" data-media-align="left">Gauche</button>
+                    <button type="button" data-media-align="center">Centre</button>
+                    <button type="button" data-media-align="right">Droite</button>
+                    <button type="button" data-media-align="wrap-left">Texte a droite</button>
+                    <button type="button" data-media-align="wrap-right">Texte a gauche</button>
+                    <button type="button" data-media-align="clear">Sans habillage</button>
+                    <span class="wysiwyg-separator"></span>
+                    <button type="button" data-media-remove="true">Supprimer</button>
+                `;
+
+                const toolbar = document.createElement('div');
+                toolbar.className = 'wysiwyg-toolbar';
+                toolbar.innerHTML = `
+                    <button type="button" data-command="undo" title="Annuler">Undo</button>
+                    <button type="button" data-command="redo" title="Retablir">Redo</button>
+                    <span class="wysiwyg-separator"></span>
+                    <button type="button" data-block="p">P</button>
+                    <button type="button" data-block="h2">H2</button>
+                    <button type="button" data-block="h3">H3</button>
+                    <button type="button" data-block="h4">H4</button>
+                    <span class="wysiwyg-separator"></span>
+                    <button type="button" data-command="bold"><strong>B</strong></button>
+                    <button type="button" data-command="italic"><em>I</em></button>
+                    <button type="button" data-command="underline"><u>U</u></button>
+                    <span class="wysiwyg-separator"></span>
+                    <button type="button" data-command="insertUnorderedList">Liste</button>
+                    <button type="button" data-command="insertOrderedList">1.</button>
+                    <button type="button" data-command="formatBlock" data-value="blockquote">Citation</button>
+                    <button type="button" data-command="justifyLeft">Gauche</button>
+                    <button type="button" data-command="justifyCenter">Centre</button>
+                    <span class="wysiwyg-separator"></span>
+                    <button type="button" data-link="true">Lien</button>
+                    <button type="button" data-media-upload="true">Uploader media</button>
+                    <button type="button" data-library-toggle="true">Mediatheque</button>
+                    <button type="button" data-image-url="true">Image URL</button>
+                    <button type="button" data-command="removeFormat">Nettoyer</button>
+                `;
+
+                const library = document.createElement('div');
+                library.className = 'wysiwyg-library';
+                library.hidden = true;
+                library.innerHTML = mediaLibrary.length
+                    ? mediaLibrary.map((media) => `
+                        <button type="button" data-library-image="${escapeAttribute(media.url)}" data-library-caption="${escapeAttribute(media.caption || media.label)}">
+                            <img src="${escapeAttribute(media.url)}" alt="">
+                            <span>${escapeHtml(media.label)}</span>
+                            <small>${escapeHtml(media.source)}</small>
+                        </button>
+                    `).join('')
+                    : '<p>Aucune image dans la mediatheque pour le moment.</p>';
+
+                const editor = document.createElement('div');
+                editor.className = 'wysiwyg-editor';
+                editor.contentEditable = 'true';
+                editor.dir = textarea.getAttribute('dir') || 'ltr';
+                editor.innerHTML = toHtml(textarea.value);
+
+                const source = document.createElement('textarea');
+                source.className = 'wysiwyg-source-editor';
+                source.hidden = true;
+                source.dir = 'ltr';
+                source.spellcheck = false;
+                source.value = editor.innerHTML.trim();
+
+                const mediaInput = document.createElement('input');
+                mediaInput.type = 'file';
+                mediaInput.accept = 'image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime';
+                mediaInput.className = 'wysiwyg-media-input';
+                let selectedFigure = null;
+
+                const sync = () => {
+                    textarea.value = source.hidden ? editor.innerHTML.trim() : source.value.trim();
+                };
+
+                const insertImage = (url, alt = '') => {
+                    const safeUrl = String(url || '').trim();
+                    if (!safeUrl) {
+                        return;
+                    }
+
+                    document.execCommand('insertHTML', false, `<figure data-size="100" data-align="center"><img src="${escapeAttribute(safeUrl)}" alt="${escapeAttribute(alt)}"><figcaption>${escapeHtml(alt)}</figcaption></figure><p><br></p>`);
+                    sync();
+                };
+
+                const insertVideo = (url) => {
+                    const safeUrl = String(url || '').trim();
+                    if (!safeUrl) {
+                        return;
+                    }
+
+                    document.execCommand('insertHTML', false, `<figure data-size="100" data-align="center"><video controls playsinline preload="metadata" src="${escapeAttribute(safeUrl)}"></video><figcaption>Video</figcaption></figure><p><br></p>`);
+                    sync();
+                };
+
+                const uploadVideoInChunks = async (file) => {
+                    const chunkSize = 1024 * 1024;
+                    const total = Math.ceil(file.size / chunkSize);
+                    const uploadId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+                    let result = null;
+
+                    for (let index = 0; index < total; index++) {
+                        const formData = new FormData();
+                        formData.append('chunk', file.slice(index * chunkSize, Math.min(file.size, (index + 1) * chunkSize)), file.name);
+                        formData.append('upload_id', uploadId);
+                        formData.append('original_name', file.name);
+                        formData.append('index', String(index));
+                        formData.append('total', String(total));
+                        formData.append('_token', mediaUploadToken);
+
+                        const response = await fetch(videoChunkUploadUrl, {
+                            method: 'POST',
+                            body: formData,
+                            credentials: 'same-origin',
+                            headers: {'X-CSRF-TOKEN': mediaUploadToken},
+                        });
+                        const data = await response.json();
+                        if (!response.ok || data.error) {
+                            throw new Error(data.error || 'Upload video impossible.');
+                        }
+                        result = data;
+                    }
+
+                    if (!result?.url) {
+                        throw new Error('Upload video incomplet.');
+                    }
+
+                    return result;
+                };
+
+                mediaInput.addEventListener('change', async () => {
+                    const file = mediaInput.files?.[0];
+                    if (!file) {
+                        return;
+                    }
+
+                    const isVideo = /\.(mp4|webm|mov)$/i.test(file.name);
+                    const maxSize = isVideo ? 64 * 1024 * 1024 : 8 * 1024 * 1024;
+                    if (file.size > maxSize) {
+                        window.alert(isVideo ? 'Video trop lourde. Maximum: 64 Mo.' : 'Image trop lourde. Maximum: 8 Mo.');
+                        mediaInput.value = '';
+                        return;
+                    }
+
+                    if (isVideo) {
+                        try {
+                            const data = await uploadVideoInChunks(file);
+                            editor.focus();
+                            insertVideo(data.url);
+                        } catch (error) {
+                            window.alert(error.message);
+                        } finally {
+                            mediaInput.value = '';
+                        }
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append('media', file);
+                    formData.append('_token', mediaUploadToken);
+                    formData.append('max_width', mediaOptions.querySelector('[data-media-width]').value || '');
+                    formData.append('max_height', mediaOptions.querySelector('[data-media-height]').value || '');
+
+                    try {
+                        const response = await fetch(mediaUploadUrl, {
+                            method: 'POST',
+                            body: formData,
+                            credentials: 'same-origin',
+                            headers: {'X-CSRF-TOKEN': mediaUploadToken},
+                        });
+                        const data = await response.json();
+                        if (!response.ok || !data.url) {
+                            throw new Error(data.error || 'Upload impossible.');
+                        }
+                        editor.focus();
+                        if (data.type === 'video') {
+                            insertVideo(data.url);
+                        } else {
+                            insertImage(data.url, file.name.replace(/\.[^.]+$/, ''));
+                        }
+                    } catch (error) {
+                        window.alert(error.message);
+                    } finally {
+                        mediaInput.value = '';
+                    }
+                });
+
+                header.addEventListener('click', (event) => {
+                    const button = event.target.closest('button[data-source-toggle]');
+                    if (!button) {
+                        return;
+                    }
+
+                    const showSource = source.hidden;
+                    if (showSource) {
+                        source.value = editor.innerHTML.trim();
+                    } else {
+                        editor.innerHTML = source.value;
+                        sync();
+                    }
+                    editor.hidden = showSource;
+                    source.hidden = !showSource;
+                    button.classList.toggle('active', showSource);
+                });
+
+                toolbar.addEventListener('click', (event) => {
+                    const button = event.target.closest('button');
+                    if (!button) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    editor.focus();
+
+                    if (button.dataset.block) {
+                        document.execCommand('formatBlock', false, button.dataset.block);
+                        sync();
+                        return;
+                    }
+
+                    if (button.dataset.link) {
+                        const url = window.prompt('URL du lien');
+                        if (url) {
+                            document.execCommand('createLink', false, url);
+                            sync();
+                        }
+                        return;
+                    }
+
+                    if (button.dataset.mediaUpload) {
+                        mediaInput.click();
+                        return;
+                    }
+
+                    if (button.dataset.libraryToggle) {
+                        library.hidden = !library.hidden;
+                        return;
+                    }
+
+                    if (button.dataset.imageUrl) {
+                        const url = window.prompt("URL de l'image");
+                        if (url) {
+                            const alt = window.prompt('Legende / texte alternatif', '') || '';
+                            insertImage(url, alt);
+                        }
+                        return;
+                    }
+
+                    document.execCommand(button.dataset.command, false, button.dataset.value || null);
+                    sync();
+                });
+
+                library.addEventListener('click', (event) => {
+                    const button = event.target.closest('button[data-library-image]');
+                    if (!button) {
+                        return;
+                    }
+
+                    editor.focus();
+                    insertImage(button.dataset.libraryImage, button.dataset.libraryCaption || '');
+                    library.hidden = true;
+                });
+
+                const selectFigure = (figure) => {
+                    editor.querySelectorAll('figure.is-selected').forEach((item) => item.classList.remove('is-selected'));
+                    selectedFigure = figure;
+                    resizeBar.hidden = !selectedFigure;
+                    if (selectedFigure) {
+                        selectedFigure.classList.add('is-selected');
+                    }
+                };
+
+                editor.addEventListener('click', (event) => {
+                    const figure = event.target.closest('figure');
+                    selectFigure(editor.contains(figure) ? figure : null);
+                });
+
+                resizeBar.addEventListener('click', (event) => {
+                    const button = event.target.closest('button');
+                    if (!button || !selectedFigure) {
+                        return;
+                    }
+
+                    if (button.dataset.mediaSize) {
+                        selectedFigure.dataset.size = button.dataset.mediaSize;
+                        sync();
+                        return;
+                    }
+
+                    if (button.dataset.mediaAlign) {
+                        if (button.dataset.mediaAlign === 'clear') {
+                            selectedFigure.removeAttribute('data-align');
+                        } else {
+                            selectedFigure.dataset.align = button.dataset.mediaAlign;
+                        }
+                        sync();
+                        return;
+                    }
+
+                    if (button.dataset.mediaRemove) {
+                        selectedFigure.remove();
+                        selectFigure(null);
+                        sync();
+                    }
+                });
+
+                editor.addEventListener('input', sync);
+                source.addEventListener('input', sync);
+                textarea.form?.addEventListener('submit', sync);
+                textarea.classList.add('wysiwyg-hidden');
+                textarea.after(wrapper);
+                wrapper.append(header, mediaOptions, resizeBar, toolbar, library, editor, source, mediaInput);
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block body %}
+<header class="admin-header admin-header-pro">
+    <a class="brand" href="{{ path('admin_dashboard') }}">CMS Bazma</a>
+    <nav>
+        <a href="{{ path(context.backRoute, context.backParams|default({})) }}">Retour</a>
+        <a href="{{ path('app_home', {_locale: 'ar'}) }}">Voir le site</a>
+        <a href="{{ path('app_logout') }}">Deconnexion</a>
+    </nav>
+</header>
+
+<main class="admin-layout admin-editor-layout">
+    {% for message in app.flashes('success') %}<p class="success">{{ message }}</p>{% endfor %}
+    {% for message in app.flashes('error') %}<p class="alert">{{ message }}</p>{% endfor %}
+
+    <aside class="admin-editor-aside">
+        <p class="admin-eyebrow">{{ context.section }}</p>
+        <h1>{{ context.title }}</h1>
+        <p>{{ context.hint }}</p>
+        <a href="{{ path(context.backRoute, context.backParams|default({})) }}">Annuler et revenir</a>
+    </aside>
+
+    <section class="admin-editor-panel">
+        {% if entity.imageUrl is defined and entity.imageUrl %}
+            <div class="homepage-preview entity-image-preview">
+                <img src="{{ entity.imageUrl|webp_image }}" alt="">
+                <div>
+                    <span>Image actuelle</span>
+                    <strong>{{ entity.imageUrl }}</strong>
+                </div>
+            </div>
+        {% endif %}
+        {{ form_start(form, {attr: {class: 'admin-form'}}) }}
+            {{ form_errors(form) }}
+            <div class="admin-form-grid">
+                {% set richFieldNames = ['body', 'bodyEn', 'bodyAr', 'description', 'descriptionEn', 'descriptionAr'] %}
+                {% for child in form %}
+                    {% if child.vars.name != '_token' %}
+                        {% set isRichField = child.vars.name in richFieldNames %}
+                        <div class="admin-field {{ 'checkbox' in child.vars.block_prefixes ? 'admin-field-check' : '' }} {{ 'file' in child.vars.block_prefixes ? 'upload-field admin-field-wide' : '' }} {{ isRichField ? 'admin-field-rich admin-field-wide' : '' }}">
+                            {{ form_label(child) }}
+                            {% if isRichField %}
+                                {% set currentClass = child.vars.attr.class|default('') %}
+                                {{ form_widget(child, {attr: child.vars.attr|merge({class: (currentClass ~ ' wysiwyg-source')|trim})}) }}
+                            {% else %}
+                                {{ form_widget(child) }}
+                            {% endif %}
+                            {{ form_help(child) }}
+                            {{ form_errors(child) }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="admin-submit-bar">
+                <a href="{{ path(context.backRoute, context.backParams|default({})) }}">Annuler</a>
+                <button type="submit">Enregistrer</button>
+            </div>
+        {{ form_end(form) }}
+
+        {% if pageMedia is defined and entity.id %}
+            <div class="page-media-manager">
+                <div class="admin-section-head">
+                    <div>
+                        <p class="admin-eyebrow">Mediatheque</p>
+                        <h2>Images attachees a cette page</h2>
+                    </div>
+                    <a class="button small" href="{{ path('admin_page_media_new', {pageId: entity.id}) }}">Ajouter une image</a>
+                </div>
+                <div class="admin-card-grid">
+                    {% for media in pageMedia %}
+                        <article class="admin-media-card">
+                            <img src="{{ media.imageUrl|webp_image }}" alt="">
+                            <div>
+                                <h3>{{ media.title }}</h3>
+                                <p>{{ media.caption ?: media.imageUrl }}</p>
+                                <div class="admin-item-actions">
+                                    <a href="{{ path('admin_page_media_edit', {pageId: entity.id, id: media.id}) }}">Modifier</a>
+                                    <form method="post" action="{{ path('admin_page_media_delete', {id: media.id}) }}" onsubmit="return confirm('Supprimer cette image ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_page_media_' ~ media.id) }}">
+                                        <button class="link-danger" type="submit">Supprimer</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </article>
+                    {% else %}
+                        <p class="admin-empty">Aucune image attachee a cette page.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </section>
+</main>
+{% endblock %}

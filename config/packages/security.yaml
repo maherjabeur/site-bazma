@@ -1,0 +1,60 @@
+security:
+    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+
+    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+    providers:
+        database_users:
+            entity:
+                class: App\Entity\AdminUser
+
+    role_hierarchy:
+        ROLE_SUPER_ADMIN:
+            - ROLE_CMS_ACCESS
+            - ROLE_HOME_MANAGER
+            - ROLE_PAGE_MANAGER
+            - ROLE_MEDIA_MANAGER
+            - ROLE_NEWS_MANAGER
+            - ROLE_ORGANIZATION_MANAGER
+            - ROLE_SOCIAL_MANAGER
+            - ROLE_SETTINGS_MANAGER
+            - ROLE_USER_MANAGER
+
+    firewalls:
+        dev:
+            pattern: ^/(_profiler|_wdt|assets|build)/
+            security: false
+        main:
+            lazy: true
+            provider: database_users
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                default_target_path: admin_dashboard
+                enable_csrf: true
+            logout:
+                path: app_logout
+                target: app_root
+
+    access_control:
+        - { path: ^/admin/users, roles: ROLE_USER_MANAGER }
+        - { path: ^/admin/settings, roles: ROLE_SETTINGS_MANAGER }
+        - { path: ^/admin/home, roles: ROLE_HOME_MANAGER }
+        - { path: ^/admin/pages, roles: ROLE_PAGE_MANAGER }
+        - { path: ^/admin/images, roles: ROLE_MEDIA_MANAGER }
+        - { path: ^/admin/events, roles: ROLE_NEWS_MANAGER }
+        - { path: ^/admin/social, roles: ROLE_SOCIAL_MANAGER }
+        - { path: ^/admin/organizations, roles: ROLE_ORGANIZATION_MANAGER }
+        - { path: ^/admin, roles: ROLE_CMS_ACCESS }
+
+when@test:
+    security:
+        password_hashers:
+            # Password hashers are resource-intensive by design to ensure security.
+            # In tests, it's safe to reduce their cost to improve performance.
+            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+                algorithm: auto
+                cost: 4 # Lowest possible value for bcrypt
+                time_cost: 3 # Lowest possible value for argon
+                memory_cost: 10 # Lowest possible value for argon

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 650">
+  <rect width="900" height="650" fill="#f7f4ec"/>
+  <rect x="115" y="120" width="240" height="330" rx="12" fill="#ffffff" stroke="#d9e2dc" stroke-width="8" transform="rotate(-7 235 285)"/>
+  <rect x="332" y="100" width="260" height="360" rx="12" fill="#ffffff" stroke="#d9e2dc" stroke-width="8" transform="rotate(4 462 280)"/>
+  <rect x="520" y="155" width="240" height="330" rx="12" fill="#ffffff" stroke="#d9e2dc" stroke-width="8" transform="rotate(-3 640 320)"/>
+  <path d="M150 330c90-42 160-38 235 8 86 53 163 38 285-20v110H150z" fill="#087c66"/>
+  <text x="104" y="570" fill="#13231d" font-family="Arial, sans-serif" font-size="54" font-weight="700">Bazma memory</text>
+</svg>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 650">
+  <rect width="900" height="650" fill="#f2c46f"/>
+  <path d="M0 430c150-60 302-66 456-18 170 53 306 40 444-26v264H0z" fill="#8b4b2c"/>
+  <path d="M204 410h270l62 70h89l-52 55H464l-70-78H268l-48 78h-70z" fill="#13231d"/>
+  <circle cx="574" cy="356" r="42" fill="#13231d"/>
+  <path d="M605 337c62 0 96 25 113 68-55-17-98-12-139 16z" fill="#13231d"/>
+  <text x="54" y="108" fill="#13231d" font-family="Arial, sans-serif" font-size="52" font-weight="700">Bazma traditions</text>
+</svg>

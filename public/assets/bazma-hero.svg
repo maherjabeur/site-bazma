@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 950" role="img" aria-label="Bazma oasis illustration">
+  <defs>
+    <linearGradient id="sky" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f4c76e"/>
+      <stop offset="0.42" stop-color="#c7834a"/>
+      <stop offset="1" stop-color="#1d3f36"/>
+    </linearGradient>
+    <linearGradient id="ground" x1="0" x2="1">
+      <stop offset="0" stop-color="#8b4b2c"/>
+      <stop offset="1" stop-color="#0f5f4d"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="950" fill="url(#sky)"/>
+  <circle cx="1210" cy="190" r="92" fill="#f8df91" opacity=".9"/>
+  <path d="M0 590c210-95 391-112 604-42 185 61 350 36 526-42 169-74 307-77 470-5v449H0z" fill="url(#ground)"/>
+  <path d="M0 715c180-44 335-42 520 11 192 55 332 41 496-15 210-72 375-71 584 8v231H0z" fill="#14342d" opacity=".82"/>
+  <g fill="#0c2c25">
+    <path d="M305 642c30-131 24-238-17-320 47 45 77 112 91 201 33-80 83-137 151-171-44 68-72 145-84 232 55-48 119-77 192-87-65 43-115 95-150 155 51-12 101-11 150 2-74 16-141 37-201 63l-29 140h-88l27-148c-55-31-118-52-187-62 48-18 97-20 145-5z"/>
+    <path d="M1120 634c20-103 16-187-12-252 34 35 57 87 68 156 25-63 63-107 115-133-33 52-54 111-63 178 42-36 91-58 147-66-50 33-88 73-115 119 39-9 77-8 115 2-57 12-108 28-154 48l-23 107h-68l21-113c-42-24-90-40-143-47 37-14 75-15 112 1z"/>
+  </g>
+  <g fill="#f7f0d6" opacity=".9">
+    <rect x="668" y="560" width="210" height="118" rx="6"/>
+    <rect x="705" y="507" width="136" height="72" rx="4"/>
+    <rect x="928" y="590" width="152" height="88" rx="6"/>
+    <rect x="748" y="608" width="44" height="70" rx="20" fill="#7d4b31"/>
+  </g>
+  <text x="90" y="205" fill="#fff7dd" font-family="Arial, sans-serif" font-size="84" font-weight="700">BAZMA</text>
+</svg>
