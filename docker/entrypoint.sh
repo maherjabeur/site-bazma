@@ -6,12 +6,18 @@ APP_PORT="${PORT:-10000}"
 echo "Listen ${APP_PORT}" > /etc/apache2/ports.conf
 sed "s/__PORT__/${APP_PORT}/g" /etc/apache2/sites-available/000-default.conf.template > /etc/apache2/sites-available/000-default.conf
 
+if [ -n "${DB_HOSTPORT:-}" ]; then
+    DB_HOST="${DB_HOSTPORT%:*}"
+    DB_PORT="${DB_HOSTPORT##*:}"
+fi
+
 if [ -n "${DB_HOST:-}" ]; then
     DB_PORT="${DB_PORT:-3306}"
     DB_NAME="${DB_NAME:-bazma}"
     DB_USER="${DB_USER:-bazma}"
     DB_PASSWORD_ENCODED="$(php -r 'echo rawurlencode(getenv("DB_PASSWORD") ?: "");')"
     export DATABASE_URL="mysql://${DB_USER}:${DB_PASSWORD_ENCODED}@${DB_HOST}:${DB_PORT}/${DB_NAME}?serverVersion=${DB_SERVER_VERSION:-8.4.7}&charset=utf8mb4"
+    echo "Using database ${DB_HOST}:${DB_PORT}/${DB_NAME}"
 fi
 
 {

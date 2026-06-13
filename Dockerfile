@@ -2,6 +2,8 @@ FROM php:8.3-apache
 
 ENV APP_ENV=prod \
     APP_DEBUG=0 \
+    APP_SECRET=render-build-placeholder \
+    DEFAULT_URI=https://www.bazma.tn \
     COMPOSER_ALLOW_SUPERUSER=1
 
 RUN apt-get update \
