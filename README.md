@@ -56,6 +56,8 @@ Ce projet doit etre deploye sur Render avec le runtime `Docker`, pas avec un run
 
 Si un service Render existe deja avec un mauvais runtime, recreer le service en choisissant `Docker` dans le champ `Language`, puis renseigner les variables `DEFAULT_URI`, `DB_HOST`, `DB_NAME`, `DB_USER` et `DB_PASSWORD`.
 
+Si Render affiche `Invalid platform version "" specified`, verifier dans `Environment` que `PHP_VERSION` et `COMPOSER_PLATFORM_PHP` ne sont pas vides. Les deux doivent valoir `8.3.0`.
+
 ## Administration
 
 L'espace CMS est disponible sur `/admin`.
