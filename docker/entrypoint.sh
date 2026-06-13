@@ -6,7 +6,7 @@ APP_PORT="${PORT:-10000}"
 echo "Listen ${APP_PORT}" > /etc/apache2/ports.conf
 sed "s/__PORT__/${APP_PORT}/g" /etc/apache2/sites-available/000-default.conf.template > /etc/apache2/sites-available/000-default.conf
 
-if [ -z "${DATABASE_URL:-}" ] && [ -n "${DB_HOST:-}" ]; then
+if [ -n "${DB_HOST:-}" ]; then
     DB_PORT="${DB_PORT:-3306}"
     DB_NAME="${DB_NAME:-bazma}"
     DB_USER="${DB_USER:-bazma}"
