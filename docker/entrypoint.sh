@@ -14,6 +14,15 @@ if [ -n "${DB_HOST:-}" ]; then
     export DATABASE_URL="mysql://${DB_USER}:${DB_PASSWORD_ENCODED}@${DB_HOST}:${DB_PORT}/${DB_NAME}?serverVersion=${DB_SERVER_VERSION:-8.4.7}&charset=utf8mb4"
 fi
 
+{
+    printf 'SetEnv APP_ENV "%s"\n' "${APP_ENV:-prod}"
+    printf 'SetEnv APP_DEBUG "%s"\n' "${APP_DEBUG:-0}"
+    printf 'SetEnv APP_SECRET "%s"\n' "${APP_SECRET:-}"
+    printf 'SetEnv DEFAULT_URI "%s"\n' "${DEFAULT_URI:-https://www.bazma.tn}"
+    printf 'SetEnv DATABASE_URL "%s"\n' "${DATABASE_URL:-}"
+} > /etc/apache2/conf-available/render-env.conf
+a2enconf render-env >/dev/null
+
 mkdir -p var/cache var/log var/editor-video-chunks public/uploads
 chown -R www-data:www-data var public/uploads
 
