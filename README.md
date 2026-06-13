@@ -50,6 +50,12 @@ La base MySQL locale ecoute sur le port `3307` de la machine hote.
 
 Le conteneur web construit automatiquement `DATABASE_URL` a partir de `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` et `DB_PASSWORD`.
 
+## Deploiement Render
+
+Ce projet doit etre deploye sur Render avec le runtime `Docker`, pas avec un runtime natif. Le fichier `render.yaml` force Render a construire l'image depuis `Dockerfile`.
+
+Si un service Render existe deja avec un mauvais runtime, recreer le service en choisissant `Docker` dans le champ `Language`, puis renseigner les variables `DEFAULT_URI`, `DB_HOST`, `DB_NAME`, `DB_USER` et `DB_PASSWORD`.
+
 ## Administration
 
 L'espace CMS est disponible sur `/admin`.

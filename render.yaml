@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: site-bazma
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: APP_ENV
+        value: prod
+      - key: APP_DEBUG
+        value: "0"
+      - key: APP_SECRET
+        generateValue: true
+      - key: DEFAULT_URI
+        sync: false
+      - key: PORT
+        value: "10000"
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "3306"
+      - key: DB_NAME
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_SERVER_VERSION
+        value: "8.4.7"
+      - key: RUN_MIGRATIONS
+        value: "1"
