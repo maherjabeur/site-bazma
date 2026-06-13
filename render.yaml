@@ -15,7 +15,45 @@ services:
         generateValue: true
       - key: DEFAULT_URI
         sync: false
-      - key: DATABASE_URL
-        sync: false
+      - key: DB_HOST
+        fromService:
+          type: pserv
+          name: site-bazma-db
+          property: host
+      - key: DB_PORT
+        value: "3306"
+      - key: DB_NAME
+        value: bazma
+      - key: DB_USER
+        value: bazma
+      - key: DB_PASSWORD
+        fromService:
+          type: pserv
+          name: site-bazma-db
+          envVarKey: MYSQL_PASSWORD
+      - key: DB_SERVER_VERSION
+        value: 8.4.7
       - key: RUN_MIGRATIONS
-        value: "0"
+        value: "1"
+
+  - type: pserv
+    name: site-bazma-db
+    runtime: docker
+    dockerfilePath: ./docker/mysql/Dockerfile
+    dockerContext: .
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: "3306"
+      - key: MYSQL_DATABASE
+        value: bazma
+      - key: MYSQL_USER
+        value: bazma
+      - key: MYSQL_PASSWORD
+        generateValue: true
+      - key: MYSQL_ROOT_PASSWORD
+        generateValue: true
+    disk:
+      name: site-bazma-mysql-data
+      mountPath: /var/lib/mysql
+      sizeGB: 1

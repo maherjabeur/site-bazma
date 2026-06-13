@@ -36,27 +36,27 @@ php bin/console cache:warmup --env=prod --no-debug
 
 ## Deploiement Test Sur Render
 
-Le projet contient une configuration Docker compatible Render:
+Le projet contient une configuration Docker compatible Render avec une base MySQL privee:
 
 - `Dockerfile`
+- `docker/mysql/Dockerfile`
 - `docker/apache/vhost.conf`
 - `docker/entrypoint.sh`
 - `render.yaml`
 
-Dans Render, creer un Blueprint depuis ce repository ou un Web Service Docker.
+Dans Render, creer un Blueprint depuis ce repository. Le Blueprint cree:
 
-Variables Render a renseigner:
+- `site-bazma`: service web Symfony Docker
+- `site-bazma-db`: service prive MySQL Docker avec disque persistant
 
-```text
-APP_ENV=prod
-APP_DEBUG=0
-APP_SECRET=valeur_generee_par_Render
-DEFAULT_URI=https://votre-service.onrender.com
-DATABASE_URL=mysql://USER:PASSWORD@HOST:3306/DB_NAME?serverVersion=8.4.7&charset=utf8mb4
-RUN_MIGRATIONS=0
-```
+Variables a renseigner/verifier sur Render:
 
-Mettre `RUN_MIGRATIONS=1` seulement pendant un deploiement ou vous voulez appliquer les migrations automatiquement au demarrage.
+- `DEFAULT_URI`: URL publique du service Render
+- `RUN_MIGRATIONS`: `1` pour appliquer les migrations au demarrage, puis `0` apres stabilisation si souhaite
+- `APP_SECRET`: genere automatiquement
+- `DB_PASSWORD`: genere automatiquement depuis le service DB
+
+Le conteneur web construit automatiquement `DATABASE_URL` a partir de `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` et `DB_PASSWORD`.
 
 Healthcheck Render:
 
@@ -65,6 +65,20 @@ Healthcheck Render:
 ```
 
 Le conteneur ecoute automatiquement le port fourni par Render via la variable `PORT`.
+
+## Test Docker Local Avec MySQL
+
+```bash
+docker compose up --build
+```
+
+Le site sera disponible sur:
+
+```text
+http://localhost:8000
+```
+
+La base MySQL locale ecoute sur le port `3307` de la machine hote.
 
 ## Administration
 
