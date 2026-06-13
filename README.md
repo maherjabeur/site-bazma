@@ -48,7 +48,7 @@ http://localhost:8000
 
 La base MySQL locale ecoute sur le port `3307` de la machine hote.
 
-Le conteneur web construit automatiquement `DATABASE_URL` a partir de `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` et `DB_PASSWORD`.
+Le conteneur web construit automatiquement `DATABASE_URL` a partir de `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` et `DB_SERVER_VERSION`.
 
 ## Deploiement Render
 
@@ -56,7 +56,7 @@ Ce projet doit etre deploye sur Render avec le runtime `Docker`, pas avec un run
 
 Si un service Render existe deja avec un mauvais runtime, recreer le service en choisissant `Docker` dans le champ `Language`, puis renseigner les variables `DEFAULT_URI`, `DB_HOST`, `DB_NAME`, `DB_USER` et `DB_PASSWORD`.
 
-Si Render affiche `Invalid platform version "" specified`, verifier dans `Environment` que `PHP_VERSION` et `COMPOSER_PLATFORM_PHP` ne sont pas vides. Les deux doivent valoir `8.3.0`.
+Si Render affiche `Invalid platform version "" specified`, verifier dans `Environment` que `DB_SERVER_VERSION` n'est pas vide. Pour MySQL 8, la valeur recommandee est `8.4.7`. Si `DATABASE_URL` est renseignee directement, elle doit contenir `serverVersion=8.4.7`, jamais `serverVersion=`.
 
 ## Administration
 
