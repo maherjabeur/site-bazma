@@ -1557,44 +1557,49 @@ Before publication: ask permission, record author, date, place, caption, source 
     private function insertRows(string $table, array $columns, array $rows): void
     {
         $quotedColumns = array_map(fn (string $column): string => $this->identifier($column), $columns);
-        $placeholders = array_map(fn (string $column): string => ':' . $column, $columns);
-        $sql = sprintf(
-            'INSERT INTO %s (%s) VALUES (%s)',
-            $this->identifier($table),
-            implode(', ', $quotedColumns),
-            implode(', ', $placeholders),
-        );
 
         foreach ($rows as $row) {
-            $params = array_combine($columns, $row);
-            $types = $this->parameterTypes($table, $columns, $params);
+            $values = [];
+            $params = [];
+            $types = [];
+
+            foreach ($columns as $index => $column) {
+                $value = $row[$index];
+
+                if ($value === null) {
+                    $values[] = 'NULL';
+                    continue;
+                }
+
+                $values[] = ':' . $column;
+                $params[$column] = $value;
+                $types[$column] = $this->parameterType($table, $column);
+            }
+
+            $sql = sprintf(
+                'INSERT INTO %s (%s) VALUES (%s)',
+                $this->identifier($table),
+                implode(', ', $quotedColumns),
+                implode(', ', $values),
+            );
+
             $this->addSql($sql, $params, $types);
         }
     }
 
-    /**
-     * @param list<string> $columns
-     * @param array<string, mixed> $params
-     * @return array<string, ParameterType>
-     */
-    private function parameterTypes(string $table, array $columns, array $params): array
+    private function parameterType(string $table, string $column): ParameterType
     {
-        $types = [];
         $booleanColumns = self::BOOLEAN_COLUMNS[$table] ?? [];
 
-        foreach ($columns as $column) {
-            if ($params[$column] === null) {
-                $types[$column] = ParameterType::NULL;
-            } elseif (in_array($column, $booleanColumns, true)) {
-                $types[$column] = ParameterType::BOOLEAN;
-            } elseif ($column === 'id' || $column === 'position') {
-                $types[$column] = ParameterType::INTEGER;
-            } else {
-                $types[$column] = ParameterType::STRING;
-            }
+        if (in_array($column, $booleanColumns, true)) {
+            return ParameterType::BOOLEAN;
         }
 
-        return $types;
+        if ($column === 'id' || $column === 'position') {
+            return ParameterType::INTEGER;
+        }
+
+        return ParameterType::STRING;
     }
 
     /**
