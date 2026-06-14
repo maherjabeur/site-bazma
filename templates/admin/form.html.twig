@@ -449,6 +449,13 @@
         <p class="admin-eyebrow">{{ context.section }}</p>
         <h1>{{ context.title }}</h1>
         <p>{{ context.hint }}</p>
+        {% if context.tips is defined %}
+            <ul class="admin-editor-tips">
+                {% for tip in context.tips %}
+                    <li>{{ tip }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
         <a href="{{ path(context.backRoute, context.backParams|default({})) }}">Annuler et revenir</a>
     </aside>
 

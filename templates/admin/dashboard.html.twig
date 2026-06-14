@@ -198,7 +198,7 @@
             {% for event in events %}
                 <article class="admin-item">
                     <div class="admin-item-main">
-                        <span class="status-pill {{ event.published ? 'is-live' : 'is-draft' }}">{{ event.published ? 'Publié' : 'Brouillon' }}</span>
+                        <span class="status-pill {{ event.archived ? 'is-archived' : (event.published ? 'is-live' : 'is-draft') }}">{{ event.archived ? 'Archivé' : (event.published ? (event.featured ? 'Dans le slider' : 'Publié') : 'Brouillon') }}</span>
                         <h3>{{ event.title }}</h3>
                         <p>{{ event.category }} · {{ event.eventDate ? event.eventDate|date('d/m/Y') : 'Sans date' }} · {{ event.location }}</p>
                     </div>

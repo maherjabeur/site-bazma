@@ -19,7 +19,7 @@
         <a href="{{ path('app_gallery', {_locale: locale}) }}">{{ settings.value('nav_gallery_' ~ locale, 'nav.gallery'|trans) }}</a>
         <a href="#associations">{{ settings.value('nav_associations_' ~ locale, 'nav.associations'|trans) }}</a>
         <a href="#reseaux">{{ settings.value('nav_social_' ~ locale, 'nav.social'|trans) }}</a>
-        <a href="#actualites">{{ settings.value('nav_news_' ~ locale, 'nav.news'|trans) }}</a>
+        <a href="{{ path('app_news_archive', {_locale: locale}) }}">{{ settings.value('nav_news_' ~ locale, 'nav.news'|trans) }}</a>
         <span class="locale-switch">
             <a class="{{ locale == 'ar' ? 'active' : '' }}" href="{{ path('app_home', {_locale: 'ar'}) }}">AR</a>
             <a class="{{ locale == 'fr' ? 'active' : '' }}" href="{{ path('app_home', {_locale: 'fr'}) }}">FR</a>
@@ -51,12 +51,15 @@
     </section>
 
     <section id="actualites" class="section news-band">
-        <div class="section-heading">
-            <p class="eyebrow">{{ settings.value('home_news_eyebrow_' ~ locale, 'section.cms_eyebrow'|trans) }}</p>
-            <h2>{{ settings.value('home_news_title_' ~ locale, 'section.cms_title'|trans) }}</h2>
-            <p>{{ settings.value('home_news_text_' ~ locale, 'section.cms_text'|trans) }}</p>
+        <div class="section-heading news-heading">
+            <div>
+                <p class="eyebrow">{{ settings.value('home_news_eyebrow_' ~ locale, 'section.cms_eyebrow'|trans) }}</p>
+                <h2>{{ settings.value('home_news_title_' ~ locale, 'section.cms_title'|trans) }}</h2>
+                <p>{{ settings.value('home_news_text_' ~ locale, 'section.cms_text'|trans) }}</p>
+            </div>
+            <a class="button secondary" href="{{ path('app_news_archive', {_locale: locale}) }}">{{ 'news.archive'|trans }}</a>
         </div>
-        <div class="news-board">
+        <div class="news-board news-slider" aria-label="{{ 'nav.news'|trans }}">
             {% for event in events %}
                 <article>
                     {% if event.imageUrl %}
@@ -164,6 +167,7 @@
         <a href="{{ path('app_gallery', {_locale: locale}) }}">{{ settings.value('nav_gallery_' ~ locale, 'nav.gallery'|trans) }}</a>
         <a href="#associations">{{ settings.value('nav_associations_' ~ locale, 'nav.associations'|trans) }}</a>
         <a href="#reseaux">{{ settings.value('nav_social_' ~ locale, 'nav.social'|trans) }}</a>
+        <a href="{{ path('app_news_archive', {_locale: locale}) }}">{{ settings.value('nav_news_' ~ locale, 'nav.news'|trans) }}</a>
         <a class="{{ locale == 'ar' ? 'active' : '' }}" href="{{ path('app_home', {_locale: 'ar'}) }}">AR</a>
         <a class="{{ locale == 'fr' ? 'active' : '' }}" href="{{ path('app_home', {_locale: 'fr'}) }}">FR</a>
         <a class="{{ locale == 'en' ? 'active' : '' }}" href="{{ path('app_home', {_locale: 'en'}) }}">EN</a>

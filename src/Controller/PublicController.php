@@ -39,7 +39,7 @@ class PublicController extends AbstractController
             'locale' => $locale,
             'pages' => $pages->findPublished(),
             'images' => $images->findBy([], ['featured' => 'DESC', 'position' => 'ASC'], 8),
-            'events' => $events->findBy(['published' => true], ['featured' => 'DESC', 'position' => 'ASC', 'eventDate' => 'DESC'], 4),
+            'events' => $events->findHomepageSlider(),
             'socialLinks' => $socialLinks->findBy(['featured' => true], ['position' => 'ASC'], 8),
             'organizations' => $organizations->findBy(['active' => true], ['position' => 'ASC']),
             'settings' => $settings,
@@ -58,6 +58,16 @@ class PublicController extends AbstractController
             'locale' => $request->getLocale(),
             'page' => $page,
             'media' => $media->findForPage($page),
+        ]);
+    }
+
+    #[Route('/{_locale}/actualites', name: 'app_news_archive', requirements: ['_locale' => 'ar|fr|en'])]
+    public function newsArchive(Request $request, EventRepository $events): Response
+    {
+        return $this->render('public/news_archive.html.twig', [
+            'locale' => $request->getLocale(),
+            'currentEvents' => $events->findPublishedActive(),
+            'archivedEvents' => $events->findPublishedArchived(),
         ]);
     }
 
@@ -99,6 +109,7 @@ class PublicController extends AbstractController
         foreach (['ar', 'fr', 'en'] as $locale) {
             $urls[] = $this->generateUrl('app_home', ['_locale' => $locale], UrlGeneratorInterface::ABSOLUTE_URL);
             $urls[] = $this->generateUrl('app_gallery', ['_locale' => $locale], UrlGeneratorInterface::ABSOLUTE_URL);
+            $urls[] = $this->generateUrl('app_news_archive', ['_locale' => $locale], UrlGeneratorInterface::ABSOLUTE_URL);
             foreach ($events->findBy(['published' => true]) as $event) {
                 $urls[] = $this->generateUrl('app_news_show', ['_locale' => $locale, 'slug' => $event->getSlug()], UrlGeneratorInterface::ABSOLUTE_URL);
             }

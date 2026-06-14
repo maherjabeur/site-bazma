@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'news.archive_title'|trans }} - Bazma Kebili{% endblock %}
+{% block meta_description %}{{ 'news.archive_text'|trans }}{% endblock %}
+{% block canonical_url %}{{ url('app_news_archive', {_locale: locale}) }}{% endblock %}
+
+{% block body %}
+<header class="site-header compact">
+    <a class="brand" href="{{ path('app_home', {_locale: locale}) }}">{{ 'brand'|trans }}</a>
+    <nav>
+        <a href="{{ path('app_home', {_locale: locale}) }}">{{ 'nav.home'|trans }}</a>
+        <a href="{{ path('app_gallery', {_locale: locale}) }}">{{ 'nav.gallery'|trans }}</a>
+        <a href="{{ path('app_news_archive', {_locale: locale}) }}">{{ 'nav.news'|trans }}</a>
+    </nav>
+</header>
+
+<main class="section news-archive-page">
+    <div class="section-heading archive-heading">
+        <p class="eyebrow">{{ 'news.archive'|trans }}</p>
+        <h1>{{ 'news.archive_title'|trans }}</h1>
+        <p>{{ 'news.archive_text'|trans }}</p>
+    </div>
+
+    <section class="archive-section">
+        <div class="archive-section-head">
+            <h2>{{ 'news.latest'|trans }}</h2>
+            <span>{{ currentEvents|length }}</span>
+        </div>
+        <div class="archive-grid">
+            {% for event in currentEvents %}
+                {% include 'public/_news_card.html.twig' with {event: event, locale: locale} only %}
+            {% else %}
+                <p class="archive-empty">{{ 'no_news'|trans }}</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="archive-section">
+        <div class="archive-section-head">
+            <h2>{{ 'news.archived'|trans }}</h2>
+            <span>{{ archivedEvents|length }}</span>
+        </div>
+        <div class="archive-grid">
+            {% for event in archivedEvents %}
+                {% include 'public/_news_card.html.twig' with {event: event, locale: locale, archived: true} only %}
+            {% else %}
+                <p class="archive-empty">{{ 'news.no_archived'|trans }}</p>
+            {% endfor %}
+        </div>
+    </section>
+</main>
+{% endblock %}

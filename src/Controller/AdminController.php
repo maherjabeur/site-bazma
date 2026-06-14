@@ -669,8 +669,13 @@ class AdminController extends AbstractController
             $entity instanceof Event => [
                 'section' => 'Actualités',
                 'title' => $entity->getId() ? 'Modifier une actualité' : 'Nouvelle actualité',
-                'hint' => 'Date, lieu, catégorie, contenu multilingue et publication.',
+                'hint' => 'Rédigez une actualité claire avec image, résumé court, date, rubrique, source et statut de publication.',
                 'backRoute' => 'admin_dashboard',
+                'tips' => [
+                    'Slider: cochez "Afficher dans le slider" pour les nouvelles importantes.',
+                    'Archive: cochez "Archiver" quand l’actualité ne doit plus apparaître sur l’accueil.',
+                    'Source: ajoutez un lien quand l’information vient d’une page ou publication externe.',
+                ],
             ],
             $entity instanceof SiteSetting => [
                 'section' => 'Paramètres',

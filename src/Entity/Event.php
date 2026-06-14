@@ -53,6 +53,9 @@ class Event
     #[ORM\Column]
     private bool $featured = true;
 
+    #[ORM\Column(options: ['default' => false])]
+    private bool $archived = false;
+
     #[ORM\Column]
     private int $position = 0;
 
@@ -113,6 +116,8 @@ class Event
     }
     public function isFeatured(): bool { return $this->featured; }
     public function setFeatured(bool $featured): self { $this->featured = $featured; return $this; }
+    public function isArchived(): bool { return $this->archived; }
+    public function setArchived(bool $archived): self { $this->archived = $archived; return $this; }
     public function getPosition(): int { return $this->position; }
     public function setPosition(int $position): self { $this->position = $position; return $this; }
     public function getDescription(): string { return $this->description; }
