@@ -61,20 +61,10 @@ class PublicController extends AbstractController
         ]);
     }
 
-    #[Route('/{_locale}/actualites', name: 'app_news_archive', requirements: ['_locale' => 'ar|fr|en'])]
-    public function newsArchive(Request $request, EventRepository $events): Response
-    {
-        return $this->render('public/news_archive.html.twig', [
-            'locale' => $request->getLocale(),
-            'currentEvents' => $events->findPublishedActive(),
-            'archivedEvents' => $events->findPublishedArchived(),
-        ]);
-    }
-
     #[Route('/{_locale}/actualites/{slug}', name: 'app_news_show', requirements: ['_locale' => 'ar|fr|en'])]
     public function newsShow(Request $request, string $slug, EventRepository $events): Response
     {
-        $event = $events->findOneBy(['slug' => $slug, 'published' => true]);
+        $event = $events->findOneBy(['slug' => $slug, 'published' => true, 'archived' => false]);
         if (!$event) {
             throw $this->createNotFoundException('Actualité introuvable');
         }
@@ -109,8 +99,7 @@ class PublicController extends AbstractController
         foreach (['ar', 'fr', 'en'] as $locale) {
             $urls[] = $this->generateUrl('app_home', ['_locale' => $locale], UrlGeneratorInterface::ABSOLUTE_URL);
             $urls[] = $this->generateUrl('app_gallery', ['_locale' => $locale], UrlGeneratorInterface::ABSOLUTE_URL);
-            $urls[] = $this->generateUrl('app_news_archive', ['_locale' => $locale], UrlGeneratorInterface::ABSOLUTE_URL);
-            foreach ($events->findBy(['published' => true]) as $event) {
+            foreach ($events->findBy(['published' => true, 'archived' => false]) as $event) {
                 $urls[] = $this->generateUrl('app_news_show', ['_locale' => $locale, 'slug' => $event->getSlug()], UrlGeneratorInterface::ABSOLUTE_URL);
             }
             foreach ($pages->findPublished() as $page) {

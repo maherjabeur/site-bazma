@@ -27,7 +27,7 @@ class EventType extends AbstractType
             ->add('location', TextType::class, ['label' => 'Lieu', 'help' => 'Exemple: Bazma, Maison des jeunes, terrain de sport...'])
             ->add('imageUrl', TextType::class, ['label' => 'Image WebP', 'required' => false, 'help' => 'Importez une image ou collez un chemin existant.'])
             ->add('imageFile', FileType::class, ['label' => 'Importer une image', 'mapped' => false, 'required' => false, 'help' => 'JPG, PNG ou WebP. Conversion automatique en WebP.', 'attr' => ['accept' => 'image/jpeg,image/png,image/webp']])
-            ->add('excerpt', TextareaType::class, ['label' => 'Résumé court FR', 'required' => false, 'help' => 'Deux lignes maximum pour le slider et les archives.', 'attr' => ['rows' => 3]])
+            ->add('excerpt', TextareaType::class, ['label' => 'Résumé court FR', 'required' => false, 'help' => 'Deux lignes maximum pour le slider et les cartes publiques.', 'attr' => ['rows' => 3]])
             ->add('excerptEn', TextareaType::class, ['label' => 'Résumé court EN', 'required' => false, 'attr' => ['rows' => 3]])
             ->add('excerptAr', TextareaType::class, ['label' => 'Résumé court AR', 'required' => false, 'attr' => ['rows' => 3, 'dir' => 'rtl']])
             ->add('description', TextareaType::class, ['label' => 'Contenu complet FR', 'help' => 'Ajoutez les détails, le contexte, les personnes ou structures concernées, puis les médias utiles.', 'attr' => ['rows' => 8]])
@@ -36,7 +36,7 @@ class EventType extends AbstractType
             ->add('sourceUrl', TextType::class, ['label' => 'Lien source', 'required' => false])
             ->add('position', IntegerType::class, ['label' => 'Ordre d’affichage'])
             ->add('featured', CheckboxType::class, ['label' => 'Afficher dans le slider', 'required' => false])
-            ->add('archived', CheckboxType::class, ['label' => 'Archiver cette actualité', 'required' => false, 'help' => 'Une actualité archivée quitte le slider mais reste visible dans les archives.'])
+            ->add('archived', CheckboxType::class, ['label' => 'Archiver cette actualité', 'required' => false, 'help' => 'Une actualité archivée est conservée dans le CMS et retirée du front.'])
             ->add('published', CheckboxType::class, ['label' => 'Publié', 'required' => false]);
     }
 

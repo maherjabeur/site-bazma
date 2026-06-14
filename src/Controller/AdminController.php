@@ -673,7 +673,7 @@ class AdminController extends AbstractController
                 'backRoute' => 'admin_dashboard',
                 'tips' => [
                     'Slider: cochez "Afficher dans le slider" pour les nouvelles importantes.',
-                    'Archive: cochez "Archiver" quand l’actualité ne doit plus apparaître sur l’accueil.',
+                    'Archive: cochez "Archiver" pour conserver l’actualité dans le CMS et la retirer du front.',
                     'Source: ajoutez un lien quand l’information vient d’une page ou publication externe.',
                 ],
             ],
