@@ -2210,3 +2210,192 @@ footer,
         flex: 0 0 auto;
     }
 }
+
+/* CMS hardening: stable form layouts, previews, and post-submit states. */
+.admin-layout > .success,
+.admin-layout > .alert,
+.admin-flashes,
+.admin-form-errors {
+    grid-column: 1 / -1;
+}
+
+.admin-flashes {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+}
+
+.admin-flash,
+.admin-form-errors > ul,
+.admin-field ul {
+    margin: 0;
+    padding: 12px 14px;
+    border-radius: 8px;
+}
+
+.admin-flash.alert,
+.admin-form-errors > ul,
+.admin-field ul {
+    border: 1px solid #efcaca;
+    background: #fff4f2;
+    color: #8f1f1f;
+}
+
+.admin-form-errors > ul,
+.admin-field ul {
+    list-style: none;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.admin-form-grid,
+.admin-field,
+.wysiwyg,
+.wysiwyg-editor,
+.wysiwyg-source-editor,
+.image-url-preview,
+.admin-submit-bar,
+.admin-submit-actions {
+    min-width: 0;
+}
+
+.admin-field {
+    align-content: start;
+}
+
+.admin-field input,
+.admin-field textarea,
+.admin-field select {
+    max-width: 100%;
+}
+
+.admin-field textarea {
+    resize: vertical;
+}
+
+.admin-choice-grid > div {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 10px;
+}
+
+.admin-choice-grid > div > label,
+.admin-choice-grid > div > div {
+    min-width: 0;
+}
+
+.admin-choice-grid input[type="checkbox"] {
+    margin-right: 8px;
+    accent-color: var(--accent);
+}
+
+.admin-field label,
+.admin-field .help-text,
+.admin-field .form-text,
+.admin-field > div[id$="_help"],
+.field-help,
+.image-url-preview strong {
+    overflow-wrap: anywhere;
+}
+
+.upload-field {
+    padding: 14px;
+    border: 1px dashed #cdd8d1;
+    border-radius: 8px;
+    background: #fbfcfb;
+}
+
+.upload-field input[type="file"] {
+    border-style: dashed;
+    background: #fff;
+}
+
+.image-url-preview {
+    display: grid;
+    grid-template-columns: 132px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #e4ebe6;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.image-url-preview[hidden] {
+    display: none;
+}
+
+.image-url-preview img {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    border-radius: 6px;
+    object-fit: cover;
+    background: #eef2ef;
+}
+
+.image-url-preview span {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.image-url-preview strong {
+    display: block;
+    margin-top: 3px;
+    color: #20362d;
+    font-size: 13px;
+}
+
+.admin-submit-bar {
+    flex-wrap: wrap;
+}
+
+.admin-submit-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.admin-submit-actions .button {
+    margin: 0;
+}
+
+.admin-submit-actions button,
+.admin-submit-actions .button {
+    min-height: 44px;
+}
+
+.admin-submit-actions button[name="_action"][value="save_stay"] {
+    border: 1px solid rgba(8,124,102,.28);
+    background: #fff;
+    color: var(--accent-dark);
+    box-shadow: none;
+}
+
+.admin-submit-actions button:disabled {
+    cursor: wait;
+    opacity: .72;
+    transform: none;
+}
+
+.wysiwyg-toolbar button,
+.wysiwyg-resize-bar button,
+.wysiwyg-header button {
+    white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+    .image-url-preview {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-submit-actions,
+    .admin-submit-actions button,
+    .admin-submit-actions .button {
+        width: 100%;
+        justify-content: center;
+    }
+}

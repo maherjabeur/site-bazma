@@ -399,6 +399,10 @@ class AdminController extends AbstractController
             $em->flush();
             $this->addFlash('success', 'Modérateur enregistré.');
 
+            if ((string) $request->request->get('_action') === 'save_stay') {
+                return $this->redirectToRoute('admin_user_edit', ['id' => $adminUser->getId()]);
+            }
+
             return $this->redirectToRoute('admin_users');
         }
 
@@ -465,14 +469,21 @@ class AdminController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             if ($form->has('imageFile')) {
                 $uploadedImage = $form->get('imageFile')->getData();
-                if ($uploadedImage instanceof UploadedFile && method_exists($entity, 'setImageUrl')) {
+                if ($uploadedImage instanceof UploadedFile) {
                     try {
-                        $entity->setImageUrl($this->imageUploader->uploadAsWebp($uploadedImage, $this->getUploadPrefix($entity)));
+                        $uploadedPath = $this->imageUploader->uploadAsWebp($uploadedImage, $this->getUploadPrefix($entity));
+                        if ($entity instanceof SiteSetting) {
+                            $entity->setSettingValue($uploadedPath);
+                        } elseif (method_exists($entity, 'setImageUrl')) {
+                            $entity->setImageUrl($uploadedPath);
+                        }
                     } catch (\Throwable $exception) {
                         $this->addFlash('error', $exception->getMessage());
 
                         return $this->redirectToRoute($entity instanceof PageMedia ? 'admin_page_edit' : 'admin_dashboard', $entity instanceof PageMedia ? ['id' => $entity->getPage()?->getId()] : []);
                     }
+                } elseif ($entity instanceof SiteSetting && $this->isImageSetting($entity)) {
+                    $entity->setSettingValue($this->imageUploader->normalizeLocalImagePath($entity->getSettingValue()));
                 } elseif (method_exists($entity, 'getImageUrl') && method_exists($entity, 'setImageUrl')) {
                     $entity->setImageUrl($this->imageUploader->normalizeLocalImagePath($entity->getImageUrl()));
                 }
@@ -481,6 +492,10 @@ class AdminController extends AbstractController
             $em->persist($entity);
             $em->flush();
             $this->addFlash('success', 'Contenu enregistré.');
+
+            if ((string) $request->request->get('_action') === 'save_stay') {
+                return $this->redirectToStayRoute($entity);
+            }
 
             if ($entity instanceof PageMedia) {
                 return $this->redirectToRoute('admin_page_edit', ['id' => $entity->getPage()?->getId()]);
@@ -495,6 +510,42 @@ class AdminController extends AbstractController
             'context' => $this->getFormContext($entity),
             'editorMediaLibrary' => $this->getEditorMediaLibrary($em, $entity),
         ] + $extra);
+    }
+
+    private function redirectToStayRoute(object $entity): Response
+    {
+        if ($entity instanceof Page) {
+            return $this->redirectToRoute('admin_page_edit', ['id' => $entity->getId()]);
+        }
+
+        if ($entity instanceof PageMedia) {
+            return $this->redirectToRoute('admin_page_media_edit', [
+                'pageId' => $entity->getPage()?->getId(),
+                'id' => $entity->getId(),
+            ]);
+        }
+
+        if ($entity instanceof GalleryImage) {
+            return $this->redirectToRoute('admin_image_edit', ['id' => $entity->getId()]);
+        }
+
+        if ($entity instanceof Event) {
+            return $this->redirectToRoute('admin_event_edit', ['id' => $entity->getId()]);
+        }
+
+        if ($entity instanceof SocialLink) {
+            return $this->redirectToRoute('admin_social_edit', ['id' => $entity->getId()]);
+        }
+
+        if ($entity instanceof CommunityOrganization) {
+            return $this->redirectToRoute('admin_organization_edit', ['id' => $entity->getId()]);
+        }
+
+        if ($entity instanceof SiteSetting) {
+            return $this->redirectToRoute('admin_setting_edit', ['id' => $entity->getId()]);
+        }
+
+        return $this->redirectToRoute('admin_dashboard');
     }
 
     private function getEditorMediaLibrary(EntityManagerInterface $em, object $entity): array
@@ -555,6 +606,7 @@ class AdminController extends AbstractController
             $entity instanceof PageMedia => 'page-media',
             $entity instanceof CommunityOrganization => 'association',
             $entity instanceof SocialLink => 'reseau',
+            $entity instanceof SiteSetting => 'parametre',
             default => 'image',
         };
     }
@@ -570,6 +622,11 @@ class AdminController extends AbstractController
             || str_starts_with($key, 'news_source_label_')
             || str_starts_with($key, 'planned_label_')
             || str_starts_with($key, 'no_news_');
+    }
+
+    private function isImageSetting(SiteSetting $setting): bool
+    {
+        return str_contains(strtolower($setting->getSettingKey()), 'image');
     }
 
     /**

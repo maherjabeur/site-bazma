@@ -382,6 +382,45 @@
                 textarea.after(wrapper);
                 wrapper.append(header, mediaOptions, resizeBar, toolbar, library, editor, source, mediaInput);
             });
+
+            document.querySelectorAll('[data-image-url-preview]').forEach((input) => {
+                const preview = input.closest('.admin-field')?.querySelector('[data-image-url-preview-target]');
+                if (!preview) {
+                    return;
+                }
+
+                const image = preview.querySelector('img');
+                const path = preview.querySelector('strong');
+                const refresh = () => {
+                    const value = input.value.trim();
+                    preview.hidden = value === '';
+                    if (value) {
+                        image.src = value;
+                        path.textContent = value;
+                    }
+                };
+
+                input.addEventListener('input', refresh);
+                refresh();
+            });
+
+            document.querySelectorAll('form.admin-form').forEach((form) => {
+                form.addEventListener('submit', (event) => {
+                    if (form.dataset.submitting === 'true') {
+                        event.preventDefault();
+                        return;
+                    }
+
+                    form.dataset.submitting = 'true';
+                    window.setTimeout(() => {
+                        form.querySelectorAll('button[type="submit"]').forEach((button) => {
+                            button.disabled = true;
+                            button.dataset.originalText = button.textContent;
+                            button.textContent = 'Enregistrement...';
+                        });
+                    }, 0);
+                });
+            });
         });
     </script>
 {% endblock %}
@@ -397,8 +436,14 @@
 </header>
 
 <main class="admin-layout admin-editor-layout">
-    {% for message in app.flashes('success') %}<p class="success">{{ message }}</p>{% endfor %}
-    {% for message in app.flashes('error') %}<p class="alert">{{ message }}</p>{% endfor %}
+    {% set successMessages = app.flashes('success') %}
+    {% set errorMessages = app.flashes('error') %}
+    {% if successMessages or errorMessages %}
+        <div class="admin-flashes" role="status" aria-live="polite">
+            {% for message in successMessages %}<p class="success admin-flash">{{ message }}</p>{% endfor %}
+            {% for message in errorMessages %}<p class="alert admin-flash">{{ message }}</p>{% endfor %}
+        </div>
+    {% endif %}
 
     <aside class="admin-editor-aside">
         <p class="admin-eyebrow">{{ context.section }}</p>
@@ -408,27 +453,52 @@
     </aside>
 
     <section class="admin-editor-panel">
+        {% set currentImage = null %}
         {% if entity.imageUrl is defined and entity.imageUrl %}
-            <div class="homepage-preview entity-image-preview">
-                <img src="{{ entity.imageUrl|webp_image }}" alt="">
+            {% set currentImage = entity.imageUrl %}
+        {% elseif entity.settingKey is defined and entity.settingValue and 'image' in entity.settingKey|lower %}
+            {% set currentImage = entity.settingValue %}
+        {% endif %}
+        {% if currentImage %}
+            <div class="homepage-preview entity-image-preview admin-image-editor-preview">
+                <img src="{{ currentImage|webp_image }}" alt="">
                 <div>
                     <span>Image actuelle</span>
-                    <strong>{{ entity.imageUrl }}</strong>
+                    <strong>{{ currentImage }}</strong>
                 </div>
             </div>
         {% endif %}
         {{ form_start(form, {attr: {class: 'admin-form'}}) }}
-            {{ form_errors(form) }}
+            {% if form_errors(form) %}
+                <div class="admin-form-errors">{{ form_errors(form) }}</div>
+            {% endif %}
             <div class="admin-form-grid">
                 {% set richFieldNames = ['body', 'bodyEn', 'bodyAr', 'description', 'descriptionEn', 'descriptionAr'] %}
                 {% for child in form %}
                     {% if child.vars.name != '_token' %}
                         {% set isRichField = child.vars.name in richFieldNames %}
-                        <div class="admin-field {{ 'checkbox' in child.vars.block_prefixes ? 'admin-field-check' : '' }} {{ 'file' in child.vars.block_prefixes ? 'upload-field admin-field-wide' : '' }} {{ isRichField ? 'admin-field-rich admin-field-wide' : '' }}">
+                        {% set isTextarea = 'textarea' in child.vars.block_prefixes %}
+                        {% set isFile = 'file' in child.vars.block_prefixes %}
+                        {% set isImageUrl = child.vars.name == 'imageUrl' %}
+                        {% set isExpandedChoice = child.vars.expanded|default(false) %}
+                        <div class="admin-field {{ 'checkbox' in child.vars.block_prefixes ? 'admin-field-check' : '' }} {{ isFile ? 'upload-field admin-field-wide' : '' }} {{ (isRichField or isTextarea or isImageUrl or isExpandedChoice) ? 'admin-field-wide' : '' }} {{ isRichField ? 'admin-field-rich' : '' }} {{ isExpandedChoice ? 'admin-choice-grid' : '' }}">
                             {{ form_label(child) }}
                             {% if isRichField %}
                                 {% set currentClass = child.vars.attr.class|default('') %}
                                 {{ form_widget(child, {attr: child.vars.attr|merge({class: (currentClass ~ ' wysiwyg-source')|trim})}) }}
+                            {% elseif isImageUrl %}
+                                {% set currentClass = child.vars.attr.class|default('') %}
+                                {{ form_widget(child, {attr: child.vars.attr|merge({class: (currentClass ~ ' image-url-input')|trim, 'data-image-url-preview': 'true'})}) }}
+                                <div class="image-url-preview" data-image-url-preview-target hidden>
+                                    <img src="" alt="">
+                                    <div>
+                                        <span>Apercu image</span>
+                                        <strong></strong>
+                                    </div>
+                                </div>
+                            {% elseif isFile %}
+                                {% set currentClass = child.vars.attr.class|default('') %}
+                                {{ form_widget(child, {attr: child.vars.attr|merge({class: (currentClass ~ ' file-input')|trim})}) }}
                             {% else %}
                                 {{ form_widget(child) }}
                             {% endif %}
@@ -440,7 +510,10 @@
             </div>
             <div class="admin-submit-bar">
                 <a href="{{ path(context.backRoute, context.backParams|default({})) }}">Annuler</a>
-                <button type="submit">Enregistrer</button>
+                <div class="admin-submit-actions">
+                    <button type="submit" name="_action" value="save_stay">Enregistrer et continuer</button>
+                    <button type="submit" name="_action" value="save">Enregistrer</button>
+                </div>
             </div>
         {{ form_end(form) }}
 

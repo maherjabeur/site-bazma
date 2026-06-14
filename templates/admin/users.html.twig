@@ -17,8 +17,14 @@
 </header>
 
 <main class="admin-layout admin-workspace">
-    {% for message in app.flashes('success') %}<p class="success">{{ message }}</p>{% endfor %}
-    {% for message in app.flashes('error') %}<p class="alert">{{ message }}</p>{% endfor %}
+    {% set successMessages = app.flashes('success') %}
+    {% set errorMessages = app.flashes('error') %}
+    {% if successMessages or errorMessages %}
+        <div class="admin-flashes" role="status" aria-live="polite">
+            {% for message in successMessages %}<p class="success admin-flash">{{ message }}</p>{% endfor %}
+            {% for message in errorMessages %}<p class="alert admin-flash">{{ message }}</p>{% endfor %}
+        </div>
+    {% endif %}
 
     <section class="admin-hero-panel">
         <div>

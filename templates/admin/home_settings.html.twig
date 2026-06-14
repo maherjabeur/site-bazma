@@ -17,8 +17,14 @@
 </header>
 
 <main class="admin-layout admin-editor-layout">
-    {% for message in app.flashes('success') %}<p class="success">{{ message }}</p>{% endfor %}
-    {% for message in app.flashes('error') %}<p class="alert">{{ message }}</p>{% endfor %}
+    {% set successMessages = app.flashes('success') %}
+    {% set errorMessages = app.flashes('error') %}
+    {% if successMessages or errorMessages %}
+        <div class="admin-flashes" role="status" aria-live="polite">
+            {% for message in successMessages %}<p class="success admin-flash">{{ message }}</p>{% endfor %}
+            {% for message in errorMessages %}<p class="alert admin-flash">{{ message }}</p>{% endfor %}
+        </div>
+    {% endif %}
 
     <aside class="admin-editor-aside">
         <p class="admin-eyebrow">Page d’accueil</p>
@@ -42,7 +48,14 @@
             <div class="admin-form-grid">
                 <div class="admin-field admin-field-wide">
                     <label for="hero_image">Grande image d’accueil</label>
-                    <input id="hero_image" name="hero_image" value="{{ values.hero_image }}" placeholder="/assets/bazma-hero.webp">
+                    <input id="hero_image" name="hero_image" value="{{ values.hero_image }}" placeholder="/assets/bazma-hero.webp" data-image-url-preview="true">
+                    <div class="image-url-preview" data-image-url-preview-target hidden>
+                        <img src="" alt="">
+                        <div>
+                            <span>Apercu image</span>
+                            <strong></strong>
+                        </div>
+                    </div>
                     <p class="field-help">Utilisez une image WebP large. Exemple: /assets/ma-photo.webp</p>
                 </div>
                 <div class="admin-field admin-field-wide upload-field">
@@ -90,9 +103,53 @@
 
             <div class="admin-submit-bar">
                 <a href="{{ path('admin_dashboard') }}">Annuler</a>
-                <button type="submit">Enregistrer l’accueil</button>
+                <div class="admin-submit-actions">
+                    <a class="button secondary-admin" href="{{ path('app_home', {_locale: 'fr'}) }}">Previsualiser</a>
+                    <button type="submit">Enregistrer l'accueil</button>
+                </div>
             </div>
         </form>
     </section>
 </main>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('[data-image-url-preview]').forEach((input) => {
+            const preview = input.closest('.admin-field')?.querySelector('[data-image-url-preview-target]');
+            if (!preview) {
+                return;
+            }
+
+            const image = preview.querySelector('img');
+            const path = preview.querySelector('strong');
+            const refresh = () => {
+                const value = input.value.trim();
+                preview.hidden = value === '';
+                if (value) {
+                    image.src = value;
+                    path.textContent = value;
+                }
+            };
+
+            input.addEventListener('input', refresh);
+            refresh();
+        });
+
+        document.querySelectorAll('form.admin-form').forEach((form) => {
+            form.addEventListener('submit', (event) => {
+                if (form.dataset.submitting === 'true') {
+                    event.preventDefault();
+                    return;
+                }
+
+                form.dataset.submitting = 'true';
+                window.setTimeout(() => {
+                    form.querySelectorAll('button[type="submit"]').forEach((button) => {
+                        button.disabled = true;
+                        button.textContent = 'Enregistrement...';
+                    });
+                }, 0);
+            });
+        });
+    });
+</script>
 {% endblock %}
