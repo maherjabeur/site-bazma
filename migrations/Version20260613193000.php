@@ -1209,55 +1209,55 @@ Before publication: ask permission, record author, date, place, caption, source 
       array (
         0 => 164,
         1 => 'home_news_eyebrow_fr',
-        2 => 'CMS local',
+        2 => 'Actualités locales',
       ),
       102 => 
       array (
         0 => 165,
         1 => 'home_news_eyebrow_en',
-        2 => 'Local CMS',
+        2 => 'Local news',
       ),
       103 => 
       array (
         0 => 166,
         1 => 'home_news_eyebrow_ar',
-        2 => 'نظام محلي',
+        2 => 'أخبار محلية',
       ),
       104 => 
       array (
         0 => 167,
         1 => 'home_news_title_fr',
-        2 => 'Une vitrine qui peut évoluer',
+        2 => 'Actualités, événements et initiatives de Bazma',
       ),
       105 => 
       array (
         0 => 168,
         1 => 'home_news_title_en',
-        2 => 'A showcase that can evolve',
+        2 => 'Bazma news, events and initiatives',
       ),
       106 => 
       array (
         0 => 169,
         1 => 'home_news_title_ar',
-        2 => 'واجهة قابلة للتطور',
+        2 => 'أخبار بازمة وفعالياتها ومبادراتها',
       ),
       107 => 
       array (
         0 => 170,
         1 => 'home_news_text_fr',
-        2 => 'Pages, images, crédits, événements et textes importants sont administrables depuis un espace sécurisé.',
+        2 => 'Suivez les nouvelles publiées autour de Bazma: annonces locales, activités de jeunesse, actions associatives, sport, photos autorisées et événements importants du village.',
       ),
       108 => 
       array (
         0 => 171,
         1 => 'home_news_text_en',
-        2 => 'Pages, images, credits, events and important texts are managed from a secure space.',
+        2 => 'Follow updates from Bazma: local announcements, youth activities, association work, sports, authorized photos and important village events.',
       ),
       109 => 
       array (
         0 => 172,
         1 => 'home_news_text_ar',
-        2 => 'الصفحات والصور والاعتمادات والأحداث والنصوص المهمة تدار من فضاء آمن.',
+        2 => 'تابع مستجدات بازمة: الإعلانات المحلية، أنشطة الشباب، أعمال الجمعيات، الرياضة، الصور المرخصة والأحداث المهمة في القرية.',
       ),
       110 => 
       array (
