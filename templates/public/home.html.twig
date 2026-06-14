@@ -11,6 +11,59 @@
 {% endblock %}
 {% block og_image %}{{ absolute_url(settings.value('og_image', '/assets/bazma-hero.webp')|webp_image) }}{% endblock %}
 
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-news-carousel]').forEach((carousel) => {
+                const track = carousel.querySelector('[data-carousel-track]');
+                const slides = Array.from(carousel.querySelectorAll('[data-carousel-slide]'));
+                const dots = Array.from(carousel.querySelectorAll('[data-carousel-dot]'));
+                const previous = carousel.querySelector('[data-carousel-prev]');
+                const next = carousel.querySelector('[data-carousel-next]');
+                let current = 0;
+
+                if (!track || slides.length === 0) {
+                    return;
+                }
+
+                const update = () => {
+                    track.style.transform = `translate3d(${-current * 100}%, 0, 0)`;
+                    slides.forEach((slide, index) => {
+                        const active = index === current;
+                        slide.classList.toggle('is-active', active);
+                        slide.setAttribute('aria-hidden', active ? 'false' : 'true');
+                    });
+                    dots.forEach((dot, index) => {
+                        dot.classList.toggle('is-active', index === current);
+                        dot.setAttribute('aria-current', index === current ? 'true' : 'false');
+                    });
+                };
+
+                const goTo = (index) => {
+                    current = (index + slides.length) % slides.length;
+                    update();
+                };
+
+                previous?.addEventListener('click', () => goTo(current - 1));
+                next?.addEventListener('click', () => goTo(current + 1));
+                dots.forEach((dot, index) => dot.addEventListener('click', () => goTo(index)));
+                carousel.addEventListener('keydown', (event) => {
+                    if (event.key === 'ArrowLeft') {
+                        goTo(document.documentElement.dir === 'rtl' ? current + 1 : current - 1);
+                    }
+                    if (event.key === 'ArrowRight') {
+                        goTo(document.documentElement.dir === 'rtl' ? current - 1 : current + 1);
+                    }
+                });
+
+                carousel.classList.add('is-ready');
+                update();
+            });
+        });
+    </script>
+{% endblock %}
+
 {% block body %}
 <header class="site-header">
     <a class="brand" href="{{ path('app_home', {_locale: locale}) }}">{{ settings.value('brand_' ~ locale, 'brand'|trans) }}</a>
@@ -59,21 +112,38 @@
             </div>
             <a class="button secondary" href="{{ path('app_news_archive', {_locale: locale}) }}">{{ 'news.archive'|trans }}</a>
         </div>
-        <div class="news-board news-slider" aria-label="{{ 'nav.news'|trans }}">
-            {% for event in events %}
-                <article>
-                    {% if event.imageUrl %}
-                        <img src="{{ event.imageUrl|webp_image }}" alt="{{ event.localizedTitle(locale) }}">
-                    {% endif %}
-                    <span class="news-category">{{ event.category }}</span>
-                    <time>{{ event.eventDate ? event.eventDate|date('d/m/Y') : settings.value('planned_label_' ~ locale, 'planned'|trans) }}</time>
-                    <h3>{{ event.localizedTitle(locale) }}</h3>
-                    <p>{{ event.localizedExcerpt(locale) }}</p>
-                    <a href="{{ path('app_news_show', {_locale: locale, slug: event.slug}) }}">{{ settings.value('read_more_' ~ locale, 'read_more'|trans) }}</a>
-                </article>
-            {% else %}
-                <article><h3>{{ settings.value('no_news_' ~ locale, 'no_news'|trans) }}</h3></article>
-            {% endfor %}
+        <div class="news-carousel" data-news-carousel tabindex="0" aria-label="{{ 'nav.news'|trans }}">
+            <div class="news-carousel-viewport">
+                <div class="news-board news-slider" data-carousel-track>
+                    {% for event in events %}
+                        <article class="news-slide" data-carousel-slide dir="{{ locale == 'ar' ? 'rtl' : 'ltr' }}">
+                            {% if event.imageUrl %}
+                                <img src="{{ event.imageUrl|webp_image }}" alt="{{ event.localizedTitle(locale) }}">
+                            {% endif %}
+                            <div class="news-slide-content">
+                                <span class="news-category">{{ event.category }}</span>
+                                <time>{{ event.eventDate ? event.eventDate|date('d/m/Y') : settings.value('planned_label_' ~ locale, 'planned'|trans) }}</time>
+                                <h3>{{ event.localizedTitle(locale) }}</h3>
+                                <p>{{ event.localizedExcerpt(locale) }}</p>
+                                <a href="{{ path('app_news_show', {_locale: locale, slug: event.slug}) }}">{{ settings.value('read_more_' ~ locale, 'read_more'|trans) }}</a>
+                            </div>
+                        </article>
+                    {% else %}
+                        <article class="news-slide is-empty" data-carousel-slide><div class="news-slide-content"><h3>{{ settings.value('no_news_' ~ locale, 'no_news'|trans) }}</h3></div></article>
+                    {% endfor %}
+                </div>
+            </div>
+            {% if events|length > 1 %}
+                <div class="news-carousel-controls">
+                    <button type="button" class="news-carousel-arrow" data-carousel-prev aria-label="{{ 'news.previous'|trans }}" title="{{ 'news.previous'|trans }}">‹</button>
+                    <div class="news-carousel-dots" aria-label="{{ 'news.slide_navigation'|trans }}">
+                        {% for event in events %}
+                            <button type="button" data-carousel-dot aria-label="{{ 'news.slide'|trans({'%number%': loop.index}) }}"></button>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="news-carousel-arrow" data-carousel-next aria-label="{{ 'news.next'|trans }}" title="{{ 'news.next'|trans }}">›</button>
+                </div>
+            {% endif %}
         </div>
     </section>
 
