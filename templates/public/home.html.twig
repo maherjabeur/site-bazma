@@ -21,7 +21,10 @@
                 const dots = Array.from(carousel.querySelectorAll('[data-carousel-dot]'));
                 const previous = carousel.querySelector('[data-carousel-prev]');
                 const next = carousel.querySelector('[data-carousel-next]');
+                const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                const interval = Number(carousel.dataset.carouselInterval || 6500);
                 let current = 0;
+                let timer = null;
 
                 if (!track || slides.length === 0) {
                     return;
@@ -45,20 +48,47 @@
                     update();
                 };
 
-                previous?.addEventListener('click', () => goTo(current - 1));
-                next?.addEventListener('click', () => goTo(current + 1));
-                dots.forEach((dot, index) => dot.addEventListener('click', () => goTo(index)));
+                const stopAuto = () => {
+                    if (timer) {
+                        window.clearInterval(timer);
+                        timer = null;
+                    }
+                };
+
+                const startAuto = () => {
+                    stopAuto();
+                    if (!reduceMotion && slides.length > 1) {
+                        timer = window.setInterval(() => goTo(current + 1), interval);
+                    }
+                };
+
+                const manualGoTo = (index) => {
+                    goTo(index);
+                    startAuto();
+                };
+
+                previous?.addEventListener('click', () => manualGoTo(current - 1));
+                next?.addEventListener('click', () => manualGoTo(current + 1));
+                dots.forEach((dot, index) => dot.addEventListener('click', () => manualGoTo(index)));
                 carousel.addEventListener('keydown', (event) => {
                     if (event.key === 'ArrowLeft') {
-                        goTo(document.documentElement.dir === 'rtl' ? current + 1 : current - 1);
+                        manualGoTo(document.documentElement.dir === 'rtl' ? current + 1 : current - 1);
                     }
                     if (event.key === 'ArrowRight') {
-                        goTo(document.documentElement.dir === 'rtl' ? current - 1 : current + 1);
+                        manualGoTo(document.documentElement.dir === 'rtl' ? current - 1 : current + 1);
                     }
+                });
+                carousel.addEventListener('pointerenter', stopAuto);
+                carousel.addEventListener('pointerleave', startAuto);
+                carousel.addEventListener('focusin', stopAuto);
+                carousel.addEventListener('focusout', startAuto);
+                document.addEventListener('visibilitychange', () => {
+                    document.hidden ? stopAuto() : startAuto();
                 });
 
                 carousel.classList.add('is-ready');
                 update();
+                startAuto();
             });
         });
     </script>
@@ -112,7 +142,7 @@
             </div>
             <a class="button secondary" href="{{ path('app_news_archive', {_locale: locale}) }}">{{ 'news.archive'|trans }}</a>
         </div>
-        <div class="news-carousel" data-news-carousel tabindex="0" aria-label="{{ 'nav.news'|trans }}">
+        <div class="news-carousel" data-news-carousel data-carousel-interval="6500" tabindex="0" aria-label="{{ 'nav.news'|trans }}">
             <div class="news-carousel-viewport">
                 <div class="news-board news-slider" data-carousel-track>
                     {% for event in events %}
@@ -135,13 +165,13 @@
             </div>
             {% if events|length > 1 %}
                 <div class="news-carousel-controls">
-                    <button type="button" class="news-carousel-arrow" data-carousel-prev aria-label="{{ 'news.previous'|trans }}" title="{{ 'news.previous'|trans }}">‹</button>
+                    <button type="button" class="news-carousel-arrow" data-carousel-prev aria-label="{{ 'news.previous'|trans }}" title="{{ 'news.previous'|trans }}">{{ locale == 'ar' ? '›' : '‹' }}</button>
                     <div class="news-carousel-dots" aria-label="{{ 'news.slide_navigation'|trans }}">
                         {% for event in events %}
                             <button type="button" data-carousel-dot aria-label="{{ 'news.slide'|trans({'%number%': loop.index}) }}"></button>
                         {% endfor %}
                     </div>
-                    <button type="button" class="news-carousel-arrow" data-carousel-next aria-label="{{ 'news.next'|trans }}" title="{{ 'news.next'|trans }}">›</button>
+                    <button type="button" class="news-carousel-arrow" data-carousel-next aria-label="{{ 'news.next'|trans }}" title="{{ 'news.next'|trans }}">{{ locale == 'ar' ? '‹' : '›' }}</button>
                 </div>
             {% endif %}
         </div>

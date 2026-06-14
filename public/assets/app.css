@@ -1188,10 +1188,6 @@ html[dir="rtl"] .event-list article:hover {
     background: var(--accent-dark);
 }
 
-html[dir="rtl"] .news-carousel-controls {
-    flex-direction: row-reverse;
-}
-
 html[dir="rtl"] .news-carousel .news-slide,
 html[dir="rtl"] .news-carousel .news-slide:first-child {
     border-right: 5px solid var(--clay);
