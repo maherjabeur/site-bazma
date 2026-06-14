@@ -3,10 +3,89 @@
 {% block title %}{{ 'nav.gallery'|trans }} - {{ 'brand'|trans }}{% endblock %}
 {% block meta_description %}{{ 'gallery.meta_description'|trans }}{% endblock %}
 {% block canonical_url %}{{ url('app_gallery', {_locale: locale}) }}{% endblock %}
+{% block og_image %}{{ absolute_url((featuredImage ? featuredImage.imageUrl : '/assets/bazma-hero.webp')|webp_image) }}{% endblock %}
 {% block alternate_links %}
     <link rel="alternate" hreflang="ar" href="{{ url('app_gallery', {_locale: 'ar'}) }}">
     <link rel="alternate" hreflang="fr" href="{{ url('app_gallery', {_locale: 'fr'}) }}">
     <link rel="alternate" hreflang="en" href="{{ url('app_gallery', {_locale: 'en'}) }}">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const gallery = document.querySelector('[data-gallery]');
+            const lightbox = document.querySelector('[data-lightbox]');
+            if (!gallery || !lightbox) {
+                return;
+            }
+
+            const items = Array.from(gallery.querySelectorAll('[data-gallery-item]'));
+            const image = lightbox.querySelector('[data-lightbox-image]');
+            const title = lightbox.querySelector('[data-lightbox-title]');
+            const credit = lightbox.querySelector('[data-lightbox-credit]');
+            const counter = lightbox.querySelector('[data-lightbox-counter]');
+            const source = lightbox.querySelector('[data-lightbox-source]');
+            const close = lightbox.querySelector('[data-lightbox-close]');
+            const previous = lightbox.querySelector('[data-lightbox-previous]');
+            const next = lightbox.querySelector('[data-lightbox-next]');
+            let current = 0;
+
+            const showItem = (index) => {
+                current = (index + items.length) % items.length;
+                const item = items[current];
+                image.src = item.dataset.image;
+                image.alt = item.dataset.title;
+                title.textContent = item.dataset.title;
+                credit.textContent = item.dataset.credit || '';
+                credit.hidden = !item.dataset.credit;
+                counter.textContent = `${current + 1} / ${items.length}`;
+                if (item.dataset.source) {
+                    source.href = item.dataset.source;
+                    source.hidden = false;
+                } else {
+                    source.hidden = true;
+                }
+            };
+
+            const open = (index) => {
+                showItem(index);
+                lightbox.hidden = false;
+                document.body.classList.add('is-lightbox-open');
+                close.focus();
+            };
+
+            const hide = () => {
+                lightbox.hidden = true;
+                document.body.classList.remove('is-lightbox-open');
+                items[current]?.focus();
+            };
+
+            items.forEach((item, index) => item.addEventListener('click', () => open(index)));
+            close.addEventListener('click', hide);
+            previous.addEventListener('click', () => showItem(current - 1));
+            next.addEventListener('click', () => showItem(current + 1));
+            lightbox.addEventListener('click', (event) => {
+                if (event.target === lightbox) {
+                    hide();
+                }
+            });
+            document.addEventListener('keydown', (event) => {
+                if (lightbox.hidden) {
+                    return;
+                }
+                if (event.key === 'Escape') {
+                    hide();
+                }
+                if (event.key === 'ArrowLeft') {
+                    showItem(document.documentElement.dir === 'rtl' ? current + 1 : current - 1);
+                }
+                if (event.key === 'ArrowRight') {
+                    showItem(document.documentElement.dir === 'rtl' ? current - 1 : current + 1);
+                }
+            });
+        });
+    </script>
 {% endblock %}
 
 {% block body %}
@@ -21,22 +100,73 @@
         </span>
     </nav>
 </header>
-<main class="section">
-    <div class="section-heading">
-        <p class="eyebrow">{{ 'nav.gallery'|trans }}</p>
-        <h1>{{ 'gallery.title'|trans }}</h1>
-    </div>
-    <div class="gallery-grid">
-        {% for image in images %}
-            <figure>
-                <img src="{{ image.imageUrl|webp_image }}" alt="{{ image.title }}">
-                <figcaption>
-                    <strong>{{ image.localizedTitle(locale) }}</strong>
-                    {% if image.credit %}<span>{{ image.credit }}</span>{% endif %}
-                    {% if image.sourceUrl %}<a href="{{ image.sourceUrl }}" target="_blank" rel="noreferrer">{{ 'gallery.source'|trans }}</a>{% endif %}
-                </figcaption>
-            </figure>
-        {% endfor %}
+
+<main class="gallery-page">
+    <section class="gallery-hero"{% if featuredImage %} style="background-image: linear-gradient({{ locale == 'ar' ? '270deg' : '90deg' }}, rgba(19, 35, 29, .88), rgba(19, 35, 29, .26)), url('{{ featuredImage.imageUrl|webp_image }}')"{% endif %}>
+        <div class="gallery-hero-content">
+            <p class="eyebrow">{{ 'nav.gallery'|trans }}</p>
+            <h1>{{ 'gallery.title'|trans }}</h1>
+            <p>{{ 'gallery.intro'|trans }}</p>
+        </div>
+        <div class="gallery-hero-panel">
+            <span>{{ 'gallery.count'|trans({'%count%': images|length}) }}</span>
+            {% if featuredImage %}
+                <strong>{{ featuredImage.localizedTitle(locale) }}</strong>
+                {% if featuredImage.credit %}<p>{{ featuredImage.credit }}</p>{% endif %}
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="gallery-showcase section">
+        <div class="gallery-toolbar">
+            <div>
+                <p class="eyebrow">{{ 'gallery.collection'|trans }}</p>
+                <h2>{{ 'gallery.collection_title'|trans }}</h2>
+            </div>
+            <span>{{ 'gallery.count'|trans({'%count%': images|length}) }}</span>
+        </div>
+
+        <div class="gallery-masonry" data-gallery>
+            {% for image in images %}
+                {% set title = image.localizedTitle(locale) %}
+                <figure class="gallery-photo {{ loop.first ? 'is-featured' : '' }}">
+                    <button
+                        type="button"
+                        data-gallery-item
+                        data-image="{{ image.imageUrl|webp_image }}"
+                        data-title="{{ title|e('html_attr') }}"
+                        data-credit="{{ image.credit|default('')|e('html_attr') }}"
+                        data-source="{{ image.sourceUrl|default('')|e('html_attr') }}"
+                        aria-label="{{ 'gallery.open'|trans({'%title%': title}) }}"
+                    >
+                        <img src="{{ image.imageUrl|webp_image }}" alt="{{ title }}" loading="{{ loop.index > 2 ? 'lazy' : 'eager' }}">
+                    </button>
+                    <figcaption>
+                        <span>{{ loop.index < 10 ? '0' ~ loop.index : loop.index }}</span>
+                        <strong>{{ title }}</strong>
+                        {% if image.credit %}<small>{{ image.credit }}</small>{% endif %}
+                        {% if image.sourceUrl %}<a href="{{ image.sourceUrl }}" target="_blank" rel="noreferrer">{{ 'gallery.source'|trans }}</a>{% endif %}
+                    </figcaption>
+                </figure>
+            {% else %}
+                <p class="gallery-empty">{{ 'gallery.empty'|trans }}</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <div class="gallery-lightbox" data-lightbox hidden aria-modal="true" role="dialog" aria-label="{{ 'nav.gallery'|trans }}">
+        <div class="gallery-lightbox-frame">
+            <button class="gallery-lightbox-close" type="button" data-lightbox-close aria-label="{{ 'gallery.close'|trans }}">×</button>
+            <button class="gallery-lightbox-arrow is-previous" type="button" data-lightbox-previous aria-label="{{ 'gallery.previous'|trans }}">{{ locale == 'ar' ? '›' : '‹' }}</button>
+            <img data-lightbox-image src="" alt="">
+            <button class="gallery-lightbox-arrow is-next" type="button" data-lightbox-next aria-label="{{ 'gallery.next'|trans }}">{{ locale == 'ar' ? '‹' : '›' }}</button>
+            <div class="gallery-lightbox-caption">
+                <span data-lightbox-counter></span>
+                <strong data-lightbox-title></strong>
+                <p data-lightbox-credit hidden></p>
+                <a data-lightbox-source href="#" target="_blank" rel="noreferrer" hidden>{{ 'gallery.source'|trans }}</a>
+            </div>
+        </div>
     </div>
 </main>
 {% endblock %}

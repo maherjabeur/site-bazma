@@ -78,9 +78,12 @@ class PublicController extends AbstractController
     #[Route('/{_locale}/gallery', name: 'app_gallery', requirements: ['_locale' => 'ar|fr|en'])]
     public function gallery(Request $request, GalleryImageRepository $images): Response
     {
+        $galleryImages = $images->findBy([], ['featured' => 'DESC', 'position' => 'ASC']);
+
         return $this->render('public/gallery.html.twig', [
             'locale' => $request->getLocale(),
-            'images' => $images->findBy([], ['position' => 'ASC']),
+            'images' => $galleryImages,
+            'featuredImage' => $galleryImages[0] ?? null,
         ]);
     }
 
