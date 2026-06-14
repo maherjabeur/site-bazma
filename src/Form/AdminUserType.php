@@ -37,7 +37,7 @@ class AdminUserType extends AbstractType
                     'Actualités' => 'ROLE_NEWS_MANAGER',
                     'Associations' => 'ROLE_ORGANIZATION_MANAGER',
                     'Réseaux sociaux' => 'ROLE_SOCIAL_MANAGER',
-                    'SEO et paramètres' => 'ROLE_SETTINGS_MANAGER',
+                    'Référencement et paramètres' => 'ROLE_SETTINGS_MANAGER',
                     'Modérateurs' => 'ROLE_USER_MANAGER',
                 ],
             ])

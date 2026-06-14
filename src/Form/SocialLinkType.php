@@ -25,7 +25,7 @@ class SocialLinkType extends AbstractType
             ->add('summary', TextareaType::class, ['label' => 'Résumé FR', 'attr' => ['rows' => 4]])
             ->add('summaryEn', TextareaType::class, ['label' => 'Résumé EN', 'required' => false, 'attr' => ['rows' => 4]])
             ->add('summaryAr', TextareaType::class, ['label' => 'Résumé AR', 'required' => false, 'attr' => ['rows' => 4, 'dir' => 'rtl']])
-            ->add('url', TextType::class, ['label' => 'URL'])
+            ->add('url', TextType::class, ['label' => 'Adresse du lien'])
             ->add('imageUrl', TextType::class, ['label' => 'Image WebP', 'required' => false, 'help' => 'Chemin conseillé: /assets/nom-image.webp'])
             ->add('imageFile', FileType::class, ['label' => 'Importer une image', 'mapped' => false, 'required' => false, 'help' => 'JPG, PNG ou WebP. Le fichier sera converti en WebP.', 'attr' => ['accept' => 'image/jpeg,image/png,image/webp']])
             ->add('position', IntegerType::class, ['label' => 'Ordre d’affichage'])

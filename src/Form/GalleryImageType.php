@@ -22,7 +22,7 @@ class GalleryImageType extends AbstractType
             ->add('imageUrl', TextType::class, ['label' => 'Image WebP', 'required' => false, 'help' => 'Chemin conseillé: /assets/nom-image.webp'])
             ->add('imageFile', FileType::class, ['label' => 'Importer une image', 'mapped' => false, 'required' => false, 'help' => 'JPG, PNG ou WebP. Le fichier sera converti en WebP.', 'attr' => ['accept' => 'image/jpeg,image/png,image/webp']])
             ->add('credit', TextType::class, ['label' => 'Crédit', 'required' => false])
-            ->add('sourceUrl', TextType::class, ['label' => 'Source URL', 'required' => false])
+            ->add('sourceUrl', TextType::class, ['label' => 'Lien de la source', 'required' => false])
             ->add('position', IntegerType::class, ['label' => 'Ordre d’affichage'])
             ->add('featured', CheckboxType::class, ['label' => 'Mise en avant', 'required' => false]);
     }

@@ -46,10 +46,10 @@
                 header.className = 'wysiwyg-header';
                 header.innerHTML = `
                     <div>
-                        <strong>Editeur de contenu</strong>
-                        <span>Texte, liens, listes, citations et medias</span>
+                        <strong>Éditeur de contenu</strong>
+                        <span>Texte, liens, listes, citations et médias</span>
                     </div>
-                    <button type="button" data-source-toggle="true">HTML</button>
+                    <button type="button" data-source-toggle="true">Code HTML</button>
                 `;
 
                 const mediaOptions = document.createElement('div');
@@ -57,14 +57,14 @@
                 mediaOptions.innerHTML = `
                     <label>Largeur max <input type="number" min="200" max="3200" step="50" value="1600" data-media-width></label>
                     <label>Hauteur max <input type="number" min="200" max="3200" step="50" value="1100" data-media-height></label>
-                    <span>Applique aux images uploadées. Les videos sont ajoutees sans conversion.</span>
+                    <span>Appliqué aux images importées. Les vidéos sont ajoutées sans conversion.</span>
                 `;
 
                 const resizeBar = document.createElement('div');
                 resizeBar.className = 'wysiwyg-resize-bar';
                 resizeBar.hidden = true;
                 resizeBar.innerHTML = `
-                    <strong>Media selectionne</strong>
+                    <strong>Média sélectionné</strong>
                     <button type="button" data-media-size="25">25%</button>
                     <button type="button" data-media-size="50">50%</button>
                     <button type="button" data-media-size="75">75%</button>
@@ -73,8 +73,8 @@
                     <button type="button" data-media-align="left">Gauche</button>
                     <button type="button" data-media-align="center">Centre</button>
                     <button type="button" data-media-align="right">Droite</button>
-                    <button type="button" data-media-align="wrap-left">Texte a droite</button>
-                    <button type="button" data-media-align="wrap-right">Texte a gauche</button>
+                    <button type="button" data-media-align="wrap-left">Texte à droite</button>
+                    <button type="button" data-media-align="wrap-right">Texte à gauche</button>
                     <button type="button" data-media-align="clear">Sans habillage</button>
                     <span class="wysiwyg-separator"></span>
                     <button type="button" data-media-remove="true">Supprimer</button>
@@ -83,8 +83,8 @@
                 const toolbar = document.createElement('div');
                 toolbar.className = 'wysiwyg-toolbar';
                 toolbar.innerHTML = `
-                    <button type="button" data-command="undo" title="Annuler">Undo</button>
-                    <button type="button" data-command="redo" title="Retablir">Redo</button>
+                    <button type="button" data-command="undo" title="Annuler">Annuler</button>
+                    <button type="button" data-command="redo" title="Rétablir">Rétablir</button>
                     <span class="wysiwyg-separator"></span>
                     <button type="button" data-block="p">P</button>
                     <button type="button" data-block="h2">H2</button>
@@ -102,9 +102,9 @@
                     <button type="button" data-command="justifyCenter">Centre</button>
                     <span class="wysiwyg-separator"></span>
                     <button type="button" data-link="true">Lien</button>
-                    <button type="button" data-media-upload="true">Uploader media</button>
-                    <button type="button" data-library-toggle="true">Mediatheque</button>
-                    <button type="button" data-image-url="true">Image URL</button>
+                    <button type="button" data-media-upload="true">Importer un média</button>
+                    <button type="button" data-library-toggle="true">Médiathèque</button>
+                    <button type="button" data-image-url="true">Image par adresse</button>
                     <button type="button" data-command="removeFormat">Nettoyer</button>
                 `;
 
@@ -119,7 +119,7 @@
                             <small>${escapeHtml(media.source)}</small>
                         </button>
                     `).join('')
-                    : '<p>Aucune image dans la mediatheque pour le moment.</p>';
+                    : '<p>Aucune image dans la médiathèque pour le moment.</p>';
 
                 const editor = document.createElement('div');
                 editor.className = 'wysiwyg-editor';
@@ -160,7 +160,7 @@
                         return;
                     }
 
-                    document.execCommand('insertHTML', false, `<figure data-size="100" data-align="center"><video controls playsinline preload="metadata" src="${escapeAttribute(safeUrl)}"></video><figcaption>Video</figcaption></figure><p><br></p>`);
+                    document.execCommand('insertHTML', false, `<figure data-size="100" data-align="center"><video controls playsinline preload="metadata" src="${escapeAttribute(safeUrl)}"></video><figcaption>Vidéo</figcaption></figure><p><br></p>`);
                     sync();
                 };
 
@@ -187,13 +187,13 @@
                         });
                         const data = await response.json();
                         if (!response.ok || data.error) {
-                            throw new Error(data.error || 'Upload video impossible.');
+                            throw new Error(data.error || 'Import de la vidéo impossible.');
                         }
                         result = data;
                     }
 
                     if (!result?.url) {
-                        throw new Error('Upload video incomplet.');
+                        throw new Error('Import de la vidéo incomplet.');
                     }
 
                     return result;
@@ -208,7 +208,7 @@
                     const isVideo = /\.(mp4|webm|mov)$/i.test(file.name);
                     const maxSize = isVideo ? 64 * 1024 * 1024 : 8 * 1024 * 1024;
                     if (file.size > maxSize) {
-                        window.alert(isVideo ? 'Video trop lourde. Maximum: 64 Mo.' : 'Image trop lourde. Maximum: 8 Mo.');
+                        window.alert(isVideo ? 'Vidéo trop lourde. Maximum: 64 Mo.' : 'Image trop lourde. Maximum: 8 Mo.');
                         mediaInput.value = '';
                         return;
                     }
@@ -241,7 +241,7 @@
                         });
                         const data = await response.json();
                         if (!response.ok || !data.url) {
-                            throw new Error(data.error || 'Upload impossible.');
+                            throw new Error(data.error || 'Import impossible.');
                         }
                         editor.focus();
                         if (data.type === 'video') {
@@ -290,7 +290,7 @@
                     }
 
                     if (button.dataset.link) {
-                        const url = window.prompt('URL du lien');
+                        const url = window.prompt('Adresse du lien');
                         if (url) {
                             document.execCommand('createLink', false, url);
                             sync();
@@ -309,9 +309,9 @@
                     }
 
                     if (button.dataset.imageUrl) {
-                        const url = window.prompt("URL de l'image");
+                        const url = window.prompt("Adresse de l'image");
                         if (url) {
-                            const alt = window.prompt('Legende / texte alternatif', '') || '';
+                            const alt = window.prompt('Légende / texte alternatif', '') || '';
                             insertImage(url, alt);
                         }
                         return;
@@ -431,7 +431,7 @@
     <nav>
         <a href="{{ path(context.backRoute, context.backParams|default({})) }}">Retour</a>
         <a href="{{ path('app_home', {_locale: 'ar'}) }}">Voir le site</a>
-        <a href="{{ path('app_logout') }}">Deconnexion</a>
+        <a href="{{ path('app_logout') }}">Déconnexion</a>
     </nav>
 </header>
 
@@ -492,7 +492,7 @@
                                 <div class="image-url-preview" data-image-url-preview-target hidden>
                                     <img src="" alt="">
                                     <div>
-                                        <span>Apercu image</span>
+                                        <span>Aperçu image</span>
                                         <strong></strong>
                                     </div>
                                 </div>
@@ -521,8 +521,8 @@
             <div class="page-media-manager">
                 <div class="admin-section-head">
                     <div>
-                        <p class="admin-eyebrow">Mediatheque</p>
-                        <h2>Images attachees a cette page</h2>
+                        <p class="admin-eyebrow">Médiathèque</p>
+                        <h2>Images attachées à cette page</h2>
                     </div>
                     <a class="button small" href="{{ path('admin_page_media_new', {pageId: entity.id}) }}">Ajouter une image</a>
                 </div>
@@ -543,7 +543,7 @@
                             </div>
                         </article>
                     {% else %}
-                        <p class="admin-empty">Aucune image attachee a cette page.</p>
+                        <p class="admin-empty">Aucune image attachée à cette page.</p>
                     {% endfor %}
                 </div>
             </div>

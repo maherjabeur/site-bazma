@@ -12,7 +12,7 @@
     <nav>
         <a href="{{ path('app_home', {_locale: 'ar'}) }}">Voir le site</a>
         {% if is_granted('ROLE_HOME_MANAGER') %}<a href="{{ path('admin_home_settings') }}">Accueil</a>{% endif %}
-        {% if is_granted('ROLE_SETTINGS_MANAGER') %}<a href="{{ path('admin_settings') }}">SEO et paramètres</a>{% endif %}
+        {% if is_granted('ROLE_SETTINGS_MANAGER') %}<a href="{{ path('admin_settings') }}">Référencement et paramètres</a>{% endif %}
         {% if is_granted('ROLE_USER_MANAGER') %}<a href="{{ path('admin_users') }}">Modérateurs</a>{% endif %}
         <a href="{{ path('app_logout') }}">Déconnexion</a>
     </nav>
@@ -32,7 +32,7 @@
         <div>
             <p class="admin-eyebrow">Centre de contrôle</p>
             <h1>Tout le contenu du site, simple à modifier.</h1>
-            <p>Pages, images, associations, réseaux sociaux, actualités et SEO sont regroupés dans une expérience claire pour publier vite et proprement.</p>
+            <p>Pages, images, associations, réseaux sociaux, actualités et référencement sont regroupés dans une expérience claire pour publier vite et proprement.</p>
         </div>
         <div class="admin-quick-actions" aria-label="Actions rapides">
             {% if is_granted('ROLE_HOME_MANAGER') %}<a class="button" href="{{ path('admin_home_settings') }}">Modifier l’accueil</a>{% endif %}
@@ -57,7 +57,7 @@
         <div class="admin-section-head">
             <div>
                 <p class="admin-eyebrow">Architecture</p>
-                <h2>Pages SEO</h2>
+                <h2>Pages de référencement</h2>
             </div>
             <a class="button small" href="{{ path('admin_page_new') }}">Ajouter</a>
         </div>
@@ -189,7 +189,7 @@
     <section class="admin-content-section" id="events">
         <div class="admin-section-head">
             <div>
-                <p class="admin-eyebrow">Editorial</p>
+                <p class="admin-eyebrow">Éditorial</p>
                 <h2>Actualités</h2>
             </div>
             <a class="button small" href="{{ path('admin_event_new') }}">Ajouter</a>

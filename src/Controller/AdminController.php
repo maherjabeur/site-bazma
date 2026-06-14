@@ -113,7 +113,7 @@ class AdminController extends AbstractController
         $total = $request->request->getInt('total', 0);
 
         if (!$uploadId || $index < 0 || $total < 1 || $total > 160) {
-            return $this->json(['error' => 'Upload video invalide.'], Response::HTTP_BAD_REQUEST);
+            return $this->json(['error' => 'Import vidéo invalide.'], Response::HTTP_BAD_REQUEST);
         }
 
         $chunkDir = $this->getVideoChunkDir($uploadId);
@@ -132,20 +132,20 @@ class AdminController extends AbstractController
             $assembledPath = $chunkDir.DIRECTORY_SEPARATOR.'assembled-video.tmp';
             $output = fopen($assembledPath, 'wb');
             if (!$output) {
-                throw new \RuntimeException('Impossible de preparer la video.');
+                throw new \RuntimeException('Impossible de préparer la vidéo.');
             }
 
             for ($i = 0; $i < $total; $i++) {
                 $partPath = $chunkDir.DIRECTORY_SEPARATOR.sprintf('%05d.part', $i);
                 if (!is_file($partPath)) {
                     fclose($output);
-                    throw new \RuntimeException('Morceau video manquant. Reessayez l upload.');
+                    throw new \RuntimeException('Morceau vidéo manquant. Réessayez l import.');
                 }
 
                 $input = fopen($partPath, 'rb');
                 if (!$input) {
                     fclose($output);
-                    throw new \RuntimeException('Impossible de lire un morceau video.');
+                    throw new \RuntimeException('Impossible de lire un morceau vidéo.');
                 }
                 stream_copy_to_stream($input, $output);
                 fclose($input);
@@ -192,7 +192,7 @@ class AdminController extends AbstractController
             return 'Fichier trop lourd pour la configuration PHP actuelle. Augmentez post_max_size et upload_max_filesize sur le serveur.';
         }
 
-        return 'Aucun fichier recu. Verifiez que le fichier est bien selectionne et que sa taille ne depasse pas la limite du serveur.';
+        return 'Aucun fichier reçu. Vérifiez que le fichier est bien sélectionné et que sa taille ne dépasse pas la limite du serveur.';
     }
 
     private function toBytes(string $value): int
@@ -675,7 +675,7 @@ class AdminController extends AbstractController
             $entity instanceof SiteSetting => [
                 'section' => 'Paramètres',
                 'title' => $entity->getId() ? 'Modifier un paramètre' : 'Nouveau paramètre',
-                'hint' => 'SEO, images globales, textes du pied de page et réglages éditoriaux.',
+                'hint' => 'Référencement, images globales, textes du pied de page et réglages éditoriaux.',
                 'backRoute' => 'admin_settings',
             ],
             default => [

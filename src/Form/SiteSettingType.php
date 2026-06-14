@@ -15,13 +15,13 @@ class SiteSettingType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('settingKey', TextType::class, ['label' => 'Cle'])
+            ->add('settingKey', TextType::class, ['label' => 'Clé'])
             ->add('settingValue', TextareaType::class, ['label' => 'Valeur', 'attr' => ['rows' => 6]])
             ->add('imageFile', FileType::class, [
                 'label' => 'Importer une image',
                 'mapped' => false,
                 'required' => false,
-                'help' => 'Optionnel pour les cles image comme og_image. JPG, PNG ou WebP converti automatiquement.',
+                'help' => 'Optionnel pour les clés image comme og_image. JPG, PNG ou WebP converti automatiquement.',
                 'attr' => ['accept' => 'image/jpeg,image/png,image/webp'],
             ]);
     }

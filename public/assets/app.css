@@ -2279,13 +2279,23 @@ footer,
     gap: 10px;
 }
 
-.admin-choice-grid > div > label,
 .admin-choice-grid > div > div {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid #e4ebe6;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.admin-choice-grid > div > label {
     min-width: 0;
 }
 
 .admin-choice-grid input[type="checkbox"] {
-    margin-right: 8px;
+    flex: 0 0 auto;
     accent-color: var(--accent);
 }
 
@@ -2387,6 +2397,36 @@ footer,
     white-space: nowrap;
 }
 
+.admin-section-head,
+.admin-item-actions,
+.admin-quick-actions {
+    min-width: 0;
+}
+
+.admin-section-head {
+    flex-wrap: wrap;
+}
+
+.admin-item-actions a,
+.admin-item-actions button,
+.admin-quick-actions .button {
+    white-space: nowrap;
+}
+
+.admin-media-card > div {
+    padding: 14px;
+}
+
+.admin-media-card .admin-item-actions {
+    justify-content: flex-start;
+    padding: 0;
+    margin-top: 12px;
+}
+
+.page-media-manager .admin-card-grid {
+    align-items: start;
+}
+
 @media (max-width: 640px) {
     .image-url-preview {
         grid-template-columns: 1fr;
@@ -2395,6 +2435,19 @@ footer,
     .admin-submit-actions,
     .admin-submit-actions button,
     .admin-submit-actions .button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .admin-section-head {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .admin-section-head .button,
+    .admin-item-actions,
+    .admin-item-actions a,
+    .admin-item-actions button {
         width: 100%;
         justify-content: center;
     }

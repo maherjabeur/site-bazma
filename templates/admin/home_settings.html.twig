@@ -10,7 +10,7 @@
 <header class="admin-header admin-header-pro">
     <a class="brand" href="{{ path('admin_dashboard') }}">CMS Bazma</a>
     <nav>
-        <a href="{{ path('admin_dashboard') }}">Dashboard</a>
+        <a href="{{ path('admin_dashboard') }}">Tableau de bord</a>
         <a href="{{ path('app_home', {_locale: 'fr'}) }}">Voir l’accueil</a>
         <a href="{{ path('app_logout') }}">Déconnexion</a>
     </nav>
@@ -28,7 +28,7 @@
 
     <aside class="admin-editor-aside">
         <p class="admin-eyebrow">Page d’accueil</p>
-        <h1>Grande image et textes du hero.</h1>
+        <h1>Grande image et textes du bandeau.</h1>
         <p>Modifiez seulement ce que le visiteur voit en haut de la page: image, titre, introduction et boutons.</p>
         <a href="{{ path('app_home', {_locale: 'fr'}) }}">Prévisualiser le site</a>
     </aside>
@@ -52,7 +52,7 @@
                     <div class="image-url-preview" data-image-url-preview-target hidden>
                         <img src="" alt="">
                         <div>
-                            <span>Apercu image</span>
+                            <span>Aperçu image</span>
                             <strong></strong>
                         </div>
                     </div>
@@ -64,7 +64,7 @@
                     <p class="field-help">JPG, PNG ou WebP accepté. Le CMS convertit automatiquement le fichier en WebP.</p>
                 </div>
 
-                {% set locales = {fr: 'Français', en: 'English', ar: 'العربية'} %}
+                {% set locales = {fr: 'Français', en: 'Anglais', ar: 'Arabe'} %}
                 {% for code, label in locales %}
                     <fieldset class="locale-editor {{ code == 'ar' ? 'is-rtl' : '' }}">
                         <legend>{{ label }}</legend>
@@ -104,8 +104,8 @@
             <div class="admin-submit-bar">
                 <a href="{{ path('admin_dashboard') }}">Annuler</a>
                 <div class="admin-submit-actions">
-                    <a class="button secondary-admin" href="{{ path('app_home', {_locale: 'fr'}) }}">Previsualiser</a>
-                    <button type="submit">Enregistrer l'accueil</button>
+                    <a class="button secondary-admin" href="{{ path('app_home', {_locale: 'fr'}) }}">Prévisualiser</a>
+                    <button type="submit">Enregistrer l’accueil</button>
                 </div>
             </div>
         </form>
