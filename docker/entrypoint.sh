@@ -16,20 +16,7 @@ if [ -n "${DB_HOSTPORT:-}" ]; then
     DB_PORT="${DB_HOSTPORT##*:}"
 fi
 
-if [ -n "${DATABASE_URL:-}" ]; then
-    case "${DATABASE_URL}" in
-        postgres://*|postgresql://*)
-            if [ -z "${DB_SERVER_VERSION:-}" ] || [ "${DB_SERVER_VERSION}" = "8.4.7" ]; then
-                DB_SERVER_VERSION="18.0.0"
-            fi
-            ;;
-        mysql://*|mariadb://*)
-            DB_SERVER_VERSION="${DB_SERVER_VERSION:-8.4.7}"
-            ;;
-    esac
-    export DB_SERVER_VERSION
-    echo "Using database from DATABASE_URL"
-elif [ -n "${DB_HOST:-}" ]; then
+if [ -n "${DB_HOST:-}" ]; then
     DB_DRIVER="${DB_DRIVER:-mysql}"
     DB_NAME="${DB_NAME:-bazma}"
     DB_USER="${DB_USER:-bazma}"
@@ -42,11 +29,24 @@ elif [ -n "${DB_HOST:-}" ]; then
         export DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD_ENCODED}@${DB_HOST}:${DB_PORT}/${DB_NAME}?serverVersion=${DB_SERVER_VERSION}&charset=utf8"
     else
         DB_PORT="${DB_PORT:-3306}"
-        DB_SERVER_VERSION="${DB_SERVER_VERSION:-8.4.7}"
+        DB_SERVER_VERSION="${DB_SERVER_VERSION:-8.0.0}"
         export DATABASE_URL="mysql://${DB_USER}:${DB_PASSWORD_ENCODED}@${DB_HOST}:${DB_PORT}/${DB_NAME}?serverVersion=${DB_SERVER_VERSION}&charset=utf8mb4"
     fi
     export DB_SERVER_VERSION
     echo "Using database ${DB_HOST}:${DB_PORT}/${DB_NAME}"
+elif [ -n "${DATABASE_URL:-}" ]; then
+    case "${DATABASE_URL}" in
+        postgres://*|postgresql://*)
+            if [ -z "${DB_SERVER_VERSION:-}" ] || [ "${DB_SERVER_VERSION}" = "8.4.7" ]; then
+                DB_SERVER_VERSION="18.0.0"
+            fi
+            ;;
+        mysql://*|mariadb://*)
+            DB_SERVER_VERSION="${DB_SERVER_VERSION:-8.0.0}"
+            ;;
+    esac
+    export DB_SERVER_VERSION
+    echo "Using database from DATABASE_URL"
 fi
 
 {

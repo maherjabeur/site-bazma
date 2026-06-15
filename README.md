@@ -56,21 +56,26 @@ Ce projet doit etre deploye sur Render avec le runtime `Docker`, pas avec un run
 
 Si un service Render existe deja avec un mauvais runtime, recreer le service en choisissant `Docker` dans le champ `Language`.
 
-Pour une base PostgreSQL Render, renseigner:
+Pour la base MySQL FreeSQLDatabase, renseigner:
 
 ```text
 APP_ENV=prod
 APP_DEBUG=0
 APP_SECRET=<long-secret-aleatoire>
 DEFAULT_URI=https://ton-domaine-render-ou-ton-domaine-final
-DATABASE_URL=<Internal Database URL de Render>
-DB_SERVER_VERSION=18.0.0
+DB_DRIVER=mysql
+DB_HOST=sql7.freesqldatabase.com
+DB_PORT=3306
+DB_NAME=sql7830570
+DB_USER=<utilisateur FreeSQLDatabase>
+DB_PASSWORD=<mot-de-passe FreeSQLDatabase>
+DB_SERVER_VERSION=8.0.0
 RUN_MIGRATIONS=1
 ```
 
-Utiliser l'`Internal Database URL` si le service web est aussi sur Render. L'`External Database URL` fonctionne aussi, mais elle passe par l'acces public.
+Ne pas garder l'ancienne variable `DATABASE_URL` PostgreSQL dans Render si elle existe encore. Le conteneur reconstruit automatiquement l'URL MySQL a partir des variables `DB_*`.
 
-Si Render affiche `Invalid platform version "" specified`, verifier dans `Environment` que `DB_SERVER_VERSION` n'est pas vide. Pour PostgreSQL 18, la valeur recommandee est `18.0.0`. Si `DATABASE_URL` contient un parametre `serverVersion`, il doit etre `serverVersion=18.0.0`, jamais `serverVersion=`.
+Si Render affiche `Invalid platform version "" specified`, verifier dans `Environment` que `DB_SERVER_VERSION` n'est pas vide. Pour MySQL, la valeur recommandee ici est `8.0.0`.
 
 ## Administration
 
