@@ -21,19 +21,9 @@ services:
         sync: false
       - key: PORT
         value: "10000"
-      - key: DB_DRIVER
-        value: mysql
-      - key: DB_HOST
-        value: sql7.freesqldatabase.com
-      - key: DB_PORT
-        value: "3306"
-      - key: DB_NAME
-        value: sql7830570
-      - key: DB_USER
-        sync: false
-      - key: DB_PASSWORD
+      - key: DATABASE_URL
         sync: false
       - key: DB_SERVER_VERSION
-        value: "8.0.0"
+        value: "18.0.0"
       - key: RUN_MIGRATIONS
         value: "1"
