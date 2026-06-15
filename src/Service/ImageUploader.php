@@ -137,6 +137,56 @@ class ImageUploader
         return $webpPath;
     }
 
+    public function normalizeUploadPath(?string $path): ?string
+    {
+        if (!$path) {
+            return null;
+        }
+
+        $path = trim(html_entity_decode($path, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        if ($path === '') {
+            return null;
+        }
+
+        $urlPath = parse_url($path, PHP_URL_PATH);
+        if (!$urlPath) {
+            return null;
+        }
+
+        $urlPath = rawurldecode($urlPath);
+        if (!str_starts_with($urlPath, '/uploads/')) {
+            return null;
+        }
+
+        return $urlPath;
+    }
+
+    public function deleteUploadedFile(?string $path): bool
+    {
+        $urlPath = $this->normalizeUploadPath($path);
+        if (!$urlPath) {
+            return false;
+        }
+
+        $uploadsRoot = realpath($this->projectDir.'/public/uploads');
+        if (!$uploadsRoot) {
+            return false;
+        }
+
+        $targetPath = $this->projectDir.'/public'.str_replace('/', DIRECTORY_SEPARATOR, $urlPath);
+        $realTargetPath = realpath($targetPath);
+        if (!$realTargetPath || !is_file($realTargetPath)) {
+            return false;
+        }
+
+        $uploadsRoot = rtrim($uploadsRoot, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
+        if (!str_starts_with($realTargetPath, $uploadsRoot)) {
+            return false;
+        }
+
+        return @unlink($realTargetPath);
+    }
+
     private function convertFileToWebp(string $sourcePath, string $publicTargetPath, int $type, ?int $maxWidth = null, ?int $maxHeight = null): string
     {
         $targetPath = $this->projectDir.'/public'.str_replace('/', DIRECTORY_SEPARATOR, $publicTargetPath);

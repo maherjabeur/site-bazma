@@ -47,9 +47,15 @@ class AdminController extends AbstractController
     #[Route('', name: 'admin_dashboard')]
     public function dashboard(PageRepository $pages, GalleryImageRepository $images, EventRepository $events, SocialLinkRepository $socialLinks, CommunityOrganizationRepository $organizations, AdminUserRepository $users): Response
     {
+        $galleryImages = $images->findBy([], ['position' => 'ASC']);
+
         return $this->render('admin/dashboard.html.twig', [
             'pages' => $pages->findBy([], ['position' => 'ASC']),
-            'images' => $images->findBy([], ['position' => 'ASC']),
+            'images' => $galleryImages,
+            'galleryStats' => [
+                'featured' => count(array_filter($galleryImages, fn (GalleryImage $image): bool => $image->isFeatured())),
+                'local' => count(array_filter($galleryImages, fn (GalleryImage $image): bool => $this->isLocalPublicImagePath($image->getImageUrl()))),
+            ],
             'events' => $events->findBy([], ['featured' => 'DESC', 'position' => 'ASC', 'eventDate' => 'DESC']),
             'socialLinks' => $socialLinks->findBy([], ['position' => 'ASC']),
             'organizations' => $organizations->findBy([], ['position' => 'ASC']),
@@ -602,11 +608,157 @@ class AdminController extends AbstractController
             $redirectParams = ['id' => $entity->getPage()->getId()];
         }
 
+        $uploadPaths = $this->collectUploadPathsForDeletion($em, $entity);
+
         $em->remove($entity);
         $em->flush();
-        $this->addFlash('success', 'Contenu supprimé.');
+
+        $deletedUploads = $this->deleteUnreferencedUploads($em, $uploadPaths);
+        $message = 'Contenu supprimé.';
+        if ($deletedUploads > 0) {
+            $message .= sprintf(' %d fichier%s upload supprime%s.', $deletedUploads, $deletedUploads > 1 ? 's' : '', $deletedUploads > 1 ? 's' : '');
+        }
+
+        $this->addFlash('success', $message);
 
         return $this->redirectToRoute($redirectRoute, $redirectParams);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function collectUploadPathsForDeletion(EntityManagerInterface $em, object $entity): array
+    {
+        $paths = [];
+        $addPath = function (?string $path) use (&$paths): void {
+            $uploadPath = $this->imageUploader->normalizeUploadPath($path);
+            if ($uploadPath) {
+                $paths[$uploadPath] = true;
+            }
+        };
+        $addHtml = function (?string $html) use (&$paths): void {
+            foreach ($this->extractUploadPathsFromHtml($html) as $path) {
+                $paths[$path] = true;
+            }
+        };
+
+        if (method_exists($entity, 'getImageUrl')) {
+            $addPath($entity->getImageUrl());
+        }
+
+        if ($entity instanceof SiteSetting) {
+            $addPath($entity->getSettingValue());
+        }
+
+        if ($entity instanceof Page) {
+            $addHtml($entity->getBody());
+            $addHtml($entity->getBodyEn());
+            $addHtml($entity->getBodyAr());
+
+            foreach ($em->getRepository(PageMedia::class)->findBy(['page' => $entity]) as $item) {
+                $addPath($item->getImageUrl());
+            }
+        }
+
+        if ($entity instanceof Event) {
+            $addHtml($entity->getDescription());
+            $addHtml($entity->getDescriptionEn());
+            $addHtml($entity->getDescriptionAr());
+        }
+
+        return array_keys($paths);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function extractUploadPathsFromHtml(?string $html): array
+    {
+        if (!$html) {
+            return [];
+        }
+
+        $paths = [];
+        if (preg_match_all('/\s(?:src|poster)\s*=\s*([\'"])(.*?)\1/i', $html, $matches)) {
+            foreach ($matches[2] as $value) {
+                $uploadPath = $this->imageUploader->normalizeUploadPath($value);
+                if ($uploadPath) {
+                    $paths[$uploadPath] = true;
+                }
+            }
+        }
+
+        if (preg_match_all('/\s(?:src|poster)\s*=\s*([^\s>]+)/i', $html, $matches)) {
+            foreach ($matches[1] as $value) {
+                $uploadPath = $this->imageUploader->normalizeUploadPath(trim($value, '\'"'));
+                if ($uploadPath) {
+                    $paths[$uploadPath] = true;
+                }
+            }
+        }
+
+        return array_keys($paths);
+    }
+
+    /**
+     * @param list<string> $paths
+     */
+    private function deleteUnreferencedUploads(EntityManagerInterface $em, array $paths): int
+    {
+        $deleted = 0;
+
+        foreach (array_unique($paths) as $path) {
+            if ($this->isUploadReferenced($em, $path)) {
+                continue;
+            }
+
+            if ($this->imageUploader->deleteUploadedFile($path)) {
+                $deleted++;
+            }
+        }
+
+        return $deleted;
+    }
+
+    private function isUploadReferenced(EntityManagerInterface $em, string $path): bool
+    {
+        foreach ($this->getUploadReferenceFields() as $class => $fields) {
+            $qb = $em->getRepository($class)->createQueryBuilder('item');
+            $conditions = $qb->expr()->orX();
+
+            foreach ($fields as $field) {
+                $conditions->add(sprintf('item.%s LIKE :path', $field));
+            }
+
+            $count = (int) $qb
+                ->select('COUNT(item.id)')
+                ->andWhere($conditions)
+                ->setParameter('path', '%'.$path.'%')
+                ->getQuery()
+                ->getSingleScalarResult();
+
+            if ($count > 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @return array<class-string, list<string>>
+     */
+    private function getUploadReferenceFields(): array
+    {
+        return [
+            Page::class => ['imageUrl', 'body', 'bodyEn', 'bodyAr'],
+            Event::class => ['imageUrl', 'description', 'descriptionEn', 'descriptionAr'],
+            PageMedia::class => ['imageUrl'],
+            GalleryImage::class => ['imageUrl'],
+            CommunityOrganization::class => ['imageUrl'],
+            SocialLink::class => ['imageUrl'],
+            SiteSetting::class => ['settingValue'],
+        ];
     }
 
     private function getUploadPrefix(object $entity): string
@@ -641,6 +793,17 @@ class AdminController extends AbstractController
         return str_contains(strtolower($setting->getSettingKey()), 'image');
     }
 
+    private function isLocalPublicImagePath(?string $path): bool
+    {
+        if (!$path) {
+            return false;
+        }
+
+        $path = trim($path);
+
+        return str_starts_with($path, '/uploads/') || str_starts_with($path, '/assets/');
+    }
+
     /**
      * @return array{section: string, title: string, hint: string, backRoute: string}
      */
@@ -663,8 +826,13 @@ class AdminController extends AbstractController
             $entity instanceof GalleryImage => [
                 'section' => 'Médiathèque',
                 'title' => $entity->getId() ? 'Modifier une image' : 'Nouvelle image',
-                'hint' => 'Images WebP, crédit, source et mise en avant sur les pages publiques.',
+                'hint' => 'Images WebP locales, crédit, source interne et mise en avant sur les pages publiques.',
                 'backRoute' => 'admin_dashboard',
+                'tips' => [
+                    'Front public: seules les images locales /uploads ou /assets sont affichées.',
+                    'Le lien source reste une note CMS pour la traçabilité; il n’est pas affiché dans la galerie publique.',
+                    'Mise en avant place l’image en priorité dans la galerie et sur l’accueil.',
+                ],
             ],
             $entity instanceof CommunityOrganization => [
                 'section' => 'Associations',

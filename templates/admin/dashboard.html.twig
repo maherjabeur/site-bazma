@@ -87,28 +87,63 @@
     {% endif %}
 
     {% if is_granted('ROLE_MEDIA_MANAGER') %}
-    <section class="admin-content-section" id="images">
+    <section class="admin-content-section admin-gallery-manager" id="images">
         <div class="admin-section-head">
             <div>
                 <p class="admin-eyebrow">Médiathèque</p>
-                <h2>Images WebP</h2>
+                <h2>Galerie photo</h2>
             </div>
-            <a class="button small" href="{{ path('admin_image_new') }}">Ajouter</a>
+            <a class="button small" href="{{ path('admin_image_new') }}">Ajouter une image</a>
         </div>
-        <div class="admin-card-grid">
+
+        <div class="admin-gallery-summary" aria-label="Statistiques de la galerie">
+            <div>
+                <strong>{{ images|length }}</strong>
+                <span>Total images</span>
+            </div>
+            <div>
+                <strong>{{ galleryStats.featured }}</strong>
+                <span>Mises en avant</span>
+            </div>
+            <div>
+                <strong>{{ galleryStats.local }}</strong>
+                <span>Publiables front</span>
+            </div>
+        </div>
+
+        <div class="admin-gallery-grid">
             {% for image in images %}
-                <article class="admin-media-card">
-                    {% if image.imageUrl %}
-                        <img src="{{ image.imageUrl|webp_image }}" alt="">
-                    {% else %}
-                        <div class="admin-image-placeholder">Image à importer</div>
-                    {% endif %}
-                    <div>
-                        <span class="status-pill {{ image.featured ? 'is-live' : '' }}">{{ image.featured ? 'Mise en avant' : 'Galerie' }}</span>
+                {% set imagePath = image.imageUrl ?: '' %}
+                {% set isLocalImage = imagePath starts with '/uploads/' or imagePath starts with '/assets/' %}
+                <article class="admin-gallery-card {{ image.featured ? 'is-featured' : '' }} {{ not isLocalImage ? 'needs-local-image' : '' }}">
+                    <div class="admin-gallery-thumb">
+                        {% if image.imageUrl %}
+                            <img src="{{ image.imageUrl|webp_image }}" alt="">
+                        {% else %}
+                            <div class="admin-image-placeholder">Image à importer</div>
+                        {% endif %}
+                        <div class="admin-gallery-badges">
+                            <span class="status-pill {{ image.featured ? 'is-live' : '' }}">{{ image.featured ? 'Mise en avant' : 'Galerie' }}</span>
+                            <span class="admin-gallery-order">#{{ image.position }}</span>
+                        </div>
+                    </div>
+                    <div class="admin-gallery-card-body">
+                        <div class="admin-gallery-locales">
+                            <span>FR</span>
+                            {% if image.titleEn %}<span>EN</span>{% endif %}
+                            {% if image.titleAr %}<span>AR</span>{% endif %}
+                            <span class="{{ isLocalImage ? 'is-ok' : 'is-warning' }}">{{ isLocalImage ? 'Local' : 'Non publié front' }}</span>
+                        </div>
                         <h3>{{ image.title }}</h3>
-                        <p>{{ image.imageUrl }}</p>
+                        <p class="admin-gallery-path">{{ image.imageUrl ?: 'Aucun fichier sélectionné' }}</p>
+                        {% if image.credit %}
+                            <p class="admin-gallery-credit">{{ image.credit }}</p>
+                        {% endif %}
+                        {% if image.sourceUrl %}
+                            <p class="admin-gallery-source">Source CMS: {{ image.sourceUrl }}</p>
+                        {% endif %}
                         <div class="admin-item-actions">
-                            <a href="{{ path('admin_image_edit', {id: image.id}) }}">Modifier</a>
+                            <a class="button small secondary-admin" href="{{ path('admin_image_edit', {id: image.id}) }}">Modifier</a>
                             <form method="post" action="{{ path('admin_image_delete', {id: image.id}) }}" onsubmit="return confirm('Supprimer cette image ?');">
                                 <input type="hidden" name="_token" value="{{ csrf_token('delete_image_' ~ image.id) }}">
                                 <button class="link-danger" type="submit">Supprimer</button>

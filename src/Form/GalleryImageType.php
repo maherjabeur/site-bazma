@@ -19,12 +19,12 @@ class GalleryImageType extends AbstractType
             ->add('title', TextType::class, ['label' => 'Titre FR'])
             ->add('titleEn', TextType::class, ['label' => 'Titre EN', 'required' => false])
             ->add('titleAr', TextType::class, ['label' => 'Titre AR', 'required' => false, 'attr' => ['dir' => 'rtl']])
-            ->add('imageUrl', TextType::class, ['label' => 'Image WebP', 'required' => false, 'help' => 'Chemin conseillé: /assets/nom-image.webp'])
-            ->add('imageFile', FileType::class, ['label' => 'Importer une image', 'mapped' => false, 'required' => false, 'help' => 'JPG, PNG ou WebP. Le fichier sera converti en WebP.', 'attr' => ['accept' => 'image/jpeg,image/png,image/webp']])
+            ->add('imageUrl', TextType::class, ['label' => 'Chemin image local', 'required' => false, 'help' => 'Front public: utilisez /uploads/... ou /assets/.... Les URLs externes ne sont pas affichées dans la galerie.'])
+            ->add('imageFile', FileType::class, ['label' => 'Importer une image locale', 'mapped' => false, 'required' => false, 'help' => 'JPG, PNG ou WebP. Le fichier sera converti en WebP optimisé et stocké dans /uploads.', 'attr' => ['accept' => 'image/jpeg,image/png,image/webp']])
             ->add('credit', TextType::class, ['label' => 'Crédit', 'required' => false])
-            ->add('sourceUrl', TextType::class, ['label' => 'Lien de la source', 'required' => false])
-            ->add('position', IntegerType::class, ['label' => 'Ordre d’affichage'])
-            ->add('featured', CheckboxType::class, ['label' => 'Mise en avant', 'required' => false]);
+            ->add('sourceUrl', TextType::class, ['label' => 'Lien source interne CMS', 'required' => false, 'help' => 'Conservé pour traçabilité. Non affiché dans la galerie publique.'])
+            ->add('position', IntegerType::class, ['label' => 'Ordre d’affichage', 'help' => 'Plus le chiffre est petit, plus l’image remonte dans la galerie.'])
+            ->add('featured', CheckboxType::class, ['label' => 'Mise en avant galerie et accueil', 'required' => false]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

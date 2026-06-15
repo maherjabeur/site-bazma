@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\GalleryImage;
 use App\Entity\Page;
 use App\Repository\CommunityOrganizationRepository;
 use App\Repository\EventRepository;
@@ -39,7 +40,7 @@ class PublicController extends AbstractController
         return $this->render('public/home.html.twig', [
             'locale' => $locale,
             'pages' => $pages->findPublishedForHome(),
-            'images' => $images->findBy([], ['featured' => 'DESC', 'position' => 'ASC'], 8),
+            'images' => $this->getPublicGalleryImages($images, 8),
             'events' => $events->findHomepageSlider(),
             'socialLinks' => $socialLinks->findBy(['featured' => true], ['position' => 'ASC'], 8),
             'organizations' => $organizations->findBy(['active' => true], ['position' => 'ASC']),
@@ -99,13 +100,37 @@ class PublicController extends AbstractController
     #[Route('/{_locale}/gallery', name: 'app_gallery', requirements: ['_locale' => 'ar|fr|en'])]
     public function gallery(Request $request, GalleryImageRepository $images): Response
     {
-        $galleryImages = $images->findBy([], ['featured' => 'DESC', 'position' => 'ASC']);
+        $galleryImages = $this->getPublicGalleryImages($images);
 
         return $this->render('public/gallery.html.twig', [
             'locale' => $request->getLocale(),
             'images' => $galleryImages,
             'featuredImage' => $galleryImages[0] ?? null,
         ]);
+    }
+
+    /**
+     * @return list<GalleryImage>
+     */
+    private function getPublicGalleryImages(GalleryImageRepository $images, ?int $limit = null): array
+    {
+        $galleryImages = array_values(array_filter(
+            $images->findBy([], ['featured' => 'DESC', 'position' => 'ASC']),
+            fn (GalleryImage $image): bool => $this->isLocalPublicImage($image->getImageUrl())
+        ));
+
+        return $limit ? array_slice($galleryImages, 0, $limit) : $galleryImages;
+    }
+
+    private function isLocalPublicImage(?string $url): bool
+    {
+        if (!$url) {
+            return false;
+        }
+
+        $url = trim($url);
+
+        return str_starts_with($url, '/uploads/') || str_starts_with($url, '/assets/');
     }
 
     #[Route('/robots.txt', name: 'app_robots', format: 'txt')]

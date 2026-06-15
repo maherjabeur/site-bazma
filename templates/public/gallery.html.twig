@@ -10,7 +10,93 @@
     <link rel="alternate" hreflang="en" href="{{ url('app_gallery', {_locale: 'en'}) }}">
 {% endblock %}
 
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const buttons = Array.from(document.querySelectorAll('[data-gallery-item]'));
+            const lightbox = document.querySelector('[data-gallery-lightbox]');
+            if (!buttons.length || !lightbox) {
+                return;
+            }
+
+            const image = lightbox.querySelector('[data-gallery-lightbox-image]');
+            const title = lightbox.querySelector('[data-gallery-lightbox-title]');
+            const credit = lightbox.querySelector('[data-gallery-lightbox-credit]');
+            const counter = lightbox.querySelector('[data-gallery-lightbox-counter]');
+            let currentIndex = 0;
+
+            const getIndex = (index) => (index + buttons.length) % buttons.length;
+
+            const openAt = (index) => {
+                currentIndex = getIndex(index);
+                const item = buttons[currentIndex];
+                const itemTitle = item.dataset.galleryTitle || '';
+                const itemCredit = item.dataset.galleryCredit || '';
+
+                image.src = item.dataset.gallerySrc || '';
+                image.alt = itemTitle;
+                title.textContent = itemTitle;
+                credit.textContent = itemCredit;
+                credit.hidden = itemCredit === '';
+                counter.textContent = `${String(currentIndex + 1).padStart(2, '0')} / ${String(buttons.length).padStart(2, '0')}`;
+                lightbox.hidden = false;
+                document.body.classList.add('is-lightbox-open');
+                lightbox.querySelector('[data-gallery-close]')?.focus({preventScroll: true});
+            };
+
+            const close = () => {
+                lightbox.hidden = true;
+                image.removeAttribute('src');
+                document.body.classList.remove('is-lightbox-open');
+                buttons[currentIndex]?.focus({preventScroll: true});
+            };
+
+            buttons.forEach((button, index) => {
+                button.addEventListener('click', () => openAt(index));
+            });
+
+            lightbox.addEventListener('click', (event) => {
+                if (event.target === lightbox || event.target.closest('[data-gallery-close]')) {
+                    close();
+                    return;
+                }
+
+                if (event.target.closest('[data-gallery-prev]')) {
+                    openAt(currentIndex - 1);
+                    return;
+                }
+
+                if (event.target.closest('[data-gallery-next]')) {
+                    openAt(currentIndex + 1);
+                }
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (lightbox.hidden) {
+                    return;
+                }
+
+                if (event.key === 'Escape') {
+                    close();
+                    return;
+                }
+
+                if (event.key === 'ArrowLeft') {
+                    openAt(currentIndex - 1);
+                    return;
+                }
+
+                if (event.key === 'ArrowRight') {
+                    openAt(currentIndex + 1);
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
 {% block body %}
+{% set heroImage = (featuredImage ? featuredImage.imageUrl : '/assets/bazma-hero.webp')|webp_image %}
 <header class="site-header compact">
     <a class="brand" href="{{ path('app_home', {_locale: locale}) }}">{{ 'brand'|trans }}</a>
     <nav>
@@ -24,38 +110,23 @@
 </header>
 
 <main class="gallery-page">
-    <section class="section gallery-intro">
-        <div class="gallery-intro-copy">
+    <section class="gallery-hero" style="background-image: linear-gradient({{ locale == 'ar' ? '270deg' : '90deg' }}, rgba(19,35,29,.9), rgba(19,35,29,.34)), url('{{ heroImage }}')">
+        <div class="gallery-hero-content">
             <p class="eyebrow">{{ 'nav.gallery'|trans }}</p>
             <h1>{{ 'gallery.title'|trans }}</h1>
             <p>{{ 'gallery.intro'|trans }}</p>
         </div>
-        <div class="gallery-stat">
-            <strong>{{ images|length }}</strong>
-            <span>{{ 'nav.gallery'|trans }}</span>
+        <div class="gallery-hero-panel">
+            <span>{{ 'gallery.count'|trans({'%count%': images|length}) }}</span>
+            <strong>{{ featuredImage ? featuredImage.localizedTitle(locale) : 'gallery.collection_title'|trans }}</strong>
+            {% if featuredImage and featuredImage.credit %}
+                <p>{{ featuredImage.credit }}</p>
+            {% endif %}
         </div>
     </section>
 
-    {% if featuredImage %}
-        <section class="section gallery-feature">
-            <div class="gallery-feature-image">
-                <img src="{{ featuredImage.imageUrl|webp_image }}" alt="{{ featuredImage.localizedTitle(locale) }}">
-            </div>
-            <div class="gallery-feature-content">
-                <p class="eyebrow">{{ 'gallery.collection'|trans }}</p>
-                <h2>{{ featuredImage.localizedTitle(locale) }}</h2>
-                {% if featuredImage.credit %}
-                    <p>{{ featuredImage.credit }}</p>
-                {% endif %}
-                {% if featuredImage.sourceUrl %}
-                    <a class="button secondary gallery-source-button" href="{{ featuredImage.sourceUrl }}" target="_blank" rel="noreferrer">{{ 'gallery.source'|trans }}</a>
-                {% endif %}
-            </div>
-        </section>
-    {% endif %}
-
-    <section class="section gallery-collection">
-        <div class="gallery-section-head">
+    <section class="section gallery-showcase">
+        <div class="gallery-toolbar">
             <div>
                 <p class="eyebrow">{{ 'gallery.collection'|trans }}</p>
                 <h2>{{ 'gallery.collection_title'|trans }}</h2>
@@ -63,21 +134,32 @@
             <span>{{ 'gallery.count'|trans({'%count%': images|length}) }}</span>
         </div>
 
-        <div class="gallery-pro-grid">
+        <div class="gallery-masonry">
             {% for image in images %}
                 {% set title = image.localizedTitle(locale) %}
-                <figure class="gallery-card">
-                    <a class="gallery-card-media" href="{{ image.imageUrl|webp_image }}" target="_blank" rel="noreferrer" aria-label="{{ 'gallery.open'|trans({'%title%': title}) }}">
-                        <img src="{{ image.imageUrl|webp_image }}" alt="{{ title }}" loading="{{ loop.index > 3 ? 'lazy' : 'eager' }}">
-                    </a>
-                    <figcaption class="gallery-card-body">
-                        <span class="gallery-index">{{ loop.index < 10 ? '0' ~ loop.index : loop.index }}</span>
+                {% set imageSrc = image.imageUrl|webp_image %}
+                <figure class="gallery-photo {{ loop.first ? 'is-featured' : '' }}">
+                    <button
+                        type="button"
+                        data-gallery-item
+                        data-gallery-src="{{ imageSrc|e('html_attr') }}"
+                        data-gallery-title="{{ title|e('html_attr') }}"
+                        data-gallery-credit="{{ (image.credit ?: '')|e('html_attr') }}"
+                        aria-label="{{ 'gallery.open'|trans({'%title%': title}) }}"
+                    >
+                        <img
+                            src="{{ imageSrc }}"
+                            alt="{{ title }}"
+                            loading="{{ loop.index <= 3 ? 'eager' : 'lazy' }}"
+                            decoding="async"
+                            {% if loop.first %}fetchpriority="high"{% endif %}
+                        >
+                    </button>
+                    <figcaption>
+                        <span>{{ loop.index < 10 ? '0' ~ loop.index : loop.index }}</span>
                         <strong>{{ title }}</strong>
                         {% if image.credit %}
                             <small>{{ image.credit }}</small>
-                        {% endif %}
-                        {% if image.sourceUrl %}
-                            <a href="{{ image.sourceUrl }}" target="_blank" rel="noreferrer">{{ 'gallery.source'|trans }}</a>
                         {% endif %}
                     </figcaption>
                 </figure>
@@ -86,5 +168,19 @@
             {% endfor %}
         </div>
     </section>
+
+    <div class="gallery-lightbox" data-gallery-lightbox role="dialog" aria-modal="true" aria-label="{{ 'nav.gallery'|trans }}" hidden>
+        <div class="gallery-lightbox-frame">
+            <button class="gallery-lightbox-close" type="button" data-gallery-close aria-label="{{ 'gallery.close'|trans }}">&times;</button>
+            <button class="gallery-lightbox-arrow" type="button" data-gallery-prev aria-label="{{ 'gallery.previous'|trans }}">&lsaquo;</button>
+            <img data-gallery-lightbox-image alt="">
+            <button class="gallery-lightbox-arrow" type="button" data-gallery-next aria-label="{{ 'gallery.next'|trans }}">&rsaquo;</button>
+            <div class="gallery-lightbox-caption">
+                <span data-gallery-lightbox-counter></span>
+                <strong data-gallery-lightbox-title></strong>
+                <p data-gallery-lightbox-credit></p>
+            </div>
+        </div>
+    </div>
 </main>
 {% endblock %}
