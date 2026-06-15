@@ -90,38 +90,6 @@
                 update();
                 startAuto();
             });
-
-            document.querySelectorAll('[data-copy-text]').forEach((button) => {
-                const initialLabel = button.textContent;
-                button.addEventListener('click', async () => {
-                    const text = button.dataset.copyText || '';
-                    if (!text) {
-                        return;
-                    }
-
-                    try {
-                        if (navigator.clipboard?.writeText) {
-                            await navigator.clipboard.writeText(text);
-                        } else {
-                            const input = document.createElement('textarea');
-                            input.value = text;
-                            input.setAttribute('readonly', '');
-                            input.style.position = 'fixed';
-                            input.style.opacity = '0';
-                            document.body.appendChild(input);
-                            input.select();
-                            document.execCommand('copy');
-                            input.remove();
-                        }
-                        button.textContent = button.dataset.copyDone || initialLabel;
-                        window.setTimeout(() => {
-                            button.textContent = initialLabel;
-                        }, 1800);
-                    } catch (error) {
-                        button.textContent = initialLabel;
-                    }
-                });
-            });
         });
     </script>
 {% endblock %}
@@ -288,48 +256,16 @@
     </section>
 </main>
 
-{% set donationIban = settings.value('donation_iban', 'TN59 1770 6000 0003 2863 5988') %}
-{% set donationIbanRaw = donationIban|replace({' ': ''}) %}
-{% set donationBank = settings.value('donation_bank', 'Poste Tunisienne') %}
-{% set donationHolder = settings.value('donation_holder', 'JABEUR MAHER BEN MOHAMED') %}
-{% set donationBranch = settings.value('donation_branch', 'CEF Gabes - BAZMA') %}
-{% set donationBic = settings.value('donation_bic', 'LPTNTNTT') %}
-
 <footer>
     <div class="footer-brand">
         <strong>{{ settings.value('brand_' ~ locale, 'brand'|trans) }}</strong>
         <p>{{ settings.value('footer_text_' ~ locale, 'footer.text'|trans) }}</p>
     </div>
-    <section class="footer-donation" aria-labelledby="footer-donation-title">
-        <div class="footer-donation-head">
-            <span>{{ 'donation.eyebrow'|trans }}</span>
-            <h2 id="footer-donation-title">{{ 'donation.title'|trans }}</h2>
-            <p>{{ 'donation.text'|trans }}</p>
-        </div>
-        <dl>
-            <div>
-                <dt>{{ 'donation.bank'|trans }}</dt>
-                <dd>{{ donationBank }}</dd>
-            </div>
-            <div>
-                <dt>{{ 'donation.holder'|trans }}</dt>
-                <dd>{{ donationHolder }}</dd>
-            </div>
-            <div>
-                <dt>{{ 'donation.branch'|trans }}</dt>
-                <dd>{{ donationBranch }}</dd>
-            </div>
-            <div>
-                <dt>IBAN</dt>
-                <dd><code dir="ltr">{{ donationIban }}</code></dd>
-            </div>
-            <div>
-                <dt>BIC</dt>
-                <dd><code dir="ltr">{{ donationBic }}</code></dd>
-            </div>
-        </dl>
-        <button type="button" class="donation-copy" data-copy-text="{{ donationIbanRaw }}" data-copy-done="{{ 'donation.copied'|trans }}">{{ 'donation.copy_iban'|trans }}</button>
-    </section>
+    <a class="footer-donation" href="{{ path('app_donation', {_locale: locale}) }}">
+        <span>{{ 'donation.eyebrow'|trans }}</span>
+        <strong>{{ 'donation.title'|trans }}</strong>
+        <p>{{ 'donation.text'|trans }}</p>
+    </a>
     <nav class="footer-links">
         <a href="{{ path('app_home', {_locale: locale}) }}">{{ settings.value('nav_home_' ~ locale, 'nav.home'|trans) }}</a>
         <a href="{{ path('app_gallery', {_locale: locale}) }}">{{ settings.value('nav_gallery_' ~ locale, 'nav.gallery'|trans) }}</a>

@@ -9,6 +9,8 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: PageRepository::class)]
 class Page
 {
+    public const DONATION_SLUG = 'faire-un-don';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -104,4 +106,5 @@ class Page
     public function setPublished(bool $published): self { $this->published = $published; return $this; }
     public function getPosition(): int { return $this->position; }
     public function setPosition(int $position): self { $this->position = $position; return $this; }
+    public function isSystemPage(): bool { return $this->slug === self::DONATION_SLUG; }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Page;
 use App\Repository\CommunityOrganizationRepository;
 use App\Repository\EventRepository;
 use App\Repository\GalleryImageRepository;
@@ -37,7 +38,7 @@ class PublicController extends AbstractController
 
         return $this->render('public/home.html.twig', [
             'locale' => $locale,
-            'pages' => $pages->findPublished(),
+            'pages' => $pages->findPublishedForHome(),
             'images' => $images->findBy([], ['featured' => 'DESC', 'position' => 'ASC'], 8),
             'events' => $events->findHomepageSlider(),
             'socialLinks' => $socialLinks->findBy(['featured' => true], ['position' => 'ASC'], 8),
@@ -49,6 +50,10 @@ class PublicController extends AbstractController
     #[Route('/{_locale}/page/{slug}', name: 'app_page', requirements: ['_locale' => 'ar|fr|en'])]
     public function page(Request $request, string $slug, PageRepository $pages, PageMediaRepository $media): Response
     {
+        if ($slug === Page::DONATION_SLUG) {
+            return $this->redirectToRoute('app_donation', ['_locale' => $request->getLocale()], Response::HTTP_MOVED_PERMANENTLY);
+        }
+
         $page = $pages->findOneBy(['slug' => $slug, 'published' => true]);
         if (!$page) {
             throw $this->createNotFoundException('Page introuvable');
@@ -58,6 +63,22 @@ class PublicController extends AbstractController
             'locale' => $request->getLocale(),
             'page' => $page,
             'media' => $media->findForPage($page),
+        ]);
+    }
+
+    #[Route('/{_locale}/don', name: 'app_donation', requirements: ['_locale' => 'ar|fr|en'])]
+    public function donation(Request $request, PageRepository $pages, PageMediaRepository $media): Response
+    {
+        $page = $pages->findOneBy(['slug' => Page::DONATION_SLUG, 'published' => true]);
+        if (!$page) {
+            throw $this->createNotFoundException('Page de don introuvable');
+        }
+
+        return $this->render('public/page.html.twig', [
+            'locale' => $request->getLocale(),
+            'page' => $page,
+            'media' => $media->findForPage($page),
+            'canonicalRoute' => 'app_donation',
         ]);
     }
 
@@ -102,10 +123,14 @@ class PublicController extends AbstractController
         foreach (['ar', 'fr', 'en'] as $locale) {
             $urls[] = $this->generateUrl('app_home', ['_locale' => $locale], UrlGeneratorInterface::ABSOLUTE_URL);
             $urls[] = $this->generateUrl('app_gallery', ['_locale' => $locale], UrlGeneratorInterface::ABSOLUTE_URL);
+            $urls[] = $this->generateUrl('app_donation', ['_locale' => $locale], UrlGeneratorInterface::ABSOLUTE_URL);
             foreach ($events->findBy(['published' => true, 'archived' => false]) as $event) {
                 $urls[] = $this->generateUrl('app_news_show', ['_locale' => $locale, 'slug' => $event->getSlug()], UrlGeneratorInterface::ABSOLUTE_URL);
             }
             foreach ($pages->findPublished() as $page) {
+                if ($page->isSystemPage()) {
+                    continue;
+                }
                 $urls[] = $this->generateUrl('app_page', ['_locale' => $locale, 'slug' => $page->getSlug()], UrlGeneratorInterface::ABSOLUTE_URL);
             }
         }

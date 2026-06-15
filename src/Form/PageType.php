@@ -20,7 +20,7 @@ class PageType extends AbstractType
             ->add('title', TextType::class, ['label' => 'Titre FR'])
             ->add('titleEn', TextType::class, ['label' => 'Titre EN', 'required' => false])
             ->add('titleAr', TextType::class, ['label' => 'Titre AR', 'required' => false, 'attr' => ['dir' => 'rtl']])
-            ->add('slug', TextType::class, ['label' => 'Slug public', 'help' => 'Exemple: histoire-bazma'])
+            ->add('slug', TextType::class, ['label' => 'Slug public', 'help' => $options['protected_page'] ? 'Adresse protégée pour cette page système.' : 'Exemple: histoire-bazma', 'disabled' => $options['protected_page']])
             ->add('summary', TextType::class, ['label' => 'Résumé FR'])
             ->add('summaryEn', TextType::class, ['label' => 'Résumé EN', 'required' => false])
             ->add('summaryAr', TextType::class, ['label' => 'Résumé AR', 'required' => false, 'attr' => ['dir' => 'rtl']])
@@ -30,11 +30,15 @@ class PageType extends AbstractType
             ->add('imageUrl', TextType::class, ['label' => 'Image WebP', 'required' => false, 'help' => 'Chemin conseillé: /assets/nom-image.webp'])
             ->add('imageFile', FileType::class, ['label' => 'Importer une image', 'mapped' => false, 'required' => false, 'help' => 'JPG, PNG ou WebP. Le fichier sera converti en WebP.', 'attr' => ['accept' => 'image/jpeg,image/png,image/webp']])
             ->add('position', IntegerType::class, ['label' => 'Ordre d’affichage'])
-            ->add('published', CheckboxType::class, ['label' => 'Publié', 'required' => false]);
+            ->add('published', CheckboxType::class, ['label' => 'Publié', 'required' => false, 'disabled' => $options['protected_page']]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults(['data_class' => Page::class]);
+        $resolver->setDefaults([
+            'data_class' => Page::class,
+            'protected_page' => false,
+        ]);
+        $resolver->setAllowedTypes('protected_page', 'bool');
     }
 }

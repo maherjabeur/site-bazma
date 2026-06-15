@@ -18,4 +18,18 @@ class PageRepository extends ServiceEntityRepository
     {
         return $this->findBy(['published' => true], ['position' => 'ASC', 'title' => 'ASC']);
     }
+
+    /** @return Page[] */
+    public function findPublishedForHome(): array
+    {
+        return $this->createQueryBuilder('page')
+            ->andWhere('page.published = :published')
+            ->andWhere('page.slug != :donationSlug')
+            ->setParameter('published', true)
+            ->setParameter('donationSlug', Page::DONATION_SLUG)
+            ->orderBy('page.position', 'ASC')
+            ->addOrderBy('page.title', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

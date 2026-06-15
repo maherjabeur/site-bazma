@@ -381,26 +381,29 @@ footer p {
     max-width: 360px;
 }
 .footer-donation {
+    display: grid;
+    gap: 6px;
     width: min(480px, 100%);
     padding: 18px;
     border: 1px solid rgba(255,255,255,.16);
     border-radius: 8px;
     background: rgba(255,255,255,.08);
     box-shadow: 0 14px 34px rgba(0,0,0,.12);
+    transition: transform .18s ease, background .18s ease, border-color .18s ease;
 }
-.footer-donation-head {
-    display: grid;
-    gap: 5px;
-    margin-bottom: 12px;
+.footer-donation:hover {
+    transform: translateY(-2px);
+    border-color: rgba(215,155,50,.5);
+    background: rgba(255,255,255,.12);
 }
-.footer-donation-head span {
+.footer-donation span {
     color: var(--sun);
     font-size: 12px;
     font-weight: 850;
     letter-spacing: .08em;
     text-transform: uppercase;
 }
-.footer-donation h2 {
+.footer-donation strong {
     margin: 0;
     color: #fff;
     font-size: 22px;
@@ -410,52 +413,6 @@ footer p {
     max-width: none;
     font-size: 14px;
     line-height: 1.55;
-}
-.footer-donation dl {
-    display: grid;
-    gap: 8px;
-    margin: 0;
-}
-.footer-donation dl div {
-    display: grid;
-    grid-template-columns: 92px minmax(0, 1fr);
-    gap: 10px;
-    align-items: baseline;
-}
-.footer-donation dt {
-    color: rgba(255,255,255,.62);
-    font-size: 12px;
-    font-weight: 850;
-    text-transform: uppercase;
-}
-.footer-donation dd {
-    margin: 0;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 750;
-    overflow-wrap: anywhere;
-}
-.footer-donation code {
-    font-family: "Segoe UI Mono", Consolas, monospace;
-    font-size: 14px;
-    letter-spacing: 0;
-    unicode-bidi: isolate;
-}
-.donation-copy {
-    min-height: 36px;
-    margin-top: 14px;
-    padding: 8px 12px;
-    border: 1px solid rgba(255,255,255,.24);
-    background: rgba(215,155,50,.94);
-    color: #13231d;
-    box-shadow: none;
-    font-size: 13px;
-    font-weight: 900;
-}
-.donation-copy:hover {
-    background: #f1b84c;
-    color: #13231d;
-    box-shadow: none;
 }
 .footer-links {
     justify-content: flex-end;
@@ -1416,19 +1373,6 @@ html[dir="rtl"] .gallery-hero-panel {
 
 html[dir="rtl"] .gallery-toolbar {
     flex-direction: row-reverse;
-}
-
-html[dir="rtl"] .footer-donation dl div {
-    grid-template-columns: minmax(0, 1fr) 92px;
-}
-
-html[dir="rtl"] .footer-donation dt {
-    grid-column: 2;
-}
-
-html[dir="rtl"] .footer-donation dd {
-    grid-column: 1;
-    grid-row: 1;
 }
 
 html[dir="rtl"] .event-list article:hover {
@@ -3326,18 +3270,6 @@ footer,
     .footer-links {
         width: 100%;
         max-width: none;
-    }
-
-    .footer-donation dl div,
-    html[dir="rtl"] .footer-donation dl div {
-        grid-template-columns: 1fr;
-        gap: 2px;
-    }
-
-    html[dir="rtl"] .footer-donation dt,
-    html[dir="rtl"] .footer-donation dd {
-        grid-column: auto;
-        grid-row: auto;
     }
 
     .footer-links {

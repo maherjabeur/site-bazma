@@ -65,16 +65,18 @@
             {% for page in pages %}
                 <article class="admin-item">
                     <div class="admin-item-main">
-                        <span class="status-pill {{ page.published ? 'is-live' : 'is-draft' }}">{{ page.published ? 'Publié' : 'Brouillon' }}</span>
+                        <span class="status-pill {{ page.systemPage ? 'is-live' : (page.published ? 'is-live' : 'is-draft') }}">{{ page.systemPage ? 'Page système' : (page.published ? 'Publié' : 'Brouillon') }}</span>
                         <h3>{{ page.title }}</h3>
                         <p>/{{ page.slug }} · ordre {{ page.position }}</p>
                     </div>
                     <div class="admin-item-actions">
                         <a href="{{ path('admin_page_edit', {id: page.id}) }}">Modifier</a>
-                        <form method="post" action="{{ path('admin_page_delete', {id: page.id}) }}" onsubmit="return confirm('Supprimer cette page ?');">
-                            <input type="hidden" name="_token" value="{{ csrf_token('delete_page_' ~ page.id) }}">
-                            <button class="link-danger" type="submit">Supprimer</button>
-                        </form>
+                        {% if not page.systemPage %}
+                            <form method="post" action="{{ path('admin_page_delete', {id: page.id}) }}" onsubmit="return confirm('Supprimer cette page ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_page_' ~ page.id) }}">
+                                <button class="link-danger" type="submit">Supprimer</button>
+                            </form>
+                        {% endif %}
                     </div>
                 </article>
             {% else %}

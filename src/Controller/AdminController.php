@@ -304,6 +304,8 @@ class AdminController extends AbstractController
 
         return $this->handleForm($request, $em, $page, PageType::class, [
             'pageMedia' => $page->getId() ? $pageMediaRepository->findForPage($page) : [],
+        ], [
+            'protected_page' => $page->isSystemPage(),
         ]);
     }
 
@@ -421,6 +423,12 @@ class AdminController extends AbstractController
     #[Route('/pages/{id}/delete', name: 'admin_page_delete', methods: ['POST'])]
     public function deletePage(Request $request, EntityManagerInterface $em, Page $page): Response
     {
+        if ($page->isSystemPage()) {
+            $this->addFlash('error', 'Cette page système ne peut pas être supprimée. Vous pouvez seulement modifier son contenu.');
+
+            return $this->redirectToRoute('admin_dashboard');
+        }
+
         return $this->deleteEntity($request, $em, $page, 'delete_page_'.$page->getId());
     }
 
@@ -460,13 +468,17 @@ class AdminController extends AbstractController
         return $this->deleteEntity($request, $em, $adminUser, 'delete_user_'.$adminUser->getId(), 'admin_users');
     }
 
-    private function handleForm(Request $request, EntityManagerInterface $em, object $entity, string $type, array $extra = []): Response
+    private function handleForm(Request $request, EntityManagerInterface $em, object $entity, string $type, array $extra = [], array $formOptions = []): Response
     {
         /** @var FormInterface $form */
-        $form = $this->createForm($type, $entity);
+        $form = $this->createForm($type, $entity, $formOptions);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            if ($entity instanceof Page && $entity->isSystemPage()) {
+                $entity->setSlug(Page::DONATION_SLUG)->setPublished(true);
+            }
+
             if ($form->has('imageFile')) {
                 $uploadedImage = $form->get('imageFile')->getData();
                 if ($uploadedImage instanceof UploadedFile) {
@@ -638,7 +650,7 @@ class AdminController extends AbstractController
             $entity instanceof Page => [
                 'section' => 'Pages',
                 'title' => $entity->getId() ? 'Modifier une page' : 'Nouvelle page',
-                'hint' => 'Titre, résumé, contenu multilingue, image principale, médiathèque et statut de publication.',
+                'hint' => $entity->isSystemPage() ? 'Page système protégée: le contenu est modifiable, mais l’adresse et la publication restent fixes.' : 'Titre, résumé, contenu multilingue, image principale, médiathèque et statut de publication.',
                 'backRoute' => 'admin_dashboard',
             ],
             $entity instanceof PageMedia => [
