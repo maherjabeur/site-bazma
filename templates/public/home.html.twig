@@ -113,7 +113,10 @@
 
 <main>
     {% set hero_primary_url = settings.value('hero_primary_url_' ~ locale, settings.value('hero_primary_url', '#decouvrir')) %}
-    {% set hero_secondary_url = settings.value('hero_secondary_url_' ~ locale, settings.value('hero_secondary_url', path('app_gallery', {_locale: locale}))) %}
+    {% set hero_secondary_url_locale = settings.value('hero_secondary_url_' ~ locale, '') %}
+    {% set hero_secondary_url_global = settings.value('hero_secondary_url', '') %}
+    {% set hero_secondary_url_is_gallery = hero_secondary_url_global in ['/ar/gallery', '/fr/gallery', '/en/gallery'] %}
+    {% set hero_secondary_url = hero_secondary_url_locale ?: (hero_secondary_url_is_gallery ? path('app_gallery', {_locale: locale}) : (hero_secondary_url_global ?: path('app_gallery', {_locale: locale}))) %}
     <section class="hero" style="background-image: linear-gradient({{ locale == 'ar' ? '270deg' : '90deg' }}, rgba(22, 34, 30, .82), rgba(22, 34, 30, .28)), url('{{ settings.value('hero_image', '/assets/bazma-hero.webp')|webp_image }}')">
         <div class="hero-content">
             <p class="eyebrow">{{ settings.value('hero_eyebrow_' ~ locale, settings.value('hero_eyebrow', 'hero.eyebrow'|trans)) }}</p>

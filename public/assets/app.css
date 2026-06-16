@@ -1398,9 +1398,14 @@ html[dir="rtl"] .gallery-hero-panel {
 }
 
 html[dir="rtl"] .gallery-toolbar {
-    flex-direction: row-reverse;
+    flex-direction: row;
     direction: rtl;
     text-align: right;
+}
+
+html[dir="rtl"] .gallery-showcase,
+html[dir="rtl"] .gallery-masonry {
+    direction: rtl;
 }
 
 html[dir="rtl"] .gallery-intro-copy,
@@ -1412,6 +1417,12 @@ html[dir="rtl"] .gallery-empty,
 html[dir="rtl"] .gallery-lightbox-caption {
     direction: rtl;
     text-align: right;
+}
+
+html[dir="rtl"] .gallery-card-body,
+html[dir="rtl"] .gallery-photo figcaption,
+html[dir="rtl"] .gallery-lightbox-caption {
+    justify-items: start;
 }
 
 html[dir="rtl"] .gallery-hero h1,
