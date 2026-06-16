@@ -1379,19 +1379,66 @@ html[dir="rtl"] .gallery-feature-content {
 }
 
 html[dir="rtl"] .gallery-hero {
-    grid-template-columns: minmax(280px, 390px) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 390px);
+    direction: rtl;
 }
 
 html[dir="rtl"] .gallery-hero-content {
-    grid-column: 2;
+    grid-column: 1;
+    justify-self: start;
+    margin-inline-start: auto;
+    margin-inline-end: 0;
+    text-align: right;
 }
 
 html[dir="rtl"] .gallery-hero-panel {
-    grid-column: 1;
+    grid-column: 2;
+    justify-self: stretch;
+    text-align: right;
 }
 
 html[dir="rtl"] .gallery-toolbar {
     flex-direction: row-reverse;
+    direction: rtl;
+    text-align: right;
+}
+
+html[dir="rtl"] .gallery-intro-copy,
+html[dir="rtl"] .gallery-feature-content,
+html[dir="rtl"] .gallery-section-head,
+html[dir="rtl"] .gallery-card-body,
+html[dir="rtl"] .gallery-photo figcaption,
+html[dir="rtl"] .gallery-empty,
+html[dir="rtl"] .gallery-lightbox-caption {
+    direction: rtl;
+    text-align: right;
+}
+
+html[dir="rtl"] .gallery-hero h1,
+html[dir="rtl"] .gallery-hero-content p,
+html[dir="rtl"] .gallery-hero-panel span,
+html[dir="rtl"] .gallery-hero-panel strong,
+html[dir="rtl"] .gallery-hero-panel p,
+html[dir="rtl"] .gallery-toolbar h2,
+html[dir="rtl"] .gallery-toolbar .eyebrow,
+html[dir="rtl"] .gallery-toolbar > span {
+    text-align: right;
+}
+
+html[dir="rtl"] .gallery-source-button,
+html[dir="rtl"] .gallery-card-body a,
+html[dir="rtl"] .gallery-photo figcaption a {
+    margin-inline-start: 0;
+    margin-inline-end: auto;
+}
+
+html[dir="rtl"] .gallery-source-button {
+    align-self: flex-start;
+}
+
+html[dir="rtl"] .gallery-card-body a,
+html[dir="rtl"] .gallery-photo figcaption a {
+    justify-self: start;
 }
 
 html[dir="rtl"] .event-list article:hover {
