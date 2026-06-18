@@ -2353,7 +2353,7 @@ html[dir="rtl"] .news-board article:hover {
 
 .admin-choice-grid > div {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     gap: 10px;
 }
 
@@ -2938,9 +2938,6 @@ html[dir="rtl"] .news-board article:hover {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .admin-choice-grid > div {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
 }
 
 @media (max-width: 640px) {
@@ -3465,9 +3462,6 @@ footer,
         flex: 0 0 auto;
     }
 
-    .admin-choice-grid > div {
-        grid-template-columns: 1fr;
-    }
 }
 
 /* CMS hardening: stable form layouts, previews, and post-submit states. */
