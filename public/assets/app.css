@@ -4076,3 +4076,71 @@ footer,
         justify-content: center;
     }
 }
+
+/* Front card media safety: large source images must never stretch cards. */
+.content-card,
+.social-card,
+.team-card,
+.organization-card,
+.gallery-card,
+.gallery-photo,
+.news-board article {
+    min-width: 0;
+}
+
+.content-card > img,
+.social-card > img,
+.organization-card > img,
+.gallery-card-media > img,
+.gallery-strip figure > img,
+.gallery-grid figure > img,
+.news-board:not(.news-slider) article > img {
+    display: block;
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+    max-height: 280px;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    object-position: center;
+    background: #eef2ef;
+}
+
+.content-card > img,
+.social-card > img,
+.gallery-card-media > img,
+.gallery-strip figure > img,
+.gallery-grid figure > img,
+.news-board:not(.news-slider) article > img {
+    height: auto;
+}
+
+.organization-card > img {
+    height: auto;
+}
+
+.team-photo {
+    max-height: 280px;
+}
+
+.team-photo img {
+    display: block;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+@media (max-width: 640px) {
+    .content-card > img,
+    .social-card > img,
+    .organization-card > img,
+    .gallery-card-media > img,
+    .gallery-strip figure > img,
+    .gallery-grid figure > img,
+    .news-board:not(.news-slider) article > img,
+    .team-photo {
+        max-height: 220px;
+    }
+}
