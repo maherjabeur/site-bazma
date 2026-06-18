@@ -34,6 +34,15 @@ class AdminUser implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private bool $active = true;
 
+    #[ORM\Column(length: 160, nullable: true)]
+    private ?string $profession = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $facebookUrl = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $profileImageUrl = null;
+
     public function getId(): ?int { return $this->id; }
     public function getEmail(): string { return $this->email; }
     public function setEmail(string $email): self { $this->email = strtolower(trim($email)); return $this; }
@@ -44,6 +53,40 @@ class AdminUser implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $password): self { $this->password = $password; return $this; }
     public function isActive(): bool { return $this->active; }
     public function setActive(bool $active): self { $this->active = $active; return $this; }
+    public function getProfession(): ?string { return $this->profession; }
+    public function setProfession(?string $profession): self { $this->profession = $this->cleanNullable($profession); return $this; }
+    public function getFacebookUrl(): ?string { return $this->facebookUrl; }
+    public function setFacebookUrl(?string $facebookUrl): self
+    {
+        $facebookUrl = $this->cleanNullable($facebookUrl);
+        if ($facebookUrl && str_starts_with($facebookUrl, 'www.')) {
+            $facebookUrl = 'https://'.$facebookUrl;
+        } elseif ($facebookUrl && !preg_match('#^https?://#i', $facebookUrl)) {
+            $facebookUrl = 'https://'.$facebookUrl;
+        }
+
+        $this->facebookUrl = $facebookUrl;
+
+        return $this;
+    }
+    public function getProfileImageUrl(): ?string { return $this->profileImageUrl; }
+    public function setProfileImageUrl(?string $profileImageUrl): self { $this->profileImageUrl = $this->cleanNullable($profileImageUrl); return $this; }
+    public function isSuperAdmin(): bool { return in_array('ROLE_SUPER_ADMIN', $this->roles, true); }
+    public function getInitials(): string
+    {
+        $source = trim($this->name ?: $this->email);
+        if ($source === '') {
+            return 'B';
+        }
+
+        $parts = preg_split('/\s+/', $source) ?: [];
+        $initials = '';
+        foreach (array_slice($parts, 0, 2) as $part) {
+            $initials .= strtoupper(substr($part, 0, 1));
+        }
+
+        return $initials ?: 'B';
+    }
 
     /**
      * @return list<string>
@@ -68,5 +111,12 @@ class AdminUser implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function eraseCredentials(): void
     {
+    }
+
+    private function cleanNullable(?string $value): ?string
+    {
+        $value = trim((string) $value);
+
+        return $value === '' ? null : $value;
     }
 }

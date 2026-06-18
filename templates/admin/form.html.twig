@@ -431,6 +431,7 @@
     <nav>
         <a href="{{ path(context.backRoute, context.backParams|default({})) }}">Retour</a>
         <a href="{{ path('app_home', {_locale: 'ar'}) }}">Voir le site</a>
+        <a href="{{ path('admin_profile') }}">Mon profil</a>
         <a href="{{ path('app_logout') }}">Déconnexion</a>
     </nav>
 </header>
@@ -463,6 +464,8 @@
         {% set currentImage = null %}
         {% if entity.imageUrl is defined and entity.imageUrl %}
             {% set currentImage = entity.imageUrl %}
+        {% elseif entity.profileImageUrl is defined and entity.profileImageUrl %}
+            {% set currentImage = entity.profileImageUrl %}
         {% elseif entity.settingKey is defined and entity.settingValue and 'image' in entity.settingKey|lower %}
             {% set currentImage = entity.settingValue %}
         {% endif %}
@@ -486,7 +489,7 @@
                         {% set isRichField = child.vars.name in richFieldNames %}
                         {% set isTextarea = 'textarea' in child.vars.block_prefixes %}
                         {% set isFile = 'file' in child.vars.block_prefixes %}
-                        {% set isImageUrl = child.vars.name == 'imageUrl' %}
+                        {% set isImageUrl = child.vars.name in ['imageUrl', 'profileImageUrl'] %}
                         {% set isExpandedChoice = child.vars.expanded|default(false) %}
                         <div class="admin-field {{ 'checkbox' in child.vars.block_prefixes ? 'admin-field-check' : '' }} {{ isFile ? 'upload-field admin-field-wide' : '' }} {{ (isRichField or isTextarea or isImageUrl or isExpandedChoice) ? 'admin-field-wide' : '' }} {{ isRichField ? 'admin-field-rich' : '' }} {{ (isExpandedChoice and child.vars.name != 'roles') ? 'admin-choice-grid' : '' }} {{ child.vars.name == 'roles' ? 'admin-permissions-field' : '' }}">
                             {{ form_label(child) }}

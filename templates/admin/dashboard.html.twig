@@ -11,6 +11,7 @@
     <a class="brand" href="{{ path('admin_dashboard') }}">CMS Bazma</a>
     <nav>
         <a href="{{ path('app_home', {_locale: 'ar'}) }}">Voir le site</a>
+        <a href="{{ path('admin_profile') }}">Mon profil</a>
         {% if is_granted('ROLE_HOME_MANAGER') %}<a href="{{ path('admin_home_settings') }}">Accueil</a>{% endif %}
         {% if is_granted('ROLE_SETTINGS_MANAGER') %}<a href="{{ path('admin_settings') }}">Référencement et paramètres</a>{% endif %}
         {% if is_granted('ROLE_USER_MANAGER') %}<a href="{{ path('admin_users') }}">Modérateurs</a>{% endif %}

@@ -257,6 +257,46 @@
             {% endfor %}
         </div>
     </section>
+
+    {% if teamMembers|default([])|length %}
+    <section id="equipe" class="section team-band">
+        <div class="section-heading">
+            <p class="eyebrow">{{ settings.value('home_team_eyebrow_' ~ locale, 'team.eyebrow'|trans) }}</p>
+            <h2>{{ settings.value('home_team_title_' ~ locale, 'team.title'|trans) }}</h2>
+            <p>{{ settings.value('home_team_text_' ~ locale, 'team.text'|trans) }}</p>
+        </div>
+        <div class="team-grid">
+            {% for member in teamMembers %}
+                {% set roleLabel = member.superAdmin ? 'team.creator'|trans : 'team.moderator'|trans %}
+                {% if member.facebookUrl %}
+                    <a class="team-card" href="{{ member.facebookUrl }}" target="_blank" rel="noreferrer">
+                {% else %}
+                    <article class="team-card">
+                {% endif %}
+                    <div class="team-photo">
+                        {% if member.profileImageUrl %}
+                            <img src="{{ member.profileImageUrl|webp_image }}" alt="{{ member.name ?: member.email }}">
+                        {% else %}
+                            <span>{{ member.initials }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="team-card-body">
+                        <span>{{ roleLabel }}</span>
+                        <h3>{{ member.name ?: member.email }}</h3>
+                        <p>{{ member.profession ?: 'team.default_profession'|trans }}</p>
+                        {% if member.facebookUrl %}
+                            <strong>{{ 'team.facebook'|trans }}</strong>
+                        {% endif %}
+                    </div>
+                {% if member.facebookUrl %}
+                    </a>
+                {% else %}
+                    </article>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
 </main>
 
 <footer>

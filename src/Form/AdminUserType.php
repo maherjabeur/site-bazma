@@ -8,6 +8,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -26,6 +27,10 @@ class AdminUserType extends AbstractType
                 'required' => !$options['is_edit'],
                 'help' => $options['is_edit'] ? 'Laissez vide pour garder le mot de passe actuel.' : null,
             ])
+            ->add('profession', TextType::class, ['label' => 'Profession', 'required' => false])
+            ->add('facebookUrl', TextType::class, ['label' => 'Lien profil Facebook', 'required' => false, 'help' => 'Exemple: https://www.facebook.com/nom.du.profil'])
+            ->add('profileImageUrl', TextType::class, ['label' => 'Photo de profil', 'required' => false, 'help' => 'Chemin local /uploads/... ou /assets/...'])
+            ->add('profileImageFile', FileType::class, ['label' => 'Importer une photo de profil', 'mapped' => false, 'required' => false, 'help' => 'JPG, PNG ou WebP. Le fichier sera converti en WebP.', 'attr' => ['accept' => 'image/jpeg,image/png,image/webp']])
             ->add('roles', ChoiceType::class, [
                 'label' => 'Permissions',
                 'multiple' => true,

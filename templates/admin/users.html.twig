@@ -12,6 +12,7 @@
     <nav>
         <a href="{{ path('admin_dashboard') }}">Tableau de bord</a>
         <a href="{{ path('admin_user_new') }}">Ajouter</a>
+        <a href="{{ path('admin_profile') }}">Mon profil</a>
         <a href="{{ path('app_logout') }}">Déconnexion</a>
     </nav>
 </header>
@@ -43,6 +44,17 @@
                         <span class="status-pill {{ user.active ? 'is-live' : 'is-draft' }}">{{ user.active ? 'Actif' : 'Désactivé' }}</span>
                         <h3>{{ user.name ?: user.email }}</h3>
                         <p>{{ user.email }}</p>
+                        <div class="admin-user-profile-line">
+                            {% if user.profileImageUrl %}
+                                <img src="{{ user.profileImageUrl|webp_image }}" alt="">
+                            {% else %}
+                                <span>{{ user.initials }}</span>
+                            {% endif %}
+                            <div>
+                                <strong>{{ user.profession ?: 'Profession non renseignée' }}</strong>
+                                <small>{{ user.facebookUrl ?: 'Lien Facebook non renseigné' }}</small>
+                            </div>
+                        </div>
                         <div class="permission-pills">
                             {% for role in user.roles|filter(role => role != 'ROLE_CMS_ACCESS') %}
                                 <span>{{ role|admin_permission_label }}</span>

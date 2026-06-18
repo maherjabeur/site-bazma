@@ -11,6 +11,7 @@ use App\Entity\PageMedia;
 use App\Entity\SiteSetting;
 use App\Entity\SocialLink;
 use App\Form\AdminUserType;
+use App\Form\AdminProfileType;
 use App\Form\CommunityOrganizationType;
 use App\Form\EventType;
 use App\Form\GalleryImageType;
@@ -385,6 +386,45 @@ class AdminController extends AbstractController
         ]);
     }
 
+    #[Route('/profile', name: 'admin_profile')]
+    public function profile(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $hasher): Response
+    {
+        $adminUser = $this->getUser();
+        if (!$adminUser instanceof AdminUser) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $form = $this->createForm(AdminProfileType::class, $adminUser);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            try {
+                $this->applyAdminUserProfileForm($form, $adminUser, $hasher);
+            } catch (\Throwable $exception) {
+                $this->addFlash('error', $exception->getMessage());
+
+                return $this->redirectToRoute('admin_profile');
+            }
+
+            $em->persist($adminUser);
+            $em->flush();
+            $this->addFlash('success', 'Profil enregistré.');
+
+            return $this->redirectToRoute('admin_profile');
+        }
+
+        return $this->render('admin/form.html.twig', [
+            'form' => $form,
+            'entity' => $adminUser,
+            'context' => [
+                'section' => 'Mon profil',
+                'title' => 'Profil public et mot de passe',
+                'hint' => 'Ajoutez votre photo, profession, profil Facebook et changez votre mot de passe si nécessaire.',
+                'backRoute' => 'admin_dashboard',
+            ],
+        ]);
+    }
+
     #[Route('/users/new', name: 'admin_user_new')]
     #[Route('/users/{id}/edit', name: 'admin_user_edit')]
     public function userForm(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $hasher, ?AdminUser $adminUser = null): Response
@@ -394,9 +434,12 @@ class AdminController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $plainPassword = (string) $form->get('plainPassword')->getData();
-            if ($plainPassword !== '') {
-                $adminUser->setPassword($hasher->hashPassword($adminUser, $plainPassword));
+            try {
+                $this->applyAdminUserProfileForm($form, $adminUser, $hasher);
+            } catch (\Throwable $exception) {
+                $this->addFlash('error', $exception->getMessage());
+
+                return $this->redirectToRoute($adminUser->getId() ? 'admin_user_edit' : 'admin_user_new', $adminUser->getId() ? ['id' => $adminUser->getId()] : []);
             }
 
             if (!$adminUser->getRoles()) {
@@ -420,7 +463,7 @@ class AdminController extends AbstractController
             'context' => [
                 'section' => 'Modérateurs',
                 'title' => $adminUser->getId() ? 'Modifier un modérateur' : 'Nouveau modérateur',
-                'hint' => 'Définissez les accès par section du CMS.',
+                'hint' => 'Définissez les accès CMS et les informations publiques affichées sur le site.',
                 'backRoute' => 'admin_users',
             ],
         ]);
@@ -486,6 +529,23 @@ class AdminController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_USER_DELETE');
 
         return $this->deleteEntity($request, $em, $adminUser, 'delete_user_'.$adminUser->getId(), 'admin_users');
+    }
+
+    private function applyAdminUserProfileForm(FormInterface $form, AdminUser $adminUser, UserPasswordHasherInterface $hasher): void
+    {
+        $plainPassword = (string) $form->get('plainPassword')->getData();
+        if ($plainPassword !== '') {
+            $adminUser->setPassword($hasher->hashPassword($adminUser, $plainPassword));
+        }
+
+        if ($form->has('profileImageFile')) {
+            $uploadedImage = $form->get('profileImageFile')->getData();
+            if ($uploadedImage instanceof UploadedFile) {
+                $adminUser->setProfileImageUrl($this->imageUploader->uploadAsWebp($uploadedImage, 'profil'));
+            } else {
+                $adminUser->setProfileImageUrl($this->imageUploader->normalizeLocalImagePath($adminUser->getProfileImageUrl()));
+            }
+        }
     }
 
     private function handleForm(Request $request, EntityManagerInterface $em, object $entity, string $type, array $extra = [], array $formOptions = []): Response
@@ -664,6 +724,10 @@ class AdminController extends AbstractController
             $addPath($entity->getSettingValue());
         }
 
+        if ($entity instanceof AdminUser) {
+            $addPath($entity->getProfileImageUrl());
+        }
+
         if ($entity instanceof Page) {
             $addHtml($entity->getBody());
             $addHtml($entity->getBodyEn());
@@ -772,6 +836,7 @@ class AdminController extends AbstractController
             CommunityOrganization::class => ['imageUrl'],
             SocialLink::class => ['imageUrl'],
             SiteSetting::class => ['settingValue'],
+            AdminUser::class => ['profileImageUrl'],
         ];
     }
 
@@ -785,6 +850,7 @@ class AdminController extends AbstractController
             $entity instanceof CommunityOrganization => 'association',
             $entity instanceof SocialLink => 'reseau',
             $entity instanceof SiteSetting => 'parametre',
+            $entity instanceof AdminUser => 'profil',
             default => 'image',
         };
     }

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\GalleryImage;
 use App\Entity\Page;
 use App\Repository\CommunityOrganizationRepository;
+use App\Repository\AdminUserRepository;
 use App\Repository\EventRepository;
 use App\Repository\GalleryImageRepository;
 use App\Repository\PageMediaRepository;
@@ -33,7 +34,7 @@ class PublicController extends AbstractController
     }
 
     #[Route('/{_locale}', name: 'app_home', requirements: ['_locale' => 'ar|fr|en'])]
-    public function home(Request $request, PageRepository $pages, GalleryImageRepository $images, EventRepository $events, SiteSettingRepository $settings, SocialLinkRepository $socialLinks, CommunityOrganizationRepository $organizations): Response
+    public function home(Request $request, PageRepository $pages, GalleryImageRepository $images, EventRepository $events, SiteSettingRepository $settings, SocialLinkRepository $socialLinks, CommunityOrganizationRepository $organizations, AdminUserRepository $adminUsers): Response
     {
         $locale = $request->getLocale();
 
@@ -44,6 +45,7 @@ class PublicController extends AbstractController
             'events' => $events->findHomepageSlider(),
             'socialLinks' => $socialLinks->findBy(['featured' => true], ['position' => 'ASC'], 8),
             'organizations' => $organizations->findBy(['active' => true], ['position' => 'ASC']),
+            'teamMembers' => $adminUsers->findPublicTeam(),
             'settings' => $settings,
         ]);
     }
