@@ -541,7 +541,7 @@ class AdminController extends AbstractController
         if ($form->has('profileImageFile')) {
             $uploadedImage = $form->get('profileImageFile')->getData();
             if ($uploadedImage instanceof UploadedFile) {
-                $adminUser->setProfileImageUrl($this->imageUploader->uploadAsWebp($uploadedImage, 'profil'));
+                $adminUser->setProfileImageUrl($this->imageUploader->uploadAsWebp($uploadedImage, 'profil', 900, 900));
             } else {
                 $adminUser->setProfileImageUrl($this->imageUploader->normalizeLocalImagePath($adminUser->getProfileImageUrl()));
             }
