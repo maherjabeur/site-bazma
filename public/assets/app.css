@@ -2403,6 +2403,42 @@ html[dir="rtl"] .news-board article:hover {
     font-weight: 850;
 }
 
+.admin-permission-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.admin-permission-option {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    min-height: 38px;
+    padding: 8px 10px;
+    border: 1px solid #edf2ef;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.admin-permission-option input[type="checkbox"] {
+    flex: 0 0 16px;
+    width: 16px;
+    min-height: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--accent);
+}
+
+.admin-permission-option span {
+    min-width: 0;
+    color: #20362d;
+    font-size: 13px;
+    font-weight: 750;
+    line-height: 1.35;
+}
+
 .admin-permissions-field .form-help,
 .admin-permissions-field .help-text {
     color: var(--muted);

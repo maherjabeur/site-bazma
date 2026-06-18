@@ -488,9 +488,18 @@
                         {% set isFile = 'file' in child.vars.block_prefixes %}
                         {% set isImageUrl = child.vars.name == 'imageUrl' %}
                         {% set isExpandedChoice = child.vars.expanded|default(false) %}
-                        <div class="admin-field {{ 'checkbox' in child.vars.block_prefixes ? 'admin-field-check' : '' }} {{ isFile ? 'upload-field admin-field-wide' : '' }} {{ (isRichField or isTextarea or isImageUrl or isExpandedChoice) ? 'admin-field-wide' : '' }} {{ isRichField ? 'admin-field-rich' : '' }} {{ isExpandedChoice ? 'admin-choice-grid' : '' }} {{ child.vars.name == 'roles' ? 'admin-permissions-field' : '' }}">
+                        <div class="admin-field {{ 'checkbox' in child.vars.block_prefixes ? 'admin-field-check' : '' }} {{ isFile ? 'upload-field admin-field-wide' : '' }} {{ (isRichField or isTextarea or isImageUrl or isExpandedChoice) ? 'admin-field-wide' : '' }} {{ isRichField ? 'admin-field-rich' : '' }} {{ (isExpandedChoice and child.vars.name != 'roles') ? 'admin-choice-grid' : '' }} {{ child.vars.name == 'roles' ? 'admin-permissions-field' : '' }}">
                             {{ form_label(child) }}
-                            {% if isRichField %}
+                            {% if child.vars.name == 'roles' %}
+                                <div class="admin-permission-list">
+                                    {% for permission in child %}
+                                        <label class="admin-permission-option" for="{{ permission.vars.id }}">
+                                            {{ form_widget(permission) }}
+                                            <span>{{ permission.vars.label }}</span>
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                            {% elseif isRichField %}
                                 {% set currentClass = child.vars.attr.class|default('') %}
                                 {{ form_widget(child, {attr: child.vars.attr|merge({class: (currentClass ~ ' wysiwyg-source')|trim})}) }}
                             {% elseif isImageUrl %}
