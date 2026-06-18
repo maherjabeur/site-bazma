@@ -71,7 +71,7 @@
                     </div>
                     <div class="admin-item-actions">
                         <a href="{{ path('admin_page_edit', {id: page.id}) }}">Modifier</a>
-                        {% if not page.systemPage %}
+                        {% if not page.systemPage and is_granted('ROLE_PAGE_DELETE') %}
                             <form method="post" action="{{ path('admin_page_delete', {id: page.id}) }}" onsubmit="return confirm('Supprimer cette page ?');">
                                 <input type="hidden" name="_token" value="{{ csrf_token('delete_page_' ~ page.id) }}">
                                 <button class="link-danger" type="submit">Supprimer</button>
@@ -144,10 +144,12 @@
                         {% endif %}
                         <div class="admin-item-actions">
                             <a class="button small secondary-admin" href="{{ path('admin_image_edit', {id: image.id}) }}">Modifier</a>
+                            {% if is_granted('ROLE_MEDIA_DELETE') %}
                             <form method="post" action="{{ path('admin_image_delete', {id: image.id}) }}" onsubmit="return confirm('Supprimer cette image ?');">
                                 <input type="hidden" name="_token" value="{{ csrf_token('delete_image_' ~ image.id) }}">
                                 <button class="link-danger" type="submit">Supprimer</button>
                             </form>
+                            {% endif %}
                         </div>
                     </div>
                 </article>
@@ -177,10 +179,12 @@
                     </div>
                     <div class="admin-item-actions">
                         <a href="{{ path('admin_organization_edit', {id: organization.id}) }}">Modifier</a>
+                        {% if is_granted('ROLE_ORGANIZATION_DELETE') %}
                         <form method="post" action="{{ path('admin_organization_delete', {id: organization.id}) }}" onsubmit="return confirm('Supprimer cette structure ?');">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete_organization_' ~ organization.id) }}">
                             <button class="link-danger" type="submit">Supprimer</button>
                         </form>
+                        {% endif %}
                     </div>
                 </article>
             {% else %}
@@ -209,10 +213,12 @@
                     </div>
                     <div class="admin-item-actions">
                         <a href="{{ path('admin_social_edit', {id: link.id}) }}">Modifier</a>
+                        {% if is_granted('ROLE_SOCIAL_DELETE') %}
                         <form method="post" action="{{ path('admin_social_delete', {id: link.id}) }}" onsubmit="return confirm('Supprimer ce lien ?');">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete_social_' ~ link.id) }}">
                             <button class="link-danger" type="submit">Supprimer</button>
                         </form>
+                        {% endif %}
                     </div>
                 </article>
             {% else %}
@@ -241,10 +247,12 @@
                     </div>
                     <div class="admin-item-actions">
                         <a href="{{ path('admin_event_edit', {id: event.id}) }}">Modifier</a>
+                        {% if is_granted('ROLE_NEWS_DELETE') %}
                         <form method="post" action="{{ path('admin_event_delete', {id: event.id}) }}" onsubmit="return confirm('Supprimer cette actualité ?');">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete_event_' ~ event.id) }}">
                             <button class="link-danger" type="submit">Supprimer</button>
                         </form>
+                        {% endif %}
                     </div>
                 </article>
             {% else %}

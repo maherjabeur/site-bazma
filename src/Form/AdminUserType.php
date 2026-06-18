@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\AdminUser;
+use App\Security\AdminPermissionCatalog;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -29,17 +30,8 @@ class AdminUserType extends AbstractType
                 'label' => 'Permissions',
                 'multiple' => true,
                 'expanded' => true,
-                'choices' => [
-                    'Super administrateur' => 'ROLE_SUPER_ADMIN',
-                    'Accueil' => 'ROLE_HOME_MANAGER',
-                    'Pages' => 'ROLE_PAGE_MANAGER',
-                    'Médiathèque' => 'ROLE_MEDIA_MANAGER',
-                    'Actualités' => 'ROLE_NEWS_MANAGER',
-                    'Associations' => 'ROLE_ORGANIZATION_MANAGER',
-                    'Réseaux sociaux' => 'ROLE_SOCIAL_MANAGER',
-                    'Référencement et paramètres' => 'ROLE_SETTINGS_MANAGER',
-                    'Modérateurs' => 'ROLE_USER_MANAGER',
-                ],
+                'choices' => AdminPermissionCatalog::groupedChoices(),
+                'help' => 'Cochez uniquement les sections et actions autorisées pour ce modérateur.',
             ])
             ->add('active', CheckboxType::class, ['label' => 'Compte actif', 'required' => false]);
     }

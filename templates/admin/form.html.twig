@@ -488,7 +488,7 @@
                         {% set isFile = 'file' in child.vars.block_prefixes %}
                         {% set isImageUrl = child.vars.name == 'imageUrl' %}
                         {% set isExpandedChoice = child.vars.expanded|default(false) %}
-                        <div class="admin-field {{ 'checkbox' in child.vars.block_prefixes ? 'admin-field-check' : '' }} {{ isFile ? 'upload-field admin-field-wide' : '' }} {{ (isRichField or isTextarea or isImageUrl or isExpandedChoice) ? 'admin-field-wide' : '' }} {{ isRichField ? 'admin-field-rich' : '' }} {{ isExpandedChoice ? 'admin-choice-grid' : '' }}">
+                        <div class="admin-field {{ 'checkbox' in child.vars.block_prefixes ? 'admin-field-check' : '' }} {{ isFile ? 'upload-field admin-field-wide' : '' }} {{ (isRichField or isTextarea or isImageUrl or isExpandedChoice) ? 'admin-field-wide' : '' }} {{ isRichField ? 'admin-field-rich' : '' }} {{ isExpandedChoice ? 'admin-choice-grid' : '' }} {{ child.vars.name == 'roles' ? 'admin-permissions-field' : '' }}">
                             {{ form_label(child) }}
                             {% if isRichField %}
                                 {% set currentClass = child.vars.attr.class|default('') %}
@@ -542,10 +542,12 @@
                                 <p>{{ media.caption ?: media.imageUrl }}</p>
                                 <div class="admin-item-actions">
                                     <a href="{{ path('admin_page_media_edit', {pageId: entity.id, id: media.id}) }}">Modifier</a>
+                                    {% if is_granted('ROLE_PAGE_DELETE') %}
                                     <form method="post" action="{{ path('admin_page_media_delete', {id: media.id}) }}" onsubmit="return confirm('Supprimer cette image ?');">
                                         <input type="hidden" name="_token" value="{{ csrf_token('delete_page_media_' ~ media.id) }}">
                                         <button class="link-danger" type="submit">Supprimer</button>
                                     </form>
+                                    {% endif %}
                                 </div>
                             </div>
                         </article>

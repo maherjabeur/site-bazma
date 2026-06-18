@@ -27,6 +27,9 @@ services:
     App\Twig\ContentExtension:
         tags: ['twig.extension']
 
+    App\Twig\AdminPermissionExtension:
+        tags: ['twig.extension']
+
     App\Service\ImageUploader:
         arguments:
             $projectDir: '%kernel.project_dir%'

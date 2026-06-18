@@ -10,6 +10,21 @@ security:
                 class: App\Entity\AdminUser
 
     role_hierarchy:
+        ROLE_PAGE_MANAGER:
+            - ROLE_EDITOR_MEDIA_UPLOAD
+            - ROLE_PAGE_DELETE
+        ROLE_MEDIA_MANAGER:
+            - ROLE_EDITOR_MEDIA_UPLOAD
+            - ROLE_MEDIA_DELETE
+        ROLE_NEWS_MANAGER:
+            - ROLE_EDITOR_MEDIA_UPLOAD
+            - ROLE_NEWS_DELETE
+        ROLE_ORGANIZATION_MANAGER:
+            - ROLE_ORGANIZATION_DELETE
+        ROLE_SOCIAL_MANAGER:
+            - ROLE_SOCIAL_DELETE
+        ROLE_USER_MANAGER:
+            - ROLE_USER_DELETE
         ROLE_SUPER_ADMIN:
             - ROLE_CMS_ACCESS
             - ROLE_HOME_MANAGER
@@ -20,6 +35,13 @@ security:
             - ROLE_SOCIAL_MANAGER
             - ROLE_SETTINGS_MANAGER
             - ROLE_USER_MANAGER
+            - ROLE_EDITOR_MEDIA_UPLOAD
+            - ROLE_PAGE_DELETE
+            - ROLE_MEDIA_DELETE
+            - ROLE_NEWS_DELETE
+            - ROLE_ORGANIZATION_DELETE
+            - ROLE_SOCIAL_DELETE
+            - ROLE_USER_DELETE
 
     firewalls:
         dev:
@@ -38,6 +60,14 @@ security:
                 target: app_root
 
     access_control:
+        - { path: ^/admin/editor-media, roles: ROLE_EDITOR_MEDIA_UPLOAD }
+        - { path: ^/admin/pages/[^/]+/delete, roles: ROLE_PAGE_DELETE }
+        - { path: ^/admin/pages/media/[^/]+/delete, roles: ROLE_PAGE_DELETE }
+        - { path: ^/admin/images/[^/]+/delete, roles: ROLE_MEDIA_DELETE }
+        - { path: ^/admin/events/[^/]+/delete, roles: ROLE_NEWS_DELETE }
+        - { path: ^/admin/social/[^/]+/delete, roles: ROLE_SOCIAL_DELETE }
+        - { path: ^/admin/organizations/[^/]+/delete, roles: ROLE_ORGANIZATION_DELETE }
+        - { path: ^/admin/users/[^/]+/delete, roles: ROLE_USER_DELETE }
         - { path: ^/admin/users, roles: ROLE_USER_MANAGER }
         - { path: ^/admin/settings, roles: ROLE_SETTINGS_MANAGER }
         - { path: ^/admin/home, roles: ROLE_HOME_MANAGER }

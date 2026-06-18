@@ -429,6 +429,8 @@ class AdminController extends AbstractController
     #[Route('/pages/{id}/delete', name: 'admin_page_delete', methods: ['POST'])]
     public function deletePage(Request $request, EntityManagerInterface $em, Page $page): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_PAGE_DELETE');
+
         if ($page->isSystemPage()) {
             $this->addFlash('error', 'Cette page système ne peut pas être supprimée. Vous pouvez seulement modifier son contenu.');
 
@@ -441,36 +443,48 @@ class AdminController extends AbstractController
     #[Route('/images/{id}/delete', name: 'admin_image_delete', methods: ['POST'])]
     public function deleteImage(Request $request, EntityManagerInterface $em, GalleryImage $image): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_MEDIA_DELETE');
+
         return $this->deleteEntity($request, $em, $image, 'delete_image_'.$image->getId());
     }
 
     #[Route('/events/{id}/delete', name: 'admin_event_delete', methods: ['POST'])]
     public function deleteEvent(Request $request, EntityManagerInterface $em, Event $event): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_NEWS_DELETE');
+
         return $this->deleteEntity($request, $em, $event, 'delete_event_'.$event->getId());
     }
 
     #[Route('/social/{id}/delete', name: 'admin_social_delete', methods: ['POST'])]
     public function deleteSocial(Request $request, EntityManagerInterface $em, SocialLink $socialLink): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_SOCIAL_DELETE');
+
         return $this->deleteEntity($request, $em, $socialLink, 'delete_social_'.$socialLink->getId());
     }
 
     #[Route('/organizations/{id}/delete', name: 'admin_organization_delete', methods: ['POST'])]
     public function deleteOrganization(Request $request, EntityManagerInterface $em, CommunityOrganization $organization): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_ORGANIZATION_DELETE');
+
         return $this->deleteEntity($request, $em, $organization, 'delete_organization_'.$organization->getId());
     }
 
     #[Route('/pages/media/{id}/delete', name: 'admin_page_media_delete', methods: ['POST'])]
     public function deletePageMedia(Request $request, EntityManagerInterface $em, PageMedia $pageMedia): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_PAGE_DELETE');
+
         return $this->deleteEntity($request, $em, $pageMedia, 'delete_page_media_'.$pageMedia->getId());
     }
 
     #[Route('/users/{id}/delete', name: 'admin_user_delete', methods: ['POST'])]
     public function deleteUser(Request $request, EntityManagerInterface $em, AdminUser $adminUser): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_USER_DELETE');
+
         return $this->deleteEntity($request, $em, $adminUser, 'delete_user_'.$adminUser->getId(), 'admin_users');
     }
 

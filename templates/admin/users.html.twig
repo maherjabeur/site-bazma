@@ -30,7 +30,7 @@
         <div>
             <p class="admin-eyebrow">Équipe CMS</p>
             <h1>Modérateurs et permissions.</h1>
-            <p>Créez des accès limités par section: actualités, pages, médiathèque, accueil, associations ou paramètres.</p>
+            <p>Créez des accès limités par section, avec des droits séparés pour les actions sensibles comme la suppression.</p>
         </div>
         <a class="button" href="{{ path('admin_user_new') }}">Nouveau modérateur</a>
     </section>
@@ -45,16 +45,18 @@
                         <p>{{ user.email }}</p>
                         <div class="permission-pills">
                             {% for role in user.roles|filter(role => role != 'ROLE_CMS_ACCESS') %}
-                                <span>{{ role|replace({'ROLE_': '', '_': ' '})|lower }}</span>
+                                <span>{{ role|admin_permission_label }}</span>
                             {% endfor %}
                         </div>
                     </div>
                     <div class="admin-item-actions">
                         <a href="{{ path('admin_user_edit', {id: user.id}) }}">Modifier</a>
-                        <form method="post" action="{{ path('admin_user_delete', {id: user.id}) }}" onsubmit="return confirm('Supprimer ce modérateur ?');">
-                            <input type="hidden" name="_token" value="{{ csrf_token('delete_user_' ~ user.id) }}">
-                            <button class="link-danger" type="submit">Supprimer</button>
-                        </form>
+                        {% if is_granted('ROLE_USER_DELETE') %}
+                            <form method="post" action="{{ path('admin_user_delete', {id: user.id}) }}" onsubmit="return confirm('Supprimer ce modérateur ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_user_' ~ user.id) }}">
+                                <button class="link-danger" type="submit">Supprimer</button>
+                            </form>
+                        {% endif %}
                     </div>
                 </article>
             {% else %}

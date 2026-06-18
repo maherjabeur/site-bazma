@@ -2254,12 +2254,11 @@ html[dir="rtl"] .news-board article:hover {
 .permission-pills span {
     display: inline-flex;
     padding: 4px 8px;
-    border-radius: 999px;
+    border-radius: 8px;
     background: #eef7f2;
     color: var(--accent-dark);
     font-size: 11px;
     font-weight: 850;
-    text-transform: capitalize;
 }
 
 .page-media-manager {
@@ -2350,6 +2349,64 @@ html[dir="rtl"] .news-board article:hover {
     color: #20362d;
     font-size: 13px;
     line-height: 1.35;
+}
+
+.admin-choice-grid > div {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.admin-choice-grid fieldset {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 14px;
+    border: 1px solid #dbe5df;
+    border-radius: 8px;
+    background: #fbfcfb;
+}
+
+.admin-choice-grid legend {
+    padding: 0 6px;
+    color: var(--accent-dark);
+    font-size: 12px;
+    font-weight: 850;
+}
+
+.admin-choice-grid fieldset > div,
+.admin-choice-grid > div > div {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    min-height: 38px;
+    padding: 8px 10px;
+    border: 1px solid #edf2ef;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.admin-choice-grid input[type="checkbox"] {
+    flex: 0 0 auto;
+    width: 16px;
+    min-height: 16px;
+    height: 16px;
+    margin-top: 2px;
+    accent-color: var(--accent);
+}
+
+.admin-choice-grid label {
+    font-weight: 750;
+}
+
+.admin-permissions-field > label {
+    font-weight: 850;
+}
+
+.admin-permissions-field .form-help,
+.admin-permissions-field .help-text {
+    color: var(--muted);
+    font-size: 12px;
 }
 
 .admin-field input,
@@ -2880,6 +2937,10 @@ html[dir="rtl"] .news-board article:hover {
     .admin-card-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
+    .admin-choice-grid > div {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 @media (max-width: 640px) {
@@ -3402,6 +3463,10 @@ footer,
     .wysiwyg-resize-bar button,
     .wysiwyg-toolbar button {
         flex: 0 0 auto;
+    }
+
+    .admin-choice-grid > div {
+        grid-template-columns: 1fr;
     }
 }
 
