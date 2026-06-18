@@ -3532,6 +3532,18 @@ footer,
     gap: 10px;
 }
 
+.admin-permissions-field > div {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px;
+}
+
+.admin-permissions-field fieldset > div:not(:has(> input[type="checkbox"])) {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px;
+}
+
 .admin-choice-grid > div > div {
     display: flex;
     align-items: center;
@@ -3543,13 +3555,32 @@ footer,
     background: #fff;
 }
 
-.admin-choice-grid > div > label {
+.admin-permissions-field > div > div:has(> input[type="checkbox"]),
+.admin-permissions-field fieldset > div:has(> input[type="checkbox"]),
+.admin-permissions-field fieldset > div > div:has(> input[type="checkbox"]) {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100%;
+}
+
+.admin-choice-grid > div > label,
+.admin-permissions-field label {
     min-width: 0;
 }
 
 .admin-choice-grid input[type="checkbox"] {
     flex: 0 0 auto;
     accent-color: var(--accent);
+}
+
+.admin-permissions-field input[type="checkbox"] {
+    order: -1;
+    width: 16px;
+    min-height: 16px;
+    height: 16px;
+    margin: 0;
 }
 
 .admin-field label,
