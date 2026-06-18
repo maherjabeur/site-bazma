@@ -61,6 +61,8 @@ security:
 
     access_control:
         - { path: ^/admin/editor-media, roles: ROLE_EDITOR_MEDIA_UPLOAD }
+        - { path: ^/admin/approval-workflow, roles: ROLE_SUPER_ADMIN }
+        - { path: ^/admin/approvals, roles: ROLE_SUPER_ADMIN }
         - { path: ^/admin/pages/[^/]+/delete, roles: ROLE_PAGE_DELETE }
         - { path: ^/admin/pages/media/[^/]+/delete, roles: ROLE_PAGE_DELETE }
         - { path: ^/admin/images/[^/]+/delete, roles: ROLE_MEDIA_DELETE }

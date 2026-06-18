@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\CommunityOrganization;
 use App\Entity\AdminUser;
+use App\Entity\ContentApprovalRequest;
 use App\Entity\Event;
 use App\Entity\GalleryImage;
 use App\Entity\Page;
@@ -21,12 +22,14 @@ use App\Form\SiteSettingType;
 use App\Form\SocialLinkType;
 use App\Repository\AdminUserRepository;
 use App\Repository\CommunityOrganizationRepository;
+use App\Repository\ContentApprovalRequestRepository;
 use App\Repository\EventRepository;
 use App\Repository\GalleryImageRepository;
 use App\Repository\PageMediaRepository;
 use App\Repository\PageRepository;
 use App\Repository\SiteSettingRepository;
 use App\Repository\SocialLinkRepository;
+use App\Service\ContentApprovalManager;
 use App\Service\ImageUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -46,7 +49,7 @@ class AdminController extends AbstractController
     }
 
     #[Route('', name: 'admin_dashboard')]
-    public function dashboard(PageRepository $pages, GalleryImageRepository $images, EventRepository $events, SocialLinkRepository $socialLinks, CommunityOrganizationRepository $organizations, AdminUserRepository $users): Response
+    public function dashboard(PageRepository $pages, GalleryImageRepository $images, EventRepository $events, SocialLinkRepository $socialLinks, CommunityOrganizationRepository $organizations, AdminUserRepository $users, ContentApprovalRequestRepository $approvalRequests, SiteSettingRepository $settings): Response
     {
         $galleryImages = $images->findBy([], ['position' => 'ASC']);
 
@@ -61,7 +64,84 @@ class AdminController extends AbstractController
             'socialLinks' => $socialLinks->findBy([], ['position' => 'ASC']),
             'organizations' => $organizations->findBy([], ['position' => 'ASC']),
             'users' => $users->findBy([], ['name' => 'ASC']),
+            'approvalWorkflowEnabled' => $settings->value('approval_workflow_enabled', '0') === '1',
+            'approvalRequests' => $approvalRequests->findPending(),
         ]);
+    }
+
+    #[Route('/approval-workflow/toggle', name: 'admin_approval_workflow_toggle', methods: ['POST'])]
+    public function toggleApprovalWorkflow(Request $request, EntityManagerInterface $em, SiteSettingRepository $settings): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_SUPER_ADMIN');
+
+        if (!$this->isCsrfTokenValid('toggle_approval_workflow', (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton CSRF invalide.');
+
+            return $this->redirectToRoute('admin_dashboard');
+        }
+
+        $setting = $settings->findOneBy(['settingKey' => 'approval_workflow_enabled']) ?? (new SiteSetting())->setSettingKey('approval_workflow_enabled');
+        $setting->setSettingValue($setting->getSettingValue() === '1' ? '0' : '1');
+        $em->persist($setting);
+        $em->flush();
+
+        $this->addFlash('success', $setting->getSettingValue() === '1' ? 'Validation super admin activee.' : 'Validation super admin desactivee.');
+
+        return $this->redirectToRoute('admin_dashboard');
+    }
+
+    #[Route('/approvals/{id}/approve', name: 'admin_approval_approve', methods: ['POST'])]
+    public function approveRequest(Request $request, EntityManagerInterface $em, ContentApprovalManager $approvalManager, ContentApprovalRequest $approvalRequest): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_SUPER_ADMIN');
+
+        if (!$this->isCsrfTokenValid('approve_request_'.$approvalRequest->getId(), (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton CSRF invalide.');
+
+            return $this->redirectToRoute('admin_dashboard');
+        }
+
+        try {
+            $reviewer = $this->currentAdminUser() ?? throw $this->createAccessDeniedException();
+            $approvalManager->approve($approvalRequest, $reviewer);
+            $em->flush();
+
+            if ($approvalRequest->getEntityClass() === Event::class) {
+                $archivedCount = $em->getRepository(Event::class)->archivePublishedOverflow();
+                if ($archivedCount > 0) {
+                    $em->flush();
+                }
+            }
+
+            $this->addFlash('success', 'Demande approuvee et publiee.');
+        } catch (\Throwable $exception) {
+            $this->addFlash('error', $exception->getMessage());
+        }
+
+        return $this->redirectToRoute('admin_dashboard');
+    }
+
+    #[Route('/approvals/{id}/reject', name: 'admin_approval_reject', methods: ['POST'])]
+    public function rejectRequest(Request $request, EntityManagerInterface $em, ContentApprovalManager $approvalManager, ContentApprovalRequest $approvalRequest): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_SUPER_ADMIN');
+
+        if (!$this->isCsrfTokenValid('reject_request_'.$approvalRequest->getId(), (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton CSRF invalide.');
+
+            return $this->redirectToRoute('admin_dashboard');
+        }
+
+        try {
+            $reviewer = $this->currentAdminUser() ?? throw $this->createAccessDeniedException();
+            $approvalManager->reject($approvalRequest, $reviewer);
+            $em->flush();
+            $this->addFlash('success', 'Demande rejetee.');
+        } catch (\Throwable $exception) {
+            $this->addFlash('error', $exception->getMessage());
+        }
+
+        return $this->redirectToRoute('admin_dashboard');
     }
 
     #[Route('/editor-media/upload', name: 'admin_editor_media_upload', methods: ['POST'])]
@@ -281,9 +361,21 @@ class AdminController extends AbstractController
                 $request->request->set('hero_image', $this->imageUploader->normalizeLocalImagePath((string) $request->request->get('hero_image', '')));
             }
 
+            $pendingSettings = [];
+            foreach ($fields as $key) {
+                $pendingSettings[$key] = trim((string) $request->request->get($key, ''));
+            }
+
+            if ($this->approvalRequired($em)) {
+                $this->persistApprovalRequest($em, $this->approvalManager($em)->settingsGroupRequest($pendingSettings, $this->currentAdminUser()));
+                $this->addFlash('success', 'Demande envoyee au super administrateur pour validation.');
+
+                return $this->redirectToRoute('admin_dashboard');
+            }
+
             foreach ($fields as $key) {
                 $setting = $settings->findOneBy(['settingKey' => $key]) ?? (new SiteSetting())->setSettingKey($key);
-                $setting->setSettingValue(trim((string) $request->request->get($key, '')));
+                $setting->setSettingValue($pendingSettings[$key]);
                 $em->persist($setting);
             }
 
@@ -581,6 +673,22 @@ class AdminController extends AbstractController
                 }
             }
 
+            if ($this->approvalRequired($em) && !($entity instanceof AdminUser)) {
+                $approvalManager = $this->approvalManager($em);
+                $approvalRequest = (method_exists($entity, 'getId') && $entity->getId())
+                    ? $approvalManager->updateEntityRequest($entity, $this->currentAdminUser())
+                    : $approvalManager->createEntityRequest($entity, $this->currentAdminUser());
+
+                $this->persistApprovalRequest($em, $approvalRequest);
+                $this->addFlash('success', 'Demande envoyee au super administrateur pour validation.');
+
+                if ($entity instanceof PageMedia) {
+                    return $this->redirectToRoute('admin_page_edit', ['id' => $entity->getPage()?->getId()]);
+                }
+
+                return $this->redirectToRoute($entity instanceof SiteSetting ? 'admin_settings' : 'admin_dashboard');
+            }
+
             $em->persist($entity);
             $em->flush();
 
@@ -679,6 +787,13 @@ class AdminController extends AbstractController
     {
         if (!$this->isCsrfTokenValid($tokenId, (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Jeton CSRF invalide.');
+
+            return $this->redirectToRoute($fallbackRoute);
+        }
+
+        if ($this->approvalRequired($em) && !($entity instanceof AdminUser)) {
+            $this->persistApprovalRequest($em, $this->approvalManager($em)->deleteEntityRequest($entity, $this->currentAdminUser()));
+            $this->addFlash('success', 'Demande de suppression envoyee au super administrateur pour validation.');
 
             return $this->redirectToRoute($fallbackRoute);
         }
@@ -890,6 +1005,42 @@ class AdminController extends AbstractController
         $path = trim($path);
 
         return str_starts_with($path, '/uploads/') || str_starts_with($path, '/assets/');
+    }
+
+    private function approvalRequired(EntityManagerInterface $em): bool
+    {
+        $user = $this->currentAdminUser();
+        if (!$user || $user->isSuperAdmin()) {
+            return false;
+        }
+
+        return $em->getRepository(SiteSetting::class)->value('approval_workflow_enabled', '0') === '1';
+    }
+
+    private function currentAdminUser(): ?AdminUser
+    {
+        $user = $this->getUser();
+
+        return $user instanceof AdminUser ? $user : null;
+    }
+
+    private function approvalManager(EntityManagerInterface $em): ContentApprovalManager
+    {
+        return new ContentApprovalManager($em);
+    }
+
+    private function persistApprovalRequest(EntityManagerInterface $em, ContentApprovalRequest $approvalRequest): void
+    {
+        $requestedById = $approvalRequest->getRequestedBy()?->getId();
+
+        $em->clear();
+
+        if ($requestedById) {
+            $approvalRequest->setRequestedBy($em->getReference(AdminUser::class, $requestedById));
+        }
+
+        $em->persist($approvalRequest);
+        $em->flush();
     }
 
     /**

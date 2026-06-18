@@ -50,6 +50,67 @@ La base MySQL locale ecoute sur le port `3307` de la machine hote.
 
 Le conteneur web construit automatiquement une URL MySQL locale a partir de `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` et `DB_SERVER_VERSION`.
 
+## Demo Locale Avec MySQL
+
+Pre-requis: PHP, Composer, MySQL 8 local et le client `mysql` accessibles dans le terminal.
+
+1. Installer les dependances si necessaire:
+
+```bash
+composer install
+```
+
+2. Preparer la base locale `bazma` depuis le dump inclus:
+
+```powershell
+.\scripts\local-demo-mysql.ps1
+```
+
+Si Windows bloque l'execution des scripts PowerShell:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\local-demo-mysql.ps1
+```
+
+Si MySQL utilise un mot de passe:
+
+```powershell
+.\scripts\local-demo-mysql.ps1 -DbUser root -DbPassword "mot_de_passe"
+```
+
+Avec WAMP, si `mysql` n'est pas dans le `PATH`:
+
+```powershell
+.\scripts\local-demo-mysql.ps1 -Mysql "C:\wamp64\bin\mysql\mysql8.4.7\bin\mysql.exe"
+```
+
+3. Lancer le serveur PHP integre:
+
+```bash
+php -S localhost:8000 -t public
+```
+
+Sur certaines installations Windows/WAMP, si `http://localhost:8000` coupe la connexion, lancer ou ouvrir avec l'adresse IPv4:
+
+```bash
+php -S 127.0.0.1:8000 -t public
+```
+
+Le site sera disponible sur:
+
+```text
+http://localhost:8000
+http://127.0.0.1:8000
+```
+
+La configuration locale par defaut utilise:
+
+```text
+DATABASE_URL="mysql://root:@127.0.0.1:3306/bazma?serverVersion=8.4.7&charset=utf8mb4"
+APP_ENV=prod
+APP_DEBUG=0
+```
+
 ## Deploiement Render
 
 Ce projet doit etre deploye sur Render avec le runtime `Docker`, pas avec un runtime natif. Le fichier `render.yaml` force Render a construire l'image depuis `Dockerfile`.

@@ -44,6 +44,48 @@
         </div>
     </section>
 
+    <section class="admin-content-section">
+        <div class="admin-section-head">
+            <div>
+                <p class="admin-eyebrow">Validation</p>
+                <h2>Workflow super administrateur</h2>
+            </div>
+            {% if app.user and app.user.superAdmin %}
+                <form method="post" action="{{ path('admin_approval_workflow_toggle') }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('toggle_approval_workflow') }}">
+                    <button class="button small {{ approvalWorkflowEnabled ? 'secondary-admin' : '' }}" type="submit">{{ approvalWorkflowEnabled ? 'Desactiver' : 'Activer' }}</button>
+                </form>
+            {% endif %}
+        </div>
+        <p class="admin-empty">{{ approvalWorkflowEnabled ? 'Actif: les modifications des moderateurs sont envoyees en validation avant publication.' : 'Inactif: les modifications autorisees sont appliquees directement.' }}</p>
+
+        {% if app.user and app.user.superAdmin %}
+            <div class="admin-list">
+                {% for approvalRequest in approvalRequests %}
+                    <article class="admin-item">
+                        <div class="admin-item-main">
+                            <span class="status-pill is-draft">{{ approvalRequest.action }}</span>
+                            <h3>{{ approvalRequest.entityLabel }}</h3>
+                            <p>{{ approvalRequest.entityClass|split('\\\\')|last }} · demandé par {{ approvalRequest.requestedBy ? approvalRequest.requestedBy.name : 'Compte supprime' }} · {{ approvalRequest.createdAt|date('d/m/Y H:i') }}</p>
+                        </div>
+                        <div class="admin-item-actions">
+                            <form method="post" action="{{ path('admin_approval_approve', {id: approvalRequest.id}) }}" onsubmit="return confirm('Approuver et publier cette demande ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('approve_request_' ~ approvalRequest.id) }}">
+                                <button type="submit">Approuver</button>
+                            </form>
+                            <form method="post" action="{{ path('admin_approval_reject', {id: approvalRequest.id}) }}" onsubmit="return confirm('Rejeter cette demande ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('reject_request_' ~ approvalRequest.id) }}">
+                                <button class="link-danger" type="submit">Rejeter</button>
+                            </form>
+                        </div>
+                    </article>
+                {% else %}
+                    <p class="admin-empty">Aucune demande en attente.</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </section>
+
     <section class="admin-kpis admin-kpis-pro" aria-label="Statistiques CMS">
         <div><strong>{{ pages|length }}</strong><span>Pages</span></div>
         <div><strong>{{ images|length }}</strong><span>Images WebP</span></div>
