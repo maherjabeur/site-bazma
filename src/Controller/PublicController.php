@@ -88,7 +88,7 @@ class PublicController extends AbstractController
     #[Route('/{_locale}/actualites/{slug}', name: 'app_news_show', requirements: ['_locale' => 'ar|fr|en'])]
     public function newsShow(Request $request, string $slug, EventRepository $events): Response
     {
-        $event = $events->findOneBy(['slug' => $slug, 'published' => true, 'archived' => false]);
+        $event = $events->findPublicBySlug($slug);
         if (!$event) {
             throw $this->createNotFoundException('Actualité introuvable');
         }
@@ -151,7 +151,7 @@ class PublicController extends AbstractController
             $urls[] = $this->generateUrl('app_home', ['_locale' => $locale], UrlGeneratorInterface::ABSOLUTE_URL);
             $urls[] = $this->generateUrl('app_gallery', ['_locale' => $locale], UrlGeneratorInterface::ABSOLUTE_URL);
             $urls[] = $this->generateUrl('app_donation', ['_locale' => $locale], UrlGeneratorInterface::ABSOLUTE_URL);
-            foreach ($events->findBy(['published' => true, 'archived' => false]) as $event) {
+            foreach ($events->findPublishedActive() as $event) {
                 $urls[] = $this->generateUrl('app_news_show', ['_locale' => $locale, 'slug' => $event->getSlug()], UrlGeneratorInterface::ABSOLUTE_URL);
             }
             foreach ($pages->findPublished() as $page) {

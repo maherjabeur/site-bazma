@@ -583,6 +583,14 @@ class AdminController extends AbstractController
 
             $em->persist($entity);
             $em->flush();
+
+            if ($entity instanceof Event) {
+                $archivedCount = $em->getRepository(Event::class)->archivePublishedOverflow();
+                if ($archivedCount > 0) {
+                    $em->flush();
+                    $this->addFlash('success', sprintf('%d ancienne actualite%s archivee%s automatiquement.', $archivedCount, $archivedCount > 1 ? 's' : '', $archivedCount > 1 ? 's' : ''));
+                }
+            }
             $this->addFlash('success', 'Contenu enregistré.');
 
             if ((string) $request->request->get('_action') === 'save_stay') {
