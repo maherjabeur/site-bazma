@@ -1,0 +1,96 @@
+@font-face {
+    font-family: 'Alexandria';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('fonts/alexandria-arabic-wght-normal.woff2') format('woff2');
+    unicode-range: U+0600-06FF,U+0750-077F,U+0870-089F,U+08A0-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FEFC,U+102E0-102FB,U+10E60-10E7E,U+10EC2-10EC4,U+10EFC-10EFF,U+1EE00-1EEFF;
+}
+@font-face {
+    font-family: 'Alexandria';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('fonts/alexandria-latin-wght-normal.woff2') format('woff2');
+    unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+/* Override the legacy RTL rules only on public Arabic pages. */
+html[lang="ar"] .village-site {
+    --font-arabic-body: 'Alexandria', Tahoma, Arial, sans-serif;
+    --font-arabic-heading: 'Alexandria', Tahoma, Arial, sans-serif;
+    font-family: var(--font-arabic-body);
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1.95;
+    text-align: start;
+}
+html[lang="ar"] .village-site :is(h1,h2,h3,nav,button,.button,.footer-intro > a) { font-family: var(--font-arabic-heading); letter-spacing: 0; }
+html[lang="ar"] .village-site :is(h1,h2,h3) { font-weight: 650; text-wrap: pretty; line-height: 1.65; }
+html[lang="ar"] .village-site :is(p,li) { text-align: start; }
+html[lang="ar"] .village-navigation { justify-content: flex-start; font-size: 14px; gap: 24px; }
+html[lang="ar"] .village-navigation > a { padding-block: 10px; }
+html[lang="ar"] .village-brand strong { font-size: 27px; font-weight: 700; line-height: 1.4; }
+html[lang="ar"] .village-brand small { font-size: 11px; line-height: 1.7; }
+html[lang="ar"] .village-languages { direction: ltr; }
+html[lang="ar"] .village-languages a { font-size: 12px; min-height: 40px; }
+html[lang="ar"] .village-languages a[lang="ar"] { width: 68px; font-weight: 600; }
+html[lang="ar"] .village-site .eyebrow { font-family: var(--font-arabic-body); font-size: 13px; line-height: 1.8; font-weight: 500; text-transform: none; }
+html[lang="ar"] .village-hero { height: auto; min-height: 590px; padding-block: 55px 90px; }
+html[lang="ar"] .village-hero-content { max-width: 660px; padding-bottom: 0; }
+html[lang="ar"] .village-hero h1 { font-size: 96px; line-height: 1.35; font-weight: 650; margin-bottom: 12px; }
+html[lang="ar"] .village-hero h2 { font-size: 28px; line-height: 1.75; font-weight: 550; margin-bottom: 14px; }
+html[lang="ar"] .village-hero-content > p:not(.eyebrow) { font-size: 17px; line-height: 2; max-width: 580px; }
+html[lang="ar"] .village-hero .hero-actions { justify-content: flex-start; }
+html[lang="ar"] .village-site :is(.button,.hero-gallery-link,.text-link) { font-size: 14px; font-weight: 550; line-height: 1.8; }
+html[lang="ar"] .hero-caption { font-size: 11px; line-height: 1.8; }
+html[lang="ar"] .village-ribbon { font-size: 13px; }
+html[lang="ar"] .editorial-heading { align-items: center; }
+html[lang="ar"] .editorial-heading > div { min-width: 0; max-width: 670px; }
+html[lang="ar"] .editorial-heading h2, html[lang="ar"] .village-site .gallery-toolbar h2 { font-size: 34px; line-height: 1.7; font-weight: 600; }
+html[lang="ar"] .editorial-heading > p { max-width: 380px; font-size: 16px; line-height: 2; }
+html[lang="ar"] .village-story h3, html[lang="ar"] .community-list h3 { font-size: 21px; line-height: 1.75; }
+html[lang="ar"] .village-news-item h3 { font-size: 24px; line-height: 1.7; }
+html[lang="ar"] :is(.village-story p,.village-news-item p:not(.news-meta),.community-list p) { font-size: 16px; line-height: 2; }
+html[lang="ar"] .news-meta { font-size: 12px; align-items: center; }
+html[lang="ar"] :is(time,.community-number,.story-label > span:first-child,[data-gallery-lightbox-counter]) { direction: ltr; unicode-bidi: isolate; font-variant-numeric: tabular-nums; }
+html[lang="ar"] .village-photo-grid figcaption { font-size: 15px; line-height: 1.9; }
+html[lang="ar"] .village-social-links strong { font-size: 17px; line-height: 1.8; }
+html[lang="ar"] .village-social-links small, html[lang="ar"] .community-list small { font-size: 12px; }
+html[lang="ar"] .village-team h3 { font-size: 17px; }
+html[lang="ar"] .village-team p { font-size: 14px; }
+html[lang="ar"] .village-footer .footer-intro > a { font-size: 46px; font-weight: 650; line-height: 1.6; }
+html[lang="ar"] .village-footer p { font-size: 15px; line-height: 2; }
+html[lang="ar"] .village-footer h2 { font-size: 16px; font-weight: 600; }
+html[lang="ar"] .village-footer > div:not(.footer-intro):not(.footer-bottom) > a { font-size: 14px; padding-block: 3px; }
+html[lang="ar"] .footer-bottom { font-size: 12px; }
+html[lang="ar"] .village-site .article-body h1 { font-size: 40px; line-height: 1.65; }
+html[lang="ar"] .village-site .article-body .lead { font-size: 20px; line-height: 2; }
+html[lang="ar"] .village-site .rich-text { font-size: 18px; line-height: 2.15; text-align: start; }
+html[lang="ar"] .village-site .rich-text :is(ul,ol) { padding-inline: 1.6em 0; }
+html[lang="ar"] .village-site .rich-text blockquote { margin-inline: 0; border-left: 0; border-inline-start: 3px solid var(--accent); padding-inline: 22px 0; }
+html[lang="ar"] .village-site .gallery-hero-content { margin-inline: 0; text-align: start; max-width: 720px; }
+html[lang="ar"] .village-site .gallery-hero h1 { font-size: 42px; line-height: 1.6; }
+html[lang="ar"] .village-site .gallery-hero-content p { font-size: 17px; line-height: 2; }
+html[lang="ar"] .village-site .gallery-photo figcaption strong { font-size: 17px; line-height: 1.8; }
+html[lang="ar"] .village-site .gallery-lightbox-caption strong { font-size: 19px; line-height: 1.8; }
+@media (max-width: 960px) {
+    html[lang="ar"] .editorial-heading { align-items: flex-start; }
+    html[lang="ar"] .village-navigation { gap: 6px 24px; }
+}
+@media (max-width: 600px) {
+    html[lang="ar"] .village-hero { min-height: 0; padding: 36px 24px 86px; }
+    html[lang="ar"] .village-hero h1 { font-size: 64px; }
+    html[lang="ar"] .village-hero h2 { font-size: 23px; }
+    html[lang="ar"] .village-hero-content > p:not(.eyebrow) { font-size: 16px; line-height: 1.95; }
+    html[lang="ar"] .village-hero .hero-actions { gap: 16px; }
+    html[lang="ar"] .village-hero .hero-actions a { width: auto; }
+    html[lang="ar"] .hero-caption { font-size: 10px; gap: 12px; }
+    html[lang="ar"] .village-ribbon { font-size: 12px; }
+    html[lang="ar"] .village-site .eyebrow { font-size: 12px; }
+    html[lang="ar"] .editorial-heading h2, html[lang="ar"] .village-site .gallery-toolbar h2 { font-size: 27px; }
+    html[lang="ar"] .village-site :is(.article-body h1,.gallery-hero h1) { font-size: 30px; }
+    html[lang="ar"] .village-site .article-body .lead { font-size: 18px; }
+    html[lang="ar"] .village-site .rich-text { font-size: 17px; }
+    html[lang="ar"] .village-site .gallery-toolbar { align-items: flex-start; }
+    html[lang="ar"] .village-site .gallery-lightbox-caption strong { font-size: 16px; }
+}

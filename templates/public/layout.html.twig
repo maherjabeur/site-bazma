@@ -1,6 +1,14 @@
 {% extends 'base.html.twig' %}
 {% block body_class %}village-site{% endblock %}
-{% block stylesheets %}<link rel="stylesheet" href="{{ asset('assets/village.css') }}?v=1">{% endblock %}
+{% block fonts %}
+    {% if locale == 'ar' %}
+        <link rel="preload" href="{{ asset('assets/fonts/alexandria-arabic-wght-normal.woff2') }}" as="font" type="font/woff2" crossorigin>
+    {% else %}{{ parent() }}{% endif %}
+{% endblock %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('assets/village.css') }}?v=2">
+    {% if locale == 'ar' %}<link rel="stylesheet" href="{{ asset('assets/arabic.css') }}?v=1">{% endif %}
+{% endblock %}
 {% block javascripts %}<script src="{{ asset('assets/village.js') }}?v=1" defer></script>{% endblock %}
 {% block body %}
 <a class="skip-link" href="#main-content">{{ 'village.skip'|trans }}</a>
@@ -14,7 +22,7 @@
         <a href="{{ path('app_home', {_locale: locale}) }}#associations">{{ 'nav.associations'|trans }}</a>
         <span class="village-languages" aria-label="{{ 'village.languages'|trans }}">
             {% set route = app.request.attributes.get('_route') %}{% set params = app.request.attributes.get('_route_params')|default({}) %}
-            {% for language, label in {fr: 'FR', ar: 'ع', en: 'EN'} %}<a href="{{ path(route, params|merge({_locale: language})) }}" lang="{{ language }}" hreflang="{{ language }}" {% if locale == language %}aria-current="true"{% endif %}>{{ label }}</a>{% endfor %}
+            {% for language, label in {fr: 'FR', ar: 'العربية', en: 'EN'} %}<a href="{{ path(route, params|merge({_locale: language})) }}" lang="{{ language }}" dir="{{ language == 'ar' ? 'rtl' : 'ltr' }}" hreflang="{{ language }}" aria-label="{{ {fr: 'Français', ar: 'العربية', en: 'English'}[language] }}" {% if locale == language %}aria-current="true"{% endif %}>{{ label }}</a>{% endfor %}
         </span>
     </nav>
 </header>
@@ -23,6 +31,6 @@
     <div class="footer-intro"><a href="{{ path('app_home', {_locale: locale}) }}">{{ locale == 'ar' ? 'بازمة' : 'Bazma' }}<span>.</span></a><p>{{ settings is defined ? settings.value('footer_text_' ~ locale, 'village.footer'|trans) : 'village.footer'|trans }}</p></div>
     <div><h2>{{ 'nav.discover'|trans }}</h2><a href="{{ path('app_home', {_locale: locale}) }}#decouvrir">{{ 'village.village'|trans }}</a><a href="{{ path('app_gallery', {_locale: locale}) }}">{{ 'nav.gallery'|trans }}</a><a href="{{ path('app_home', {_locale: locale}) }}#actualites">{{ 'nav.news'|trans }}</a></div>
     <div><h2>{{ 'village.together'|trans }}</h2><a href="{{ path('app_home', {_locale: locale}) }}#associations">{{ 'nav.associations'|trans }}</a><a href="{{ path('app_home', {_locale: locale}) }}#reseaux">{{ 'nav.social'|trans }}</a><a href="{{ path('app_donation', {_locale: locale}) }}">{{ 'donation.title'|trans }}</a></div>
-    <div class="footer-bottom"><span>&copy; {{ 'now'|date('Y') }} Bazma · {{ 'village.location'|trans }}</span><a href="#main-content">{{ 'village.top'|trans }} &uarr;</a></div>
+    <div class="footer-bottom"><span>&copy; <bdi>{{ 'now'|date('Y') }}</bdi> {{ locale == 'ar' ? 'بازمة' : 'Bazma' }} · {{ 'village.location'|trans }}</span><a href="#main-content">{{ 'village.top'|trans }} &uarr;</a></div>
 </footer>
 {% endblock %}

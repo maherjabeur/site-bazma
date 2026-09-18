@@ -18,6 +18,7 @@
 .village-languages { display: flex; gap: 4px; padding-inline-start: 20px; border-inline-start: 1px solid #d8e2dc; align-items: center; }
 .village-languages a { display: grid; place-items: center; width: 34px; height: 36px; font-size: 12px; }
 .village-languages a[aria-current] { background: #edf4ef; border-radius: 4px; }
+.village-languages a[lang="ar"] { width: 62px; }
 .menu-toggle { display: none; }
 .village-hero { height: min(620px, calc(100svh - 220px)); min-height: 500px; position: relative; color: #fff; display: flex; align-items: center; padding: 55px max(28px, calc((100% - 1280px) / 2)); isolation: isolate; background: #324940; }
 .village-hero-image { position: absolute; z-index: -2; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 55%; }

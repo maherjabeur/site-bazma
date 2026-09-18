@@ -1,6 +1,6 @@
 {% extends 'public/layout.html.twig' %}
 
-{% block title %}{{ event.localizedTitle(locale) }} - Bazma Kebili{% endblock %}
+{% block title %}{{ event.localizedTitle(locale) }} - {{ 'brand'|trans }}{% endblock %}
 {% block meta_description %}{{ event.localizedExcerpt(locale) }}{% endblock %}
 {% block canonical_url %}{{ url('app_news_show', {_locale: locale, slug: event.slug}) }}{% endblock %}
 {% block og_type %}article{% endblock %}
@@ -13,7 +13,7 @@
         <img class="article-hero" src="{{ event.imageUrl|webp_image }}" alt="{{ event.localizedTitle(locale) }}">
     {% endif %}
     <article class="article-body">
-        <p class="eyebrow">{{ event.category }}{% if event.eventDate %} · {{ event.eventDate|date('d/m/Y') }}{% endif %}</p>
+        <p class="eyebrow"><bdi>{{ event.category }}</bdi>{% if event.eventDate %} · <time datetime="{{ event.eventDate|date('Y-m-d') }}" dir="ltr">{{ event.eventDate|date('d/m/Y') }}</time>{% endif %}</p>
         <h1>{{ event.localizedTitle(locale) }}</h1>
         <p class="lead">{{ event.localizedExcerpt(locale) }}</p>
         <div class="rich-text">{{ event.localizedDescription(locale)|rich_content }}</div>
