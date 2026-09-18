@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends 'public/layout.html.twig' %}
 
 {% block title %}{{ 'nav.gallery'|trans }} - {{ 'brand'|trans }}{% endblock %}
 {% block meta_description %}{{ 'gallery.meta_description'|trans }}{% endblock %}
@@ -95,21 +95,10 @@
     </script>
 {% endblock %}
 
-{% block body %}
+{% block content %}
 {% set heroImage = (featuredImage ? featuredImage.imageUrl : '/assets/bazma-hero.webp')|webp_image %}
-<header class="site-header compact">
-    <a class="brand" href="{{ path('app_home', {_locale: locale}) }}">{{ 'brand'|trans }}</a>
-    <nav>
-        <a href="{{ path('app_home', {_locale: locale}) }}">{{ 'nav.home'|trans }}</a>
-        <span class="locale-switch">
-            <a class="{{ locale == 'ar' ? 'active' : '' }}" href="{{ path('app_gallery', {_locale: 'ar'}) }}">AR</a>
-            <a class="{{ locale == 'fr' ? 'active' : '' }}" href="{{ path('app_gallery', {_locale: 'fr'}) }}">FR</a>
-            <a class="{{ locale == 'en' ? 'active' : '' }}" href="{{ path('app_gallery', {_locale: 'en'}) }}">EN</a>
-        </span>
-    </nav>
-</header>
 
-<main class="gallery-page">
+<main id="main-content" class="gallery-page">
     <section class="gallery-hero" style="background-image: linear-gradient({{ locale == 'ar' ? '270deg' : '90deg' }}, rgba(19,35,29,.9), rgba(19,35,29,.34)), url('{{ heroImage }}')">
         <div class="gallery-hero-content">
             <p class="eyebrow">{{ 'nav.gallery'|trans }}</p>

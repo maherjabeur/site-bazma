@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends 'public/layout.html.twig' %}
 
 {% block title %}{{ event.localizedTitle(locale) }} - Bazma Kebili{% endblock %}
 {% block meta_description %}{{ event.localizedExcerpt(locale) }}{% endblock %}
@@ -6,17 +6,9 @@
 {% block og_type %}article{% endblock %}
 {% block og_image %}{{ absolute_url((event.imageUrl ?: '/assets/bazma-hero.webp')|webp_image) }}{% endblock %}
 
-{% block body %}
-<header class="site-header compact">
-    <a class="brand" href="{{ path('app_home', {_locale: locale}) }}">{{ 'brand'|trans }}</a>
-    <nav>
-        <a href="{{ path('app_home', {_locale: locale}) }}">{{ 'nav.home'|trans }}</a>
-        <a href="{{ path('app_gallery', {_locale: locale}) }}">{{ 'nav.gallery'|trans }}</a>
-        <a href="{{ path('app_home', {_locale: locale}) }}#actualites">{{ 'nav.news'|trans }}</a>
-    </nav>
-</header>
+{% block content %}
 
-<main class="article-page news-detail-page">
+<main id="main-content" class="article-page news-detail-page">
     {% if event.imageUrl %}
         <img class="article-hero" src="{{ event.imageUrl|webp_image }}" alt="{{ event.localizedTitle(locale) }}">
     {% endif %}

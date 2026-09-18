@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends 'public/layout.html.twig' %}
 
 {% block title %}{{ page.localizedTitle(locale) }} - {{ 'brand'|trans }}{% endblock %}
 {% block meta_description %}{{ page.localizedSummary(locale) }}{% endblock %}
@@ -17,19 +17,8 @@
 {% block og_type %}article{% endblock %}
 {% block og_image %}{{ absolute_url((page.imageUrl ?: '/assets/bazma-hero.webp')|webp_image) }}{% endblock %}
 
-{% block body %}
-<header class="site-header compact">
-    <a class="brand" href="{{ path('app_home', {_locale: locale}) }}">{{ 'brand'|trans }}</a>
-    <nav>
-        <a href="{{ path('app_gallery', {_locale: locale}) }}">{{ 'nav.gallery'|trans }}</a>
-        <span class="locale-switch">
-            <a class="{{ locale == 'ar' ? 'active' : '' }}" href="{{ canonicalRoute|default(null) ? path(canonicalRoute, {_locale: 'ar'}) : path('app_page', {_locale: 'ar', slug: page.slug}) }}">AR</a>
-            <a class="{{ locale == 'fr' ? 'active' : '' }}" href="{{ canonicalRoute|default(null) ? path(canonicalRoute, {_locale: 'fr'}) : path('app_page', {_locale: 'fr', slug: page.slug}) }}">FR</a>
-            <a class="{{ locale == 'en' ? 'active' : '' }}" href="{{ canonicalRoute|default(null) ? path(canonicalRoute, {_locale: 'en'}) : path('app_page', {_locale: 'en', slug: page.slug}) }}">EN</a>
-        </span>
-    </nav>
-</header>
-<main class="article-page">
+{% block content %}
+<main id="main-content" class="article-page">
     {% if page.imageUrl %}
         <img class="article-hero" src="{{ page.imageUrl|webp_image }}" alt="{{ page.title }}">
     {% endif %}
@@ -40,7 +29,7 @@
         <div class="rich-text">{{ page.localizedBody(locale)|rich_content }}</div>
         {% if media is defined and media|length %}
             <section class="article-media">
-                <h2>Médiathèque</h2>
+                <h2>{{ 'village.media'|trans }}</h2>
                 <div class="gallery-grid">
                     {% for item in media %}
                         <figure>

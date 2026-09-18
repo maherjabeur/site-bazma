@@ -111,7 +111,11 @@ APP_ENV=prod
 APP_DEBUG=0
 ```
 
-## Deploiement Render
+## Production sans Docker
+
+Voir [DEPLOYMENT.md](DEPLOYMENT.md) pour la configuration PHP / MySQL, les variables d'environnement et les controles avant mise en ligne.
+
+## Deploiement Render (optionnel)
 
 Ce projet doit etre deploye sur Render avec le runtime `Docker`, pas avec un runtime natif. Le fichier `render.yaml` force Render a construire l'image depuis `Dockerfile`.
 

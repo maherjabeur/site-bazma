@@ -407,6 +407,7 @@ class SeedContentCommand extends Command
 
         $this->em->persist((new Event())
             ->setTitle('Dossier associations de Bazma')
+            ->setSlug('dossier-associations-bazma')
             ->setTitleEn('Bazma associations file')
             ->setTitleAr('ملف جمعيات بازمة')
             ->setEventDate(new \DateTime('2026-06-12'))

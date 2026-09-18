@@ -1,323 +1,61 @@
-{% extends 'base.html.twig' %}
-
-{% block title %}{{ settings.value('seo_title_' ~ locale, settings.value('site_title_' ~ locale, 'brand'|trans)) }}{% endblock %}
-{% block meta_description %}{{ settings.value('seo_description_' ~ locale, settings.value('site_intro_' ~ locale, 'meta.description'|trans)) }}{% endblock %}
+{% extends 'public/layout.html.twig' %}
+{% set configuredHero = settings.value('hero_image', '') %}
+{% set heroImage = configuredHero and configuredHero not in ['/assets/bazma-hero.webp', '/assets/bazma-hero.svg'] ? configuredHero : '/uploads/galerie-508827300-24067667929588022-5905114708121139324-n-06cc27679f.webp' %}
+{% block title %}{{ settings.value('seo_title_' ~ locale, 'village.title'|trans) }}{% endblock %}
+{% block og_image %}{{ absolute_url(heroImage|webp_image) }}{% endblock %}
+{% block meta_description %}{{ settings.value('seo_description_' ~ locale, 'village.intro'|trans) }}{% endblock %}
 {% block canonical_url %}{{ url('app_home', {_locale: locale}) }}{% endblock %}
 {% block alternate_links %}
-    <link rel="alternate" hreflang="ar" href="{{ url('app_home', {_locale: 'ar'}) }}">
-    <link rel="alternate" hreflang="fr" href="{{ url('app_home', {_locale: 'fr'}) }}">
-    <link rel="alternate" hreflang="en" href="{{ url('app_home', {_locale: 'en'}) }}">
+    {% for language in ['ar', 'fr', 'en'] %}<link rel="alternate" hreflang="{{ language }}" href="{{ url('app_home', {_locale: language}) }}">{% endfor %}
     <link rel="alternate" hreflang="x-default" href="{{ url('app_home', {_locale: 'ar'}) }}">
 {% endblock %}
-{% block og_image %}{{ absolute_url(settings.value('og_image', '/assets/bazma-hero.webp')|webp_image) }}{% endblock %}
-
-{% block javascripts %}
-    {{ parent() }}
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('[data-news-carousel]').forEach((carousel) => {
-                const track = carousel.querySelector('[data-carousel-track]');
-                const slides = Array.from(carousel.querySelectorAll('[data-carousel-slide]'));
-                const dots = Array.from(carousel.querySelectorAll('[data-carousel-dot]'));
-                const previous = carousel.querySelector('[data-carousel-prev]');
-                const next = carousel.querySelector('[data-carousel-next]');
-                const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-                const interval = Number(carousel.dataset.carouselInterval || 6500);
-                let current = 0;
-                let timer = null;
-
-                if (!track || slides.length === 0) {
-                    return;
-                }
-
-                const update = () => {
-                    track.style.transform = `translate3d(${-current * 100}%, 0, 0)`;
-                    slides.forEach((slide, index) => {
-                        const active = index === current;
-                        slide.classList.toggle('is-active', active);
-                        slide.setAttribute('aria-hidden', active ? 'false' : 'true');
-                    });
-                    dots.forEach((dot, index) => {
-                        dot.classList.toggle('is-active', index === current);
-                        dot.setAttribute('aria-current', index === current ? 'true' : 'false');
-                    });
-                };
-
-                const goTo = (index) => {
-                    current = (index + slides.length) % slides.length;
-                    update();
-                };
-
-                const stopAuto = () => {
-                    if (timer) {
-                        window.clearInterval(timer);
-                        timer = null;
-                    }
-                };
-
-                const startAuto = () => {
-                    stopAuto();
-                    if (!reduceMotion && slides.length > 1) {
-                        timer = window.setInterval(() => goTo(current + 1), interval);
-                    }
-                };
-
-                const manualGoTo = (index) => {
-                    goTo(index);
-                    startAuto();
-                };
-
-                previous?.addEventListener('click', () => manualGoTo(current - 1));
-                next?.addEventListener('click', () => manualGoTo(current + 1));
-                dots.forEach((dot, index) => dot.addEventListener('click', () => manualGoTo(index)));
-                carousel.addEventListener('keydown', (event) => {
-                    if (event.key === 'ArrowLeft') {
-                        manualGoTo(document.documentElement.dir === 'rtl' ? current + 1 : current - 1);
-                    }
-                    if (event.key === 'ArrowRight') {
-                        manualGoTo(document.documentElement.dir === 'rtl' ? current - 1 : current + 1);
-                    }
-                });
-                carousel.addEventListener('pointerenter', stopAuto);
-                carousel.addEventListener('pointerleave', startAuto);
-                carousel.addEventListener('focusin', stopAuto);
-                carousel.addEventListener('focusout', startAuto);
-                document.addEventListener('visibilitychange', () => {
-                    document.hidden ? stopAuto() : startAuto();
-                });
-
-                carousel.classList.add('is-ready');
-                update();
-                startAuto();
-            });
-        });
-    </script>
-{% endblock %}
-
-{% block body %}
-<header class="site-header">
-    <a class="brand" href="{{ path('app_home', {_locale: locale}) }}">{{ settings.value('brand_' ~ locale, 'brand'|trans) }}</a>
-    <nav>
-        <a href="#decouvrir">{{ settings.value('nav_discover_' ~ locale, 'nav.discover'|trans) }}</a>
-        <a href="{{ path('app_gallery', {_locale: locale}) }}">{{ settings.value('nav_gallery_' ~ locale, 'nav.gallery'|trans) }}</a>
-        <a href="#associations">{{ settings.value('nav_associations_' ~ locale, 'nav.associations'|trans) }}</a>
-        <a href="#reseaux">{{ settings.value('nav_social_' ~ locale, 'nav.social'|trans) }}</a>
-        <a href="#actualites">{{ settings.value('nav_news_' ~ locale, 'nav.news'|trans) }}</a>
-        <span class="locale-switch">
-            <a class="{{ locale == 'ar' ? 'active' : '' }}" href="{{ path('app_home', {_locale: 'ar'}) }}">AR</a>
-            <a class="{{ locale == 'fr' ? 'active' : '' }}" href="{{ path('app_home', {_locale: 'fr'}) }}">FR</a>
-            <a class="{{ locale == 'en' ? 'active' : '' }}" href="{{ path('app_home', {_locale: 'en'}) }}">EN</a>
-        </span>
-    </nav>
-</header>
-
-<main>
-    {% set hero_primary_url = settings.value('hero_primary_url_' ~ locale, settings.value('hero_primary_url', '#decouvrir')) %}
-    {% set hero_secondary_url_locale = settings.value('hero_secondary_url_' ~ locale, '') %}
-    {% set hero_secondary_url_global = settings.value('hero_secondary_url', '') %}
-    {% set hero_secondary_url_is_gallery = hero_secondary_url_global in ['/ar/gallery', '/fr/gallery', '/en/gallery'] %}
-    {% set hero_secondary_url = hero_secondary_url_locale ?: (hero_secondary_url_is_gallery ? path('app_gallery', {_locale: locale}) : (hero_secondary_url_global ?: path('app_gallery', {_locale: locale}))) %}
-    <section class="hero" style="background-image: linear-gradient({{ locale == 'ar' ? '270deg' : '90deg' }}, rgba(22, 34, 30, .82), rgba(22, 34, 30, .28)), url('{{ settings.value('hero_image', '/assets/bazma-hero.webp')|webp_image }}')">
-        <div class="hero-content">
-            <p class="eyebrow">{{ settings.value('hero_eyebrow_' ~ locale, settings.value('hero_eyebrow', 'hero.eyebrow'|trans)) }}</p>
-            <h1>{{ settings.value('hero_title_' ~ locale, settings.value('site_title_' ~ locale, settings.value('site_title', 'Bazma, entre palmeraie et mémoire du Nefzaoua'))) }}</h1>
-            <p>{{ settings.value('hero_intro_' ~ locale, settings.value('site_intro_' ~ locale, settings.value('site_intro', 'Un site vitrine vivant pour raconter Bazma.'))) }}</p>
-            <div class="hero-actions">
-                <a class="button" href="{{ hero_primary_url }}">{{ settings.value('hero_primary_label_' ~ locale, settings.value('hero_primary_label', 'hero.explore'|trans)) }}</a>
-                <a class="button secondary" href="{{ hero_secondary_url }}">{{ settings.value('hero_secondary_label_' ~ locale, settings.value('hero_secondary_label', 'hero.images'|trans)) }}</a>
-            </div>
+{% block content %}
+<main id="main-content">
+    {% set primaryUrl = settings.value('hero_primary_url_' ~ locale, settings.value('hero_primary_url', '#decouvrir')) %}
+    {% set secondaryGlobalUrl = settings.value('hero_secondary_url', '') %}
+    {% set secondaryUrl = settings.value('hero_secondary_url_' ~ locale, '') ?: (secondaryGlobalUrl in ['', '/ar/gallery', '/fr/gallery', '/en/gallery'] ? path('app_gallery', {_locale: locale}) : secondaryGlobalUrl) %}
+    <section class="village-hero">
+        <img class="village-hero-image" src="{{ heroImage|webp_image }}" alt="{{ 'village.landscape'|trans }}" fetchpriority="high" width="1600" height="1000">
+        <div class="village-hero-content">
+            <p class="eyebrow">{{ settings.value('hero_eyebrow_' ~ locale, 'hero.eyebrow'|trans) }}</p>
+            <h1>{{ locale == 'ar' ? 'بازمة' : 'Bazma' }}<span>.</span></h1>
+            <h2>{{ settings.value('hero_title_' ~ locale, 'village.tagline'|trans) }}</h2>
+            <p>{{ settings.value('hero_intro_' ~ locale, 'village.intro'|trans) }}</p>
+            <div class="hero-actions"><a class="button" href="{{ primaryUrl }}">{{ settings.value('hero_primary_label_' ~ locale, 'village.explore'|trans) }} <span aria-hidden="true">&darr;</span></a><a class="hero-gallery-link" href="{{ secondaryUrl }}">{{ settings.value('hero_secondary_label_' ~ locale, 'hero.images'|trans) }} <span aria-hidden="true">&nearr;</span></a></div>
+        </div>
+        <div class="hero-caption"><span>01 / BAZMA</span><span>{{ 'village.memory'|trans }}</span></div>
+    </section>
+    <div class="village-ribbon"><span>{{ 'village.location'|trans }}</span><span>{{ 'village.ribbon'|trans }}</span><a href="#decouvrir">{{ 'nav.discover'|trans }} &darr;</a></div>
+    <section id="decouvrir" class="village-section">
+        <div class="editorial-heading"><div><p class="eyebrow">01 / {{ 'nav.discover'|trans }}</p><h2>{{ settings.value('home_discover_title_' ~ locale, 'village.discover_title'|trans) }}</h2></div><p>{{ 'village.discover_text'|trans }}</p></div>
+        <div class="village-stories">
+            {% for page in pages %}<article class="village-story"><a href="{{ path('app_page', {_locale: locale, slug: page.slug}) }}">
+                {% if page.imageUrl %}<div class="story-image"><img src="{{ page.imageUrl|webp_image }}" alt="{{ page.localizedTitle(locale) }}" loading="lazy" decoding="async" width="640" height="480"></div>{% endif %}
+                <div class="story-label"><span>{{ '%02d'|format(loop.index) }}</span><span aria-hidden="true">&nearr;</span></div><h3>{{ page.localizedTitle(locale) }}</h3><p>{{ page.localizedSummary(locale) }}</p>
+            </a></article>{% else %}<p class="empty-state">{{ 'village.empty_pages'|trans }}</p>{% endfor %}
         </div>
     </section>
-
-    <section class="facts">
-        <div><strong>{{ settings.value('home_fact_1_value_' ~ locale, settings.value('home_fact_1_value', '33.66583, 9.01167')) }}</strong><span>{{ settings.value('home_fact_1_label_' ~ locale, settings.value('home_fact_1_label', 'facts.coordinates'|trans)) }}</span></div>
-        <div><strong>{{ settings.value('home_fact_2_value_' ~ locale, settings.value('home_fact_2_value', '6-9 km')) }}</strong><span>{{ settings.value('home_fact_2_label_' ~ locale, settings.value('home_fact_2_label', 'facts.distance'|trans)) }}</span></div>
-        <div><strong>{{ settings.value('home_fact_3_value_' ~ locale, settings.value('home_fact_3_value', 'Oasis')) }}</strong><span>{{ settings.value('home_fact_3_label_' ~ locale, settings.value('home_fact_3_label', 'facts.oasis'|trans)) }}</span></div>
-        <div><strong>{{ settings.value('home_fact_4_value_' ~ locale, settings.value('home_fact_4_value', 'BWh')) }}</strong><span>{{ settings.value('home_fact_4_label_' ~ locale, settings.value('home_fact_4_label', 'facts.climate'|trans)) }}</span></div>
-    </section>
-
-    <section id="actualites" class="section news-band">
-        <div class="section-heading news-heading">
-            <div>
-                <p class="eyebrow">{{ settings.value('home_news_eyebrow_' ~ locale, 'section.cms_eyebrow'|trans) }}</p>
-                <h2>{{ settings.value('home_news_title_' ~ locale, 'section.cms_title'|trans) }}</h2>
-                <p>{{ settings.value('home_news_text_' ~ locale, 'section.cms_text'|trans) }}</p>
-            </div>
-        </div>
-        <div class="news-carousel" data-news-carousel data-carousel-interval="6500" tabindex="0" aria-label="{{ 'nav.news'|trans }}">
-            <div class="news-carousel-viewport">
-                <div class="news-board news-slider" data-carousel-track>
-                    {% for event in events %}
-                        <article class="news-slide" data-carousel-slide dir="{{ locale == 'ar' ? 'rtl' : 'ltr' }}">
-                            {% if event.imageUrl %}
-                                <img src="{{ event.imageUrl|webp_image }}" alt="{{ event.localizedTitle(locale) }}">
-                            {% endif %}
-                            <div class="news-slide-content">
-                                <span class="news-category">{{ event.category }}</span>
-                                <time>{{ event.eventDate ? event.eventDate|date('d/m/Y') : settings.value('planned_label_' ~ locale, 'planned'|trans) }}</time>
-                                <h3>{{ event.localizedTitle(locale) }}</h3>
-                                <p>{{ event.localizedExcerpt(locale) }}</p>
-                                <a href="{{ path('app_news_show', {_locale: locale, slug: event.slug}) }}">{{ settings.value('read_more_' ~ locale, 'read_more'|trans) }}</a>
-                            </div>
-                        </article>
-                    {% else %}
-                        <article class="news-slide is-empty" data-carousel-slide><div class="news-slide-content"><h3>{{ settings.value('no_news_' ~ locale, 'no_news'|trans) }}</h3></div></article>
-                    {% endfor %}
-                </div>
-            </div>
-            {% if events|length > 1 %}
-                <div class="news-carousel-controls">
-                    <button type="button" class="news-carousel-arrow" data-carousel-prev aria-label="{{ 'news.previous'|trans }}" title="{{ 'news.previous'|trans }}">{{ locale == 'ar' ? '›' : '‹' }}</button>
-                    <div class="news-carousel-dots" aria-label="{{ 'news.slide_navigation'|trans }}">
-                        {% for event in events %}
-                            <button type="button" data-carousel-dot aria-label="{{ 'news.slide'|trans({'%number%': loop.index}) }}"></button>
-                        {% endfor %}
-                    </div>
-                    <button type="button" class="news-carousel-arrow" data-carousel-next aria-label="{{ 'news.next'|trans }}" title="{{ 'news.next'|trans }}">{{ locale == 'ar' ? '‹' : '›' }}</button>
-                </div>
-            {% endif %}
+    <section id="actualites" class="village-section village-news">
+        <div class="editorial-heading"><div><p class="eyebrow">02 / {{ 'nav.news'|trans }}</p><h2>{{ settings.value('home_news_title_' ~ locale, 'village.news_title'|trans) }}</h2></div><p>{{ 'village.news_text'|trans }}</p></div>
+        <div class="village-news-grid">
+            {% for event in events %}<article class="village-news-item">
+                {% if event.imageUrl %}<a class="news-image" href="{{ path('app_news_show', {_locale: locale, slug: event.slug}) }}"><img src="{{ event.imageUrl|webp_image }}" alt="{{ event.localizedTitle(locale) }}" loading="lazy" decoding="async" width="640" height="400"></a>{% endif %}
+                <div><p class="news-meta"><span>{{ event.category }}</span>{% if event.eventDate %}<time datetime="{{ event.eventDate|date('Y-m-d') }}">{{ event.eventDate|date('d.m.Y') }}</time>{% endif %}</p><h3><a href="{{ path('app_news_show', {_locale: locale, slug: event.slug}) }}">{{ event.localizedTitle(locale) }}</a></h3><p>{{ event.localizedExcerpt(locale) }}</p><a class="text-link" href="{{ path('app_news_show', {_locale: locale, slug: event.slug}) }}">{{ 'read_more'|trans }} <span aria-hidden="true">&nearr;</span></a></div>
+            </article>{% else %}<p class="empty-state">{{ 'no_news'|trans }}</p>{% endfor %}
         </div>
     </section>
-
-    <section id="decouvrir" class="section">
-        <div class="section-heading">
-            <p class="eyebrow">{{ settings.value('home_discover_eyebrow_' ~ locale, 'section.discover_eyebrow'|trans) }}</p>
-            <h2>{{ settings.value('home_discover_title_' ~ locale, 'section.discover_title'|trans) }}</h2>
-        </div>
-        <div class="page-grid">
-            {% for page in pages %}
-                <article class="content-card">
-                    {% if page.imageUrl %}
-                        <img src="{{ page.imageUrl|webp_image }}" alt="{{ page.title }}">
-                    {% endif %}
-                    <div>
-                        <h3>{{ page.localizedTitle(locale) }}</h3>
-                        <p>{{ page.localizedSummary(locale) }}</p>
-                        <a href="{{ path('app_page', {_locale: locale, slug: page.slug}) }}">{{ settings.value('read_more_' ~ locale, 'read_more'|trans) }}</a>
-                    </div>
-                </article>
-            {% endfor %}
-        </div>
+    <section class="village-section village-photos">
+        <div class="editorial-heading"><div><p class="eyebrow">03 / {{ 'nav.gallery'|trans }}</p><h2>{{ settings.value('home_images_title_' ~ locale, 'village.photos_title'|trans) }}</h2></div><a class="text-link" href="{{ path('app_gallery', {_locale: locale}) }}">{{ 'village.all_photos'|trans }} &nearr;</a></div>
+        <div class="village-photo-grid">{% for image in images|slice(0, 4) %}<a href="{{ path('app_gallery', {_locale: locale}) }}"><figure><img src="{{ image.imageUrl|webp_image }}" alt="{{ image.localizedTitle(locale) }}" loading="lazy" decoding="async" width="700" height="520"><figcaption>{{ image.localizedTitle(locale) }} <span aria-hidden="true">&nearr;</span></figcaption></figure></a>{% else %}<p class="empty-state">{{ 'gallery.empty'|trans }}</p>{% endfor %}</div>
     </section>
-
-    <section class="section gallery-band">
-        <div class="section-heading">
-            <p class="eyebrow">{{ settings.value('home_images_eyebrow_' ~ locale, 'section.images_eyebrow'|trans) }}</p>
-            <h2>{{ settings.value('home_images_title_' ~ locale, 'section.images_title'|trans) }}</h2>
-        </div>
-        <div class="gallery-strip">
-            {% for image in images %}
-                <figure>
-                    <img src="{{ image.imageUrl|webp_image }}" alt="{{ image.title }}">
-                    <figcaption>{{ image.localizedTitle(locale) }}</figcaption>
-                </figure>
-            {% endfor %}
-        </div>
+    <section id="associations" class="village-section village-community">
+        <div class="editorial-heading"><div><p class="eyebrow">04 / {{ 'nav.associations'|trans }}</p><h2>{{ settings.value('home_associations_title_' ~ locale, 'village.community_title'|trans) }}</h2></div><p>{{ settings.value('home_associations_text_' ~ locale, 'village.community_text'|trans) }}</p></div>
+        <div class="community-list">{% for organization in organizations %}<article><span class="community-number">{{ '%02d'|format(loop.index) }}</span><div><small>{{ organization.type }}</small><h3>{{ organization.localizedName(locale) }}</h3><p>{{ organization.localizedDescription(locale) }}</p></div>{% if organization.url %}<a class="text-link" href="{{ organization.url }}" target="_blank" rel="noopener noreferrer">{{ 'gallery.source'|trans }} &nearr;</a>{% endif %}</article>{% else %}<p class="empty-state">{{ 'village.empty_organizations'|trans }}</p>{% endfor %}</div>
     </section>
-
-    <section id="associations" class="section organizations-band">
-        <div class="section-heading">
-            <p class="eyebrow">{{ settings.value('home_associations_eyebrow_' ~ locale, 'section.associations_eyebrow'|trans) }}</p>
-            <h2>{{ settings.value('home_associations_title_' ~ locale, 'section.associations_title'|trans) }}</h2>
-            <p>{{ settings.value('home_associations_text_' ~ locale, 'section.associations_text'|trans) }}</p>
-        </div>
-        <div class="organization-grid">
-            {% for organization in organizations %}
-                <article class="organization-card">
-                    <img src="{{ organization.imageUrl|webp_image }}" alt="{{ organization.localizedName(locale) }}">
-                    <div>
-                        <span>{{ organization.type }}</span>
-                        <h3>{{ organization.localizedName(locale) }}</h3>
-                        <p>{{ organization.localizedDescription(locale) }}</p>
-                        {% if organization.url %}
-                            <a href="{{ organization.url }}" target="_blank" rel="noreferrer">{{ settings.value('source_label_' ~ locale, 'gallery.source'|trans) }}</a>
-                        {% endif %}
-                    </div>
-                </article>
-            {% endfor %}
-        </div>
+    <section id="reseaux" class="village-section village-social">
+        <div class="editorial-heading"><div><p class="eyebrow">{{ 'village.together'|trans }}</p><h2>{{ settings.value('home_social_title_' ~ locale, 'village.social_title'|trans) }}</h2></div><p>{{ settings.value('home_social_text_' ~ locale, 'village.social_text'|trans) }}</p></div>
+        <div class="village-social-links">{% for link in socialLinks %}<a href="{{ link.url }}" target="_blank" rel="noopener noreferrer"><span><small>{{ link.platform }}</small><strong>{{ link.localizedTitle(locale) }}</strong></span><span aria-hidden="true">&nearr;</span></a>{% else %}<p>{{ 'village.empty_social'|trans }}</p>{% endfor %}</div>
     </section>
-
-    <section id="reseaux" class="section social-band">
-        <div class="section-heading">
-            <p class="eyebrow">{{ settings.value('home_social_eyebrow_' ~ locale, 'section.social_eyebrow'|trans) }}</p>
-            <h2>{{ settings.value('home_social_title_' ~ locale, 'section.social_title'|trans) }}</h2>
-            <p>{{ settings.value('home_social_text_' ~ locale, 'section.social_text'|trans) }}</p>
-        </div>
-        <div class="social-grid">
-            {% for link in socialLinks %}
-                <a class="social-card" href="{{ link.url }}" target="_blank" rel="noreferrer">
-                    <img src="{{ link.imageUrl|webp_image }}" alt="{{ link.localizedTitle(locale) }}">
-                    <div>
-                        <span>{{ link.platform }} &middot; {{ link.category }}</span>
-                        <h3>{{ link.localizedTitle(locale) }}</h3>
-                        <p>{{ link.localizedSummary(locale) }}</p>
-                    </div>
-                </a>
-            {% endfor %}
-        </div>
-    </section>
-
-    {% if teamMembers|default([])|length %}
-    <section id="equipe" class="section team-band">
-        <div class="section-heading">
-            <p class="eyebrow">{{ settings.value('home_team_eyebrow_' ~ locale, 'team.eyebrow'|trans) }}</p>
-            <h2>{{ settings.value('home_team_title_' ~ locale, 'team.title'|trans) }}</h2>
-            <p>{{ settings.value('home_team_text_' ~ locale, 'team.text'|trans) }}</p>
-        </div>
-        <div class="team-grid">
-            {% for member in teamMembers %}
-                {% set roleLabel = member.superAdmin ? 'team.creator'|trans : 'team.moderator'|trans %}
-                {% if member.facebookUrl %}
-                    <a class="team-card" href="{{ member.facebookUrl }}" target="_blank" rel="noreferrer">
-                {% else %}
-                    <article class="team-card">
-                {% endif %}
-                    <div class="team-photo">
-                        {% if member.profileImageUrl %}
-                            <img src="{{ member.profileImageUrl|webp_image }}" alt="{{ member.name ?: member.email }}">
-                        {% else %}
-                            <span>{{ member.initials }}</span>
-                        {% endif %}
-                    </div>
-                    <div class="team-card-body">
-                        <span>{{ roleLabel }}</span>
-                        <h3>{{ member.name ?: member.email }}</h3>
-                        <p>{{ member.profession ?: 'team.default_profession'|trans }}</p>
-                        {% if member.facebookUrl %}
-                            <strong>{{ 'team.facebook'|trans }}</strong>
-                        {% endif %}
-                    </div>
-                {% if member.facebookUrl %}
-                    </a>
-                {% else %}
-                    </article>
-                {% endif %}
-            {% endfor %}
-        </div>
-    </section>
-    {% endif %}
+    {% if teamMembers|default([])|length %}<section class="village-section"><div class="editorial-heading"><div><p class="eyebrow">{{ 'team.eyebrow'|trans }}</p><h2>{{ settings.value('home_team_title_' ~ locale, 'team.title'|trans) }}</h2></div><p>{{ settings.value('home_team_text_' ~ locale, 'team.text'|trans) }}</p></div><div class="village-team">{% for member in teamMembers %}<article>{% if member.profileImageUrl %}<img src="{{ member.profileImageUrl|webp_image }}" alt="{{ member.name }}" loading="lazy" width="80" height="80">{% endif %}<div><h3>{{ member.name ?: member.initials }}</h3><p>{{ member.profession ?: 'team.moderator'|trans }}</p>{% if member.facebookUrl %}<a class="text-link" href="{{ member.facebookUrl }}" target="_blank" rel="noopener noreferrer">{{ 'team.facebook'|trans }} &nearr;</a>{% endif %}</div></article>{% endfor %}</div></section>{% endif %}
 </main>
-
-<footer>
-    <div class="footer-brand">
-        <strong>{{ settings.value('brand_' ~ locale, 'brand'|trans) }}</strong>
-        <p>{{ settings.value('footer_text_' ~ locale, 'footer.text'|trans) }}</p>
-    </div>
-    <a class="footer-donation" href="{{ path('app_donation', {_locale: locale}) }}">
-        <span>{{ 'donation.eyebrow'|trans }}</span>
-        <strong>{{ 'donation.title'|trans }}</strong>
-        <p>{{ 'donation.text'|trans }}</p>
-    </a>
-    <nav class="footer-links">
-        <a href="{{ path('app_home', {_locale: locale}) }}">{{ settings.value('nav_home_' ~ locale, 'nav.home'|trans) }}</a>
-        <a href="{{ path('app_gallery', {_locale: locale}) }}">{{ settings.value('nav_gallery_' ~ locale, 'nav.gallery'|trans) }}</a>
-        <a href="#associations">{{ settings.value('nav_associations_' ~ locale, 'nav.associations'|trans) }}</a>
-        <a href="#reseaux">{{ settings.value('nav_social_' ~ locale, 'nav.social'|trans) }}</a>
-        <a href="#actualites">{{ settings.value('nav_news_' ~ locale, 'nav.news'|trans) }}</a>
-        <a class="{{ locale == 'ar' ? 'active' : '' }}" href="{{ path('app_home', {_locale: 'ar'}) }}">AR</a>
-        <a class="{{ locale == 'fr' ? 'active' : '' }}" href="{{ path('app_home', {_locale: 'fr'}) }}">FR</a>
-        <a class="{{ locale == 'en' ? 'active' : '' }}" href="{{ path('app_home', {_locale: 'en'}) }}">EN</a>
-    </nav>
-</footer>
 {% endblock %}
