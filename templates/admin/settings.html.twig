@@ -1,22 +1,12 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/layout.html.twig' %}
 
 {% block title %}Paramètres CMS - Bazma Kebili{% endblock %}
 {% block html_lang %}fr{% endblock %}
 {% block html_dir %}ltr{% endblock %}
-{% block body_class %}admin-surface{% endblock %}
+
 {% block meta_robots %}noindex,nofollow{% endblock %}
 
-{% block body %}
-<header class="admin-header admin-header-pro">
-    <a class="brand" href="{{ path('admin_dashboard') }}">CMS Bazma</a>
-    <nav>
-        <a href="{{ path('admin_dashboard') }}">Tableau de bord</a>
-        <a href="{{ path('admin_home_settings') }}">Accueil</a>
-        <a href="{{ path('admin_setting_new') }}">Ajouter</a>
-        <a href="{{ path('admin_profile') }}">Mon profil</a>
-        <a href="{{ path('app_logout') }}">Déconnexion</a>
-    </nav>
-</header>
+{% block workspace %}
 
 <main class="admin-layout admin-workspace">
     {% set successMessages = app.flashes('success') %}
@@ -31,16 +21,15 @@
     <section class="admin-hero-panel">
         <div>
             <p class="admin-eyebrow">Référencement et global</p>
-            <h1>Paramètres avancés.</h1>
-            <p>Cette page sert aux réglages techniques: référencement, partage social, pied de page et clés globales. L’accueil a son écran simple dédié.</p>
+            <h1>Paramètres du site</h1>
         </div>
         <div class="admin-quick-actions">
-            <a class="button" href="{{ path('admin_home_settings') }}">Modifier l’accueil</a>
+            {% if is_granted('ROLE_HOME_MANAGER') %}<a class="button" href="{{ path('admin_home_settings') }}">Modifier l’accueil</a>{% endif %}
             <a class="button secondary-admin" href="{{ path('admin_setting_new') }}">Nouveau paramètre</a>
         </div>
     </section>
 
-    <section class="admin-content-section">
+    <section class="admin-content-section" data-cms-list>
         <div class="admin-section-head">
             <div>
                 <p class="admin-eyebrow">Clés utiles</p>
@@ -53,12 +42,18 @@
             <span>og_image</span>
             <span>footer_text_ar/fr/en</span>
         </div>
+        {% include 'admin/list_tools.html.twig' %}
         <div class="admin-list">
             {% for setting in settings %}
+                {% set key = setting.settingKey %}
+                {% set language = key|split('_')|last %}
+                {% set baseKey = language in ['fr', 'ar', 'en'] ? key|slice(0, -3) : key %}
+                {% set labels = {seo_title: 'Titre dans les moteurs de recherche', seo_description: 'Description dans les moteurs de recherche', og_image: 'Image de partage', footer_text: 'Texte du pied de page', site_title: 'Titre du site', site_intro: 'Présentation du village', brand: 'Nom du site', approval_workflow_enabled: 'Validation avant publication'} %}
+                {% set category = key starts with 'seo_' ? 'Référencement' : (key starts with 'footer_' ? 'Pied de page' : (key starts with 'og_' ? 'Partage' : 'Général')) %}
                 <article class="admin-item">
                     <div class="admin-item-main">
-                        <span class="status-pill">Paramètre</span>
-                        <h3>{{ setting.settingKey }}</h3>
+                        <span class="status-pill">{{ category }}</span>
+                        <h3>{{ attribute(labels, baseKey)|default(baseKey|replace({'_': ' '})|capitalize) }}{% if language in ['fr', 'ar', 'en'] %} · {{ {fr: 'Français', ar: 'Arabe', en: 'Anglais'}[language] }}{% endif %}</h3>
                         <p>{{ setting.settingValue|slice(0, 140) }}{% if setting.settingValue|length > 140 %}...{% endif %}</p>
                     </div>
                     <div class="admin-item-actions">

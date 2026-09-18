@@ -20,7 +20,7 @@ class PageType extends AbstractType
             ->add('title', TextType::class, ['label' => 'Titre FR'])
             ->add('titleEn', TextType::class, ['label' => 'Titre EN', 'required' => false])
             ->add('titleAr', TextType::class, ['label' => 'Titre AR', 'required' => false, 'attr' => ['dir' => 'rtl']])
-            ->add('slug', TextType::class, ['label' => 'Slug public', 'help' => $options['protected_page'] ? 'Adresse protégée pour cette page système.' : 'Exemple: histoire-bazma', 'disabled' => $options['protected_page']])
+            ->add('slug', TextType::class, ['label' => 'Adresse de la page', 'help' => $options['protected_page'] ? 'Adresse protégée pour cette page système.' : 'Exemple: histoire-bazma', 'disabled' => $options['protected_page']])
             ->add('summary', TextType::class, ['label' => 'Résumé FR'])
             ->add('summaryEn', TextType::class, ['label' => 'Résumé EN', 'required' => false])
             ->add('summaryAr', TextType::class, ['label' => 'Résumé AR', 'required' => false, 'attr' => ['dir' => 'rtl']])

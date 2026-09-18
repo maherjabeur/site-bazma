@@ -1,21 +1,12 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/layout.html.twig' %}
 
 {% block title %}Accueil - CMS Bazma{% endblock %}
 {% block html_lang %}fr{% endblock %}
 {% block html_dir %}ltr{% endblock %}
-{% block body_class %}admin-surface{% endblock %}
+
 {% block meta_robots %}noindex,nofollow{% endblock %}
 
-{% block body %}
-<header class="admin-header admin-header-pro">
-    <a class="brand" href="{{ path('admin_dashboard') }}">CMS Bazma</a>
-    <nav>
-        <a href="{{ path('admin_dashboard') }}">Tableau de bord</a>
-        <a href="{{ path('app_home', {_locale: 'fr'}) }}">Voir l’accueil</a>
-        <a href="{{ path('admin_profile') }}">Mon profil</a>
-        <a href="{{ path('app_logout') }}">Déconnexion</a>
-    </nav>
-</header>
+{% block workspace %}
 
 <main class="admin-layout admin-editor-layout">
     {% set successMessages = app.flashes('success') %}
@@ -29,8 +20,8 @@
 
     <aside class="admin-editor-aside">
         <p class="admin-eyebrow">Page d’accueil</p>
-        <h1>Grande image et textes du bandeau.</h1>
-        <p>Modifiez seulement ce que le visiteur voit en haut de la page: image, titre, introduction et boutons.</p>
+        <h1>Page d’accueil</h1>
+
         <a href="{{ path('app_home', {_locale: 'fr'}) }}">Prévisualiser le site</a>
     </aside>
 
@@ -67,7 +58,7 @@
 
                 {% set locales = {fr: 'Français', en: 'Anglais', ar: 'Arabe'} %}
                 {% for code, label in locales %}
-                    <fieldset class="locale-editor {{ code == 'ar' ? 'is-rtl' : '' }}">
+                    <fieldset data-cms-locale="{{ code }}" class="locale-editor {{ code == 'ar' ? 'is-rtl' : '' }}">
                         <legend>{{ label }}</legend>
                         <div class="admin-field">
                             <label for="hero_eyebrow_{{ code }}">Petit texte</label>

@@ -1,21 +1,12 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/layout.html.twig' %}
 
 {% block title %}Modérateurs - CMS Bazma{% endblock %}
 {% block html_lang %}fr{% endblock %}
 {% block html_dir %}ltr{% endblock %}
-{% block body_class %}admin-surface{% endblock %}
+
 {% block meta_robots %}noindex,nofollow{% endblock %}
 
-{% block body %}
-<header class="admin-header admin-header-pro">
-    <a class="brand" href="{{ path('admin_dashboard') }}">CMS Bazma</a>
-    <nav>
-        <a href="{{ path('admin_dashboard') }}">Tableau de bord</a>
-        <a href="{{ path('admin_user_new') }}">Ajouter</a>
-        <a href="{{ path('admin_profile') }}">Mon profil</a>
-        <a href="{{ path('app_logout') }}">Déconnexion</a>
-    </nav>
-</header>
+{% block workspace %}
 
 <main class="admin-layout admin-workspace">
     {% set successMessages = app.flashes('success') %}
@@ -30,13 +21,13 @@
     <section class="admin-hero-panel">
         <div>
             <p class="admin-eyebrow">Équipe CMS</p>
-            <h1>Modérateurs et permissions.</h1>
-            <p>Créez des accès limités par section, avec des droits séparés pour les actions sensibles comme la suppression.</p>
+            <h1>Équipe et accès</h1>
         </div>
         <a class="button" href="{{ path('admin_user_new') }}">Nouveau modérateur</a>
     </section>
 
-    <section class="admin-content-section">
+    <section class="admin-content-section" data-cms-list>
+        {% include 'admin/list_tools.html.twig' %}
         <div class="admin-list">
             {% for user in users %}
                 <article class="admin-item">

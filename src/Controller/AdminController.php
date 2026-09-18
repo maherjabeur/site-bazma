@@ -49,11 +49,20 @@ class AdminController extends AbstractController
     }
 
     #[Route('', name: 'admin_dashboard')]
-    public function dashboard(PageRepository $pages, GalleryImageRepository $images, EventRepository $events, SocialLinkRepository $socialLinks, CommunityOrganizationRepository $organizations, AdminUserRepository $users, ContentApprovalRequestRepository $approvalRequests, SiteSettingRepository $settings): Response
+    public function dashboard(Request $request, PageRepository $pages, GalleryImageRepository $images, EventRepository $events, SocialLinkRepository $socialLinks, CommunityOrganizationRepository $organizations, AdminUserRepository $users, ContentApprovalRequestRepository $approvalRequests, SiteSettingRepository $settings): Response
     {
+        $section = $request->query->getString('section', 'overview');
+        $sectionRoles = ['pages' => 'ROLE_PAGE_MANAGER', 'images' => 'ROLE_MEDIA_MANAGER', 'events' => 'ROLE_NEWS_MANAGER', 'organizations' => 'ROLE_ORGANIZATION_MANAGER', 'social' => 'ROLE_SOCIAL_MANAGER', 'approvals' => 'ROLE_SUPER_ADMIN'];
+        if ($section !== 'overview') {
+            if (!isset($sectionRoles[$section])) {
+                throw $this->createNotFoundException();
+            }
+            $this->denyAccessUnlessGranted($sectionRoles[$section]);
+        }
         $galleryImages = $images->findBy([], ['position' => 'ASC']);
 
         return $this->render('admin/dashboard.html.twig', [
+            'currentSection' => $section,
             'pages' => $pages->findBy([], ['position' => 'ASC']),
             'images' => $galleryImages,
             'galleryStats' => [
@@ -65,7 +74,7 @@ class AdminController extends AbstractController
             'organizations' => $organizations->findBy([], ['position' => 'ASC']),
             'users' => $users->findBy([], ['name' => 'ASC']),
             'approvalWorkflowEnabled' => $settings->value('approval_workflow_enabled', '0') === '1',
-            'approvalRequests' => $approvalRequests->findPending(),
+            'approvalRequests' => $this->isGranted('ROLE_SUPER_ADMIN') ? $approvalRequests->findPending() : [],
         ]);
     }
 
@@ -686,7 +695,7 @@ class AdminController extends AbstractController
                     return $this->redirectToRoute('admin_page_edit', ['id' => $entity->getPage()?->getId()]);
                 }
 
-                return $this->redirectToRoute($entity instanceof SiteSetting ? 'admin_settings' : 'admin_dashboard');
+                return $this->redirectToRoute($entity instanceof SiteSetting ? 'admin_settings' : 'admin_dashboard', $entity instanceof SiteSetting ? [] : $this->dashboardParams($entity));
             }
 
             $em->persist($entity);
@@ -709,15 +718,27 @@ class AdminController extends AbstractController
                 return $this->redirectToRoute('admin_page_edit', ['id' => $entity->getPage()?->getId()]);
             }
 
-            return $this->redirectToRoute($entity instanceof SiteSetting ? 'admin_settings' : 'admin_dashboard');
+            return $this->redirectToRoute($entity instanceof SiteSetting ? 'admin_settings' : 'admin_dashboard', $entity instanceof SiteSetting ? [] : $this->dashboardParams($entity));
         }
 
         return $this->render('admin/form.html.twig', [
             'form' => $form,
             'entity' => $entity,
-            'context' => $this->getFormContext($entity),
+            'context' => $this->getFormContext($entity) + ['backParams' => $this->dashboardParams($entity)],
             'editorMediaLibrary' => $this->getEditorMediaLibrary($em, $entity),
         ] + $extra);
+    }
+
+    private function dashboardParams(object $entity): array
+    {
+        return ['section' => match (true) {
+            $entity instanceof Page, $entity instanceof PageMedia => 'pages',
+            $entity instanceof GalleryImage => 'images',
+            $entity instanceof Event => 'events',
+            $entity instanceof CommunityOrganization => 'organizations',
+            $entity instanceof SocialLink => 'social',
+            default => 'overview',
+        }];
     }
 
     private function redirectToStayRoute(object $entity): Response
@@ -788,18 +809,18 @@ class AdminController extends AbstractController
         if (!$this->isCsrfTokenValid($tokenId, (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Jeton CSRF invalide.');
 
-            return $this->redirectToRoute($fallbackRoute);
+            return $this->redirectToRoute($fallbackRoute, $fallbackRoute === 'admin_dashboard' ? $this->dashboardParams($entity) : []);
         }
 
         if ($this->approvalRequired($em) && !($entity instanceof AdminUser)) {
             $this->persistApprovalRequest($em, $this->approvalManager($em)->deleteEntityRequest($entity, $this->currentAdminUser()));
             $this->addFlash('success', 'Demande de suppression envoyee au super administrateur pour validation.');
 
-            return $this->redirectToRoute($fallbackRoute);
+            return $this->redirectToRoute($fallbackRoute, $fallbackRoute === 'admin_dashboard' ? $this->dashboardParams($entity) : []);
         }
 
         $redirectRoute = $fallbackRoute;
-        $redirectParams = [];
+        $redirectParams = $fallbackRoute === 'admin_dashboard' ? $this->dashboardParams($entity) : [];
         if ($entity instanceof PageMedia && $entity->getPage()) {
             $redirectRoute = 'admin_page_edit';
             $redirectParams = ['id' => $entity->getPage()->getId()];

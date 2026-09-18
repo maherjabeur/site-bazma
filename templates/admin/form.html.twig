@@ -1,9 +1,9 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/layout.html.twig' %}
 
 {% block title %}{{ context.title }} - CMS Bazma{% endblock %}
 {% block html_lang %}fr{% endblock %}
 {% block html_dir %}ltr{% endblock %}
-{% block body_class %}admin-surface{% endblock %}
+
 {% block meta_robots %}noindex,nofollow{% endblock %}
 
 {% block javascripts %}
@@ -46,19 +46,22 @@
                 header.className = 'wysiwyg-header';
                 header.innerHTML = `
                     <div>
-                        <strong>Éditeur de contenu</strong>
-                        <span>Texte, liens, listes, citations et médias</span>
+                        <strong>Contenu</strong>
                     </div>
                     <button type="button" data-source-toggle="true">Code HTML</button>
                 `;
 
+                const mediaDetails = document.createElement('details');
+                mediaDetails.className = 'cms-media-options';
+                const mediaSummary = document.createElement('summary');
+                mediaSummary.textContent = 'Options des médias';
                 const mediaOptions = document.createElement('div');
                 mediaOptions.className = 'wysiwyg-media-options';
                 mediaOptions.innerHTML = `
                     <label>Largeur max <input type="number" min="200" max="3200" step="50" value="1600" data-media-width></label>
                     <label>Hauteur max <input type="number" min="200" max="3200" step="50" value="1100" data-media-height></label>
-                    <span>Appliqué aux images importées. Les vidéos sont ajoutées sans conversion.</span>
                 `;
+                mediaDetails.append(mediaSummary, mediaOptions);
 
                 const resizeBar = document.createElement('div');
                 resizeBar.className = 'wysiwyg-resize-bar';
@@ -83,29 +86,29 @@
                 const toolbar = document.createElement('div');
                 toolbar.className = 'wysiwyg-toolbar';
                 toolbar.innerHTML = `
-                    <button type="button" data-command="undo" title="Annuler">Annuler</button>
-                    <button type="button" data-command="redo" title="Rétablir">Rétablir</button>
+                    <button type="button" data-command="undo" aria-label="Annuler" title="Annuler" class="cms-editor-icon"><img src="/assets/icons/undo-2.svg" alt=""></button>
+                    <button type="button" data-command="redo" aria-label="Rétablir" title="Rétablir" class="cms-editor-icon"><img src="/assets/icons/redo-2.svg" alt=""></button>
                     <span class="wysiwyg-separator"></span>
                     <button type="button" data-block="p">P</button>
                     <button type="button" data-block="h2">H2</button>
                     <button type="button" data-block="h3">H3</button>
                     <button type="button" data-block="h4">H4</button>
                     <span class="wysiwyg-separator"></span>
-                    <button type="button" data-command="bold"><strong>B</strong></button>
-                    <button type="button" data-command="italic"><em>I</em></button>
-                    <button type="button" data-command="underline"><u>U</u></button>
+                    <button type="button" data-command="bold" aria-label="Gras" title="Gras" class="cms-editor-icon"><img src="/assets/icons/bold.svg" alt=""></button>
+                    <button type="button" data-command="italic" aria-label="Italique" title="Italique" class="cms-editor-icon"><img src="/assets/icons/italic.svg" alt=""></button>
+                    <button type="button" data-command="underline" aria-label="Souligner" title="Souligner" class="cms-editor-icon"><img src="/assets/icons/underline.svg" alt=""></button>
                     <span class="wysiwyg-separator"></span>
-                    <button type="button" data-command="insertUnorderedList">Liste</button>
-                    <button type="button" data-command="insertOrderedList">1.</button>
-                    <button type="button" data-command="formatBlock" data-value="blockquote">Citation</button>
-                    <button type="button" data-command="justifyLeft">Gauche</button>
-                    <button type="button" data-command="justifyCenter">Centre</button>
+                    <button type="button" data-command="insertUnorderedList" aria-label="Liste à puces" title="Liste à puces" class="cms-editor-icon"><img src="/assets/icons/list.svg" alt=""></button>
+                    <button type="button" data-command="insertOrderedList" aria-label="Liste numérotée" title="Liste numérotée" class="cms-editor-icon"><img src="/assets/icons/list-ordered.svg" alt=""></button>
+                    <button type="button" data-command="formatBlock" data-value="blockquote" aria-label="Citation" title="Citation" class="cms-editor-icon"><img src="/assets/icons/quote.svg" alt=""></button>
+                    <button type="button" data-command="justifyLeft" aria-label="Aligner à gauche" title="Aligner à gauche" class="cms-editor-icon"><img src="/assets/icons/align-left.svg" alt=""></button>
+                    <button type="button" data-command="justifyCenter" aria-label="Centrer" title="Centrer" class="cms-editor-icon"><img src="/assets/icons/align-center.svg" alt=""></button>
                     <span class="wysiwyg-separator"></span>
                     <button type="button" data-link="true">Lien</button>
                     <button type="button" data-media-upload="true">Importer un média</button>
                     <button type="button" data-library-toggle="true">Médiathèque</button>
                     <button type="button" data-image-url="true">Image par adresse</button>
-                    <button type="button" data-command="removeFormat">Nettoyer</button>
+                    <button type="button" data-command="removeFormat" aria-label="Effacer la mise en forme" title="Effacer la mise en forme" class="cms-editor-icon"><img src="/assets/icons/remove-formatting.svg" alt=""></button>
                 `;
 
                 const library = document.createElement('div');
@@ -124,6 +127,9 @@
                 const editor = document.createElement('div');
                 editor.className = 'wysiwyg-editor';
                 editor.contentEditable = 'true';
+                editor.setAttribute('role', 'textbox');
+                editor.setAttribute('aria-multiline', 'true');
+                editor.setAttribute('aria-label', textarea.closest('.admin-field').querySelector('label')?.textContent || 'Contenu');
                 editor.dir = textarea.getAttribute('dir') || 'ltr';
                 editor.innerHTML = toHtml(textarea.value);
 
@@ -141,7 +147,11 @@
                 let selectedFigure = null;
 
                 const sync = () => {
-                    textarea.value = source.hidden ? editor.innerHTML.trim() : source.value.trim();
+                    const value = source.hidden ? editor.innerHTML.trim() : source.value.trim();
+                    if (textarea.value !== value) {
+                        textarea.value = value;
+                        textarea.form?.dispatchEvent(new Event('cms:changed'));
+                    }
                 };
 
                 const insertImage = (url, alt = '') => {
@@ -380,7 +390,7 @@
                 textarea.form?.addEventListener('submit', sync);
                 textarea.classList.add('wysiwyg-hidden');
                 textarea.after(wrapper);
-                wrapper.append(header, mediaOptions, resizeBar, toolbar, library, editor, source, mediaInput);
+                wrapper.append(header, toolbar, resizeBar, library, editor, source, mediaDetails, mediaInput);
             });
 
             document.querySelectorAll('[data-image-url-preview]').forEach((input) => {
@@ -425,16 +435,7 @@
     </script>
 {% endblock %}
 
-{% block body %}
-<header class="admin-header admin-header-pro">
-    <a class="brand" href="{{ path('admin_dashboard') }}">CMS Bazma</a>
-    <nav>
-        <a href="{{ path(context.backRoute, context.backParams|default({})) }}">Retour</a>
-        <a href="{{ path('app_home', {_locale: 'ar'}) }}">Voir le site</a>
-        <a href="{{ path('admin_profile') }}">Mon profil</a>
-        <a href="{{ path('app_logout') }}">Déconnexion</a>
-    </nav>
-</header>
+{% block workspace %}
 
 <main class="admin-layout admin-editor-layout">
     {% set successMessages = app.flashes('success') %}
@@ -449,14 +450,7 @@
     <aside class="admin-editor-aside">
         <p class="admin-eyebrow">{{ context.section }}</p>
         <h1>{{ context.title }}</h1>
-        <p>{{ context.hint }}</p>
-        {% if context.tips is defined %}
-            <ul class="admin-editor-tips">
-                {% for tip in context.tips %}
-                    <li>{{ tip }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
+
         <a href="{{ path(context.backRoute, context.backParams|default({})) }}">Annuler et revenir</a>
     </aside>
 
@@ -491,7 +485,7 @@
                         {% set isFile = 'file' in child.vars.block_prefixes %}
                         {% set isImageUrl = child.vars.name in ['imageUrl', 'profileImageUrl'] %}
                         {% set isExpandedChoice = child.vars.expanded|default(false) %}
-                        <div class="admin-field {{ 'checkbox' in child.vars.block_prefixes ? 'admin-field-check' : '' }} {{ isFile ? 'upload-field admin-field-wide' : '' }} {{ (isRichField or isTextarea or isImageUrl or isExpandedChoice) ? 'admin-field-wide' : '' }} {{ isRichField ? 'admin-field-rich' : '' }} {{ (isExpandedChoice and child.vars.name != 'roles') ? 'admin-choice-grid' : '' }} {{ child.vars.name == 'roles' ? 'admin-permissions-field' : '' }}">
+                        <div data-cms-locale="{{ child.vars.name ends with 'En' ? 'en' : (child.vars.name ends with 'Ar' ? 'ar' : (attribute(form, child.vars.name ~ 'En') is defined ? 'fr' : '')) }}" class="admin-field {{ 'checkbox' in child.vars.block_prefixes ? 'admin-field-check' : '' }} {{ isFile ? 'upload-field admin-field-wide' : '' }} {{ (isRichField or isTextarea or isImageUrl or isExpandedChoice) ? 'admin-field-wide' : '' }} {{ isRichField ? 'admin-field-rich' : '' }} {{ (isExpandedChoice and child.vars.name != 'roles') ? 'admin-choice-grid' : '' }} {{ child.vars.name == 'roles' ? 'admin-permissions-field' : '' }}">
                             {{ form_label(child) }}
                             {% if child.vars.name == 'roles' %}
                                 <div class="admin-permission-list">

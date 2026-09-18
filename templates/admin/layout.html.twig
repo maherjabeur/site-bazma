@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+{% block html_lang %}fr{% endblock %}
+{% block html_dir %}ltr{% endblock %}
+{% block body_class %}admin-surface cms{% endblock %}
+{% block meta_robots %}noindex,nofollow{% endblock %}
+{% block stylesheets %}<link rel="stylesheet" href="{{ asset('assets/cms.css') }}?v=1">{% endblock %}
+{% block javascripts %}<script src="{{ asset('assets/cms.js') }}?v=1" defer></script>{% endblock %}
+{% block body %}
+{% set route = app.request.attributes.get('_route') %}
+{% set section = currentSection|default('') %}
+<a class="cms-skip" href="#cms-main">Aller au contenu</a>
+<aside class="cms-sidebar" id="cms-sidebar">
+    <a class="cms-brand" href="{{ path('admin_dashboard') }}"><span>B.</span><div><strong>Bazma</strong><small>Administration</small></div></a>
+    <nav aria-label="Administration">
+        <a href="{{ path('admin_dashboard') }}" {% if route == 'admin_dashboard' and section == 'overview' %}aria-current="page"{% endif %}><img src="/assets/icons/layout-dashboard.svg" alt="">Vue d’ensemble</a>
+        <p>Contenus</p>
+        {% for item in [
+            {key: 'events', prefix: 'admin_event_', label: 'Actualités', role: 'ROLE_NEWS_MANAGER', icon: 'newspaper'},
+            {key: 'pages', prefix: 'admin_page_', label: 'Pages du village', role: 'ROLE_PAGE_MANAGER', icon: 'files'},
+            {key: 'images', prefix: 'admin_image_', label: 'Médiathèque', role: 'ROLE_MEDIA_MANAGER', icon: 'images'},
+            {key: 'organizations', prefix: 'admin_organization_', label: 'Associations', role: 'ROLE_ORGANIZATION_MANAGER', icon: 'users'},
+            {key: 'social', prefix: 'admin_social_', label: 'Réseaux sociaux', role: 'ROLE_SOCIAL_MANAGER', icon: 'link'}
+        ] %}{% if is_granted(item.role) %}<a href="{{ path('admin_dashboard', {section: item.key}) }}" {% if section == item.key or route starts with item.prefix %}aria-current="page"{% endif %}><img src="/assets/icons/{{ item.icon }}.svg" alt="">{{ item.label }}</a>{% endif %}{% endfor %}
+        <p>Site et équipe</p>
+        {% for item in [
+            {route: 'admin_home_settings', label: 'Page d’accueil', role: 'ROLE_HOME_MANAGER', icon: 'house'},
+            {route: 'admin_settings', label: 'Paramètres', role: 'ROLE_SETTINGS_MANAGER', icon: 'settings'},
+            {route: 'admin_users', label: 'Équipe et accès', role: 'ROLE_USER_MANAGER', icon: 'shield-check'}
+        ] %}{% if is_granted(item.role) %}<a href="{{ path(item.route) }}" {% if route == item.route or (item.route == 'admin_users' and route starts with 'admin_user_') or (item.route == 'admin_settings' and route starts with 'admin_setting_') %}aria-current="page"{% endif %}><img src="/assets/icons/{{ item.icon }}.svg" alt="">{{ item.label }}</a>{% endif %}{% endfor %}
+        {% if is_granted('ROLE_SUPER_ADMIN') %}<a href="{{ path('admin_dashboard', {section: 'approvals'}) }}" {% if section == 'approvals' %}aria-current="page"{% endif %}><img src="/assets/icons/clipboard-check.svg" alt="">Validations</a>{% endif %}
+    </nav>
+    <div class="cms-account"><a href="{{ path('admin_profile') }}"><img src="/assets/icons/user.svg" alt=""><span>{{ app.user.name ?: 'Mon profil' }}</span></a><a href="{{ path('app_logout') }}" title="Se déconnecter" aria-label="Se déconnecter"><img src="/assets/icons/log-out.svg" alt=""></a></div>
+</aside>
+<div class="cms-shell">
+    <header class="cms-topbar"><button type="button" class="cms-menu" aria-controls="cms-sidebar" aria-expanded="false" title="Menu" aria-label="Menu" hidden><img src="/assets/icons/menu.svg" alt=""></button><span>Espace de gestion <span class="cms-topbar-separator">/</span> Bazma</span><a href="{{ path('app_home', {_locale: 'fr'}) }}" target="_blank" rel="noopener">Voir le site <img src="/assets/icons/external-link.svg" alt=""></a></header>
+    <div id="cms-main" tabindex="-1">{% block workspace %}{% endblock %}</div>
+</div>
+{% endblock %}

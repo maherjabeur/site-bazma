@@ -35,7 +35,7 @@ class EventType extends AbstractType
             ->add('descriptionAr', TextareaType::class, ['label' => 'Description AR', 'required' => false, 'attr' => ['rows' => 6, 'dir' => 'rtl']])
             ->add('sourceUrl', TextType::class, ['label' => 'Lien source', 'required' => false])
             ->add('position', IntegerType::class, ['label' => 'Ordre d’affichage'])
-            ->add('featured', CheckboxType::class, ['label' => 'Afficher dans le slider', 'required' => false])
+            ->add('featured', CheckboxType::class, ['label' => 'Mettre à la une', 'required' => false])
             ->add('archived', CheckboxType::class, ['label' => 'Archiver cette actualité', 'required' => false, 'help' => 'Une actualité archivée est conservée dans le CMS et retirée du front.'])
             ->add('published', CheckboxType::class, ['label' => 'Publié', 'required' => false]);
     }

@@ -1,23 +1,12 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/layout.html.twig' %}
 
 {% block title %}CMS professionnel - Bazma Kebili{% endblock %}
 {% block html_lang %}fr{% endblock %}
 {% block html_dir %}ltr{% endblock %}
-{% block body_class %}admin-surface{% endblock %}
+
 {% block meta_robots %}noindex,nofollow{% endblock %}
 
-{% block body %}
-<header class="admin-header admin-header-pro">
-    <a class="brand" href="{{ path('admin_dashboard') }}">CMS Bazma</a>
-    <nav>
-        <a href="{{ path('app_home', {_locale: 'ar'}) }}">Voir le site</a>
-        <a href="{{ path('admin_profile') }}">Mon profil</a>
-        {% if is_granted('ROLE_HOME_MANAGER') %}<a href="{{ path('admin_home_settings') }}">Accueil</a>{% endif %}
-        {% if is_granted('ROLE_SETTINGS_MANAGER') %}<a href="{{ path('admin_settings') }}">Référencement et paramètres</a>{% endif %}
-        {% if is_granted('ROLE_USER_MANAGER') %}<a href="{{ path('admin_users') }}">Modérateurs</a>{% endif %}
-        <a href="{{ path('app_logout') }}">Déconnexion</a>
-    </nav>
-</header>
+{% block workspace %}
 
 <main class="admin-layout admin-workspace">
     {% set successMessages = app.flashes('success') %}
@@ -29,11 +18,12 @@
         </div>
     {% endif %}
 
+    {% if currentSection == 'overview' %}
     <section class="admin-hero-panel">
         <div>
             <p class="admin-eyebrow">Centre de contrôle</p>
-            <h1>Tout le contenu du site, simple à modifier.</h1>
-            <p>Pages, images, associations, réseaux sociaux, actualités et référencement sont regroupés dans une expérience claire pour publier vite et proprement.</p>
+            <h1>Vue d’ensemble</h1>
+
         </div>
         <div class="admin-quick-actions" aria-label="Actions rapides">
             {% if is_granted('ROLE_HOME_MANAGER') %}<a class="button" href="{{ path('admin_home_settings') }}">Modifier l’accueil</a>{% endif %}
@@ -44,23 +34,26 @@
         </div>
     </section>
 
-    <section class="admin-content-section">
+    {% endif %}
+    {% if currentSection == 'approvals' %}
+    <section class="admin-content-section" data-cms-list>
         <div class="admin-section-head">
             <div>
                 <p class="admin-eyebrow">Validation</p>
-                <h2>Workflow super administrateur</h2>
+                <h2>Publications à valider</h2>
             </div>
             {% if app.user and app.user.superAdmin %}
                 <form method="post" action="{{ path('admin_approval_workflow_toggle') }}">
                     <input type="hidden" name="_token" value="{{ csrf_token('toggle_approval_workflow') }}">
-                    <button class="button small {{ approvalWorkflowEnabled ? 'secondary-admin' : '' }}" type="submit">{{ approvalWorkflowEnabled ? 'Desactiver' : 'Activer' }}</button>
+                    <button class="button small {{ approvalWorkflowEnabled ? 'secondary-admin' : '' }}" type="submit" role="switch" aria-checked="{{ approvalWorkflowEnabled ? 'true' : 'false' }}" aria-label="Validation avant publication">{{ approvalWorkflowEnabled ? 'Validation activée' : 'Validation désactivée' }}</button>
                 </form>
             {% endif %}
         </div>
         <p class="admin-empty">{{ approvalWorkflowEnabled ? 'Actif: les modifications des moderateurs sont envoyees en validation avant publication.' : 'Inactif: les modifications autorisees sont appliquees directement.' }}</p>
 
         {% if app.user and app.user.superAdmin %}
-            <div class="admin-list">
+            {% include 'admin/list_tools.html.twig' %}
+        <div class="admin-list">
                 {% for approvalRequest in approvalRequests %}
                     <article class="admin-item">
                         <div class="admin-item-main">
@@ -86,24 +79,37 @@
         {% endif %}
     </section>
 
+    {% endif %}
+    {% if currentSection == 'overview' %}
     <section class="admin-kpis admin-kpis-pro" aria-label="Statistiques CMS">
-        <div><strong>{{ pages|length }}</strong><span>Pages</span></div>
-        <div><strong>{{ images|length }}</strong><span>Images WebP</span></div>
-        <div><strong>{{ organizations|length }}</strong><span>Associations</span></div>
-        <div><strong>{{ socialLinks|length }}</strong><span>Liens sociaux</span></div>
-        <div><strong>{{ events|length }}</strong><span>Actualités</span></div>
-        <div><strong>{{ users|length }}</strong><span>Modérateurs</span></div>
+        {% if is_granted('ROLE_PAGE_MANAGER') %}<a href="{{ path('admin_dashboard', {section: 'pages'}) }}"><strong>{{ pages|length }}</strong><span>Pages</span><img src="/assets/icons/arrow-up-right.svg" alt=""></a>{% endif %}
+        {% if is_granted('ROLE_MEDIA_MANAGER') %}<a href="{{ path('admin_dashboard', {section: 'images'}) }}"><strong>{{ images|length }}</strong><span>Images</span><img src="/assets/icons/arrow-up-right.svg" alt=""></a>{% endif %}
+        {% if is_granted('ROLE_ORGANIZATION_MANAGER') %}<a href="{{ path('admin_dashboard', {section: 'organizations'}) }}"><strong>{{ organizations|length }}</strong><span>Associations</span><img src="/assets/icons/arrow-up-right.svg" alt=""></a>{% endif %}
+        {% if is_granted('ROLE_SOCIAL_MANAGER') %}<a href="{{ path('admin_dashboard', {section: 'social'}) }}"><strong>{{ socialLinks|length }}</strong><span>Liens sociaux</span><img src="/assets/icons/arrow-up-right.svg" alt=""></a>{% endif %}
+        {% if is_granted('ROLE_NEWS_MANAGER') %}<a href="{{ path('admin_dashboard', {section: 'events'}) }}"><strong>{{ events|length }}</strong><span>Actualités</span><img src="/assets/icons/arrow-up-right.svg" alt=""></a>{% endif %}
+        {% if is_granted('ROLE_USER_MANAGER') %}<a href="{{ path('admin_users') }}"><strong>{{ users|length }}</strong><span>Membres</span><img src="/assets/icons/arrow-up-right.svg" alt=""></a>{% endif %}
     </section>
 
-    {% if is_granted('ROLE_PAGE_MANAGER') %}
-    <section class="admin-content-section" id="pages">
+    {% endif %}
+    {% if currentSection == 'overview' %}
+        {% if is_granted('ROLE_SUPER_ADMIN') %}<div class="cms-review-summary"><span><strong>{{ approvalRequests|length }}</strong> demande{{ approvalRequests|length == 1 ? '' : 's' }} en attente</span><a href="{{ path('admin_dashboard', {section: 'approvals'}) }}">Ouvrir les validations &rarr;</a></div>{% endif %}
+        {% if is_granted('ROLE_NEWS_MANAGER') %}
+        <section class="admin-content-section">
+            <div class="admin-section-head"><h2>Actualités à la une</h2><a href="{{ path('admin_dashboard', {section: 'events'}) }}">Toutes les actualités &rarr;</a></div>
+            <div class="admin-list">{% for event in events|filter(event => event.featured and not event.archived)|slice(0, 4) %}<article class="admin-item"><div class="admin-item-main"><span class="status-pill {{ event.published ? 'is-live' : 'is-draft' }}">{{ event.published ? 'Publié' : 'Brouillon' }}</span><h3>{{ event.title }}</h3><p>{{ event.category }}</p></div><div class="admin-item-actions"><a href="{{ path('admin_event_edit', {id: event.id}) }}">Modifier</a></div></article>{% else %}<p class="admin-empty">Aucune actualité à la une.</p>{% endfor %}</div>
+        </section>
+        {% endif %}
+    {% endif %}
+    {% if currentSection == 'pages' and is_granted('ROLE_PAGE_MANAGER') %}
+    <section class="admin-content-section" id="pages" data-cms-list>
         <div class="admin-section-head">
             <div>
                 <p class="admin-eyebrow">Architecture</p>
-                <h2>Pages de référencement</h2>
+                <h2>Pages du village</h2>
             </div>
             <a class="button small" href="{{ path('admin_page_new') }}">Ajouter</a>
         </div>
+        {% include 'admin/list_tools.html.twig' %}
         <div class="admin-list">
             {% for page in pages %}
                 <article class="admin-item">
@@ -129,8 +135,8 @@
     </section>
     {% endif %}
 
-    {% if is_granted('ROLE_MEDIA_MANAGER') %}
-    <section class="admin-content-section admin-gallery-manager" id="images">
+    {% if currentSection == 'images' and is_granted('ROLE_MEDIA_MANAGER') %}
+    <section class="admin-content-section admin-gallery-manager" id="images" data-cms-list>
         <div class="admin-section-head">
             <div>
                 <p class="admin-eyebrow">Médiathèque</p>
@@ -150,10 +156,11 @@
             </div>
             <div>
                 <strong>{{ galleryStats.local }}</strong>
-                <span>Publiables front</span>
+                <span>Visibles sur le site</span>
             </div>
         </div>
 
+        {% include 'admin/list_tools.html.twig' %}
         <div class="admin-gallery-grid">
             {% for image in images %}
                 {% set imagePath = image.imageUrl ?: '' %}
@@ -175,7 +182,7 @@
                             <span>FR</span>
                             {% if image.titleEn %}<span>EN</span>{% endif %}
                             {% if image.titleAr %}<span>AR</span>{% endif %}
-                            <span class="{{ isLocalImage ? 'is-ok' : 'is-warning' }}">{{ isLocalImage ? 'Local' : 'Non publié front' }}</span>
+                            <span class="{{ isLocalImage ? 'is-ok' : 'is-warning' }}">{{ isLocalImage ? 'Local' : 'Non visible sur le site' }}</span>
                         </div>
                         <h3>{{ image.title }}</h3>
                         <p class="admin-gallery-path">{{ image.imageUrl ?: 'Aucun fichier sélectionné' }}</p>
@@ -203,8 +210,8 @@
     </section>
     {% endif %}
 
-    {% if is_granted('ROLE_ORGANIZATION_MANAGER') %}
-    <section class="admin-content-section" id="organizations">
+    {% if currentSection == 'organizations' and is_granted('ROLE_ORGANIZATION_MANAGER') %}
+    <section class="admin-content-section" id="organizations" data-cms-list>
         <div class="admin-section-head">
             <div>
                 <p class="admin-eyebrow">Communauté</p>
@@ -212,6 +219,7 @@
             </div>
             <a class="button small" href="{{ path('admin_organization_new') }}">Ajouter</a>
         </div>
+        {% include 'admin/list_tools.html.twig' %}
         <div class="admin-list">
             {% for organization in organizations %}
                 <article class="admin-item">
@@ -237,8 +245,8 @@
     </section>
     {% endif %}
 
-    {% if is_granted('ROLE_SOCIAL_MANAGER') %}
-    <section class="admin-content-section" id="social">
+    {% if currentSection == 'social' and is_granted('ROLE_SOCIAL_MANAGER') %}
+    <section class="admin-content-section" id="social" data-cms-list>
         <div class="admin-section-head">
             <div>
                 <p class="admin-eyebrow">Présence digitale</p>
@@ -246,6 +254,7 @@
             </div>
             <a class="button small" href="{{ path('admin_social_new') }}">Ajouter</a>
         </div>
+        {% include 'admin/list_tools.html.twig' %}
         <div class="admin-list">
             {% for link in socialLinks %}
                 <article class="admin-item">
@@ -271,8 +280,8 @@
     </section>
     {% endif %}
 
-    {% if is_granted('ROLE_NEWS_MANAGER') %}
-    <section class="admin-content-section" id="events">
+    {% if currentSection == 'events' and is_granted('ROLE_NEWS_MANAGER') %}
+    <section class="admin-content-section" id="events" data-cms-list>
         <div class="admin-section-head">
             <div>
                 <p class="admin-eyebrow">Éditorial</p>
@@ -280,11 +289,12 @@
             </div>
             <a class="button small" href="{{ path('admin_event_new') }}">Ajouter</a>
         </div>
+        {% include 'admin/list_tools.html.twig' %}
         <div class="admin-list">
             {% for event in events %}
                 <article class="admin-item">
                     <div class="admin-item-main">
-                        <span class="status-pill {{ event.archived ? 'is-archived' : (event.published ? 'is-live' : 'is-draft') }}">{{ event.archived ? 'Archivé' : (event.published ? (event.featured ? 'Dans le slider' : 'Publié') : 'Brouillon') }}</span>
+                        <span class="status-pill {{ event.archived ? 'is-archived' : (event.published ? 'is-live' : 'is-draft') }}">{{ event.archived ? 'Archivé' : (event.published ? (event.featured ? 'À la une' : 'Publié') : 'Brouillon') }}</span>
                         <h3>{{ event.title }}</h3>
                         <p>{{ event.category }} · {{ event.eventDate ? event.eventDate|date('d/m/Y') : 'Sans date' }} · {{ event.location }}</p>
                     </div>
