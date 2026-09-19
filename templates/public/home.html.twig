@@ -2,7 +2,7 @@
 {% set configuredHero = settings.value('hero_image', '') %}
 {% set heroImage = configuredHero and configuredHero not in ['/assets/bazma-hero.webp', '/assets/bazma-hero.svg'] ? configuredHero : '/uploads/galerie-508827300-24067667929588022-5905114708121139324-n-06cc27679f.webp' %}
 {% block title %}{{ settings.value('seo_title_' ~ locale, 'village.title'|trans) }}{% endblock %}
-{% block og_image %}{{ absolute_url(heroImage|webp_image) }}{% endblock %}
+{% block og_image %}{{ absolute_url(heroImage|webp_image|available_image('/uploads/galerie-508827300-24067667929588022-5905114708121139324-n-06cc27679f.webp')) }}{% endblock %}
 {% block meta_description %}{{ settings.value('seo_description_' ~ locale, 'village.intro'|trans) }}{% endblock %}
 {% block canonical_url %}{{ url('app_home', {_locale: locale}) }}{% endblock %}
 {% block alternate_links %}
@@ -15,9 +15,10 @@
     {% set secondaryGlobalUrl = settings.value('hero_secondary_url', '') %}
     {% set secondaryUrl = settings.value('hero_secondary_url_' ~ locale, '') ?: (secondaryGlobalUrl in ['', '/ar/gallery', '/fr/gallery', '/en/gallery'] ? path('app_gallery', {_locale: locale}) : secondaryGlobalUrl) %}
     <section class="village-hero">
-        <img class="village-hero-image" src="{{ heroImage|webp_image }}" alt="{{ 'village.landscape'|trans }}" fetchpriority="high" width="1600" height="1000">
+        <div class="hero-visual"><img class="village-hero-image" src="{{ heroImage|webp_image|available_image('/uploads/galerie-508827300-24067667929588022-5905114708121139324-n-06cc27679f.webp') }}" alt="{{ 'village.landscape'|trans }}" fetchpriority="high" width="1600" height="1000"><span class="hero-photo-label">{{ 'village.location'|trans }}</span><span class="oasis-seal" aria-hidden="true">بازمة<br><small>BAZMA</small></span></div>
         <div class="village-hero-content">
             <p class="eyebrow">{{ settings.value('hero_eyebrow_' ~ locale, 'hero.eyebrow'|trans) }}</p>
+            <p class="hero-invitation">{{ 'oasis.invitation'|trans }}</p>
             <h1>{{ locale == 'ar' ? 'بازمة' : 'Bazma' }}<span>.</span></h1>
             <h2>{{ settings.value('hero_title_' ~ locale, 'village.tagline'|trans) }}</h2>
             <p>{{ settings.value('hero_intro_' ~ locale, 'village.intro'|trans) }}</p>
@@ -26,11 +27,16 @@
         <div class="hero-caption"><span><bdi dir="ltr">01</bdi> / {{ locale == 'ar' ? 'بازمة' : 'BAZMA' }}</span><span>{{ 'village.memory'|trans }}</span></div>
     </section>
     <div class="village-ribbon"><span>{{ 'village.location'|trans }}</span><span>{{ 'village.ribbon'|trans }}</span><a href="#decouvrir">{{ 'nav.discover'|trans }} &darr;</a></div>
+    <section class="oasis-introduction" aria-labelledby="oasis-intro-title">
+        <p class="eyebrow"><span aria-hidden="true">✳</span> {{ 'oasis.roots'|trans }}</p>
+        <div><h2 id="oasis-intro-title">{{ 'oasis.intro_title'|trans }}</h2><p>{{ 'village.discover_text'|trans }}</p></div>
+        <a class="round-link" href="#decouvrir" aria-label="{{ 'village.explore'|trans }}"><span aria-hidden="true">↓</span></a>
+    </section>
     <section id="decouvrir" class="village-section">
         <div class="editorial-heading"><div><p class="eyebrow"><bdi dir="ltr">01</bdi> / {{ 'nav.discover'|trans }}</p><h2>{{ settings.value('home_discover_title_' ~ locale, 'village.discover_title'|trans) }}</h2><p class="section-note">{{ 'home.discover_intro'|trans }}</p></div></div>
         <div class="village-stories">
             {% for page in pages %}<article class="village-story"><a href="{{ path('app_page', {_locale: locale, slug: page.slug}) }}">
-                {% if page.imageUrl %}<div class="story-image"><img src="{{ page.imageUrl|webp_image }}" alt="{{ page.localizedTitle(locale) }}" loading="lazy" decoding="async" width="640" height="480"></div>{% endif %}
+                {% if page.imageUrl %}<div class="story-image"><img src="{{ page.imageUrl|webp_image|available_image }}" alt="{{ page.localizedTitle(locale) }}" loading="lazy" decoding="async" width="640" height="480"></div>{% endif %}
                 <div class="story-label"><span>{{ '%02d'|format(loop.index) }}</span><span aria-hidden="true">{% if locale == 'ar' %}&nwarr;{% else %}&nearr;{% endif %}</span></div><h3>{{ page.localizedTitle(locale) }}</h3><p>{{ page.localizedSummary(locale) }}</p>
             </a></article>{% else %}<p class="empty-state">{{ 'village.empty_pages'|trans }}</p>{% endfor %}
         </div>
@@ -39,14 +45,14 @@
         <div class="editorial-heading"><div><p class="eyebrow"><bdi dir="ltr">02</bdi> / {{ 'nav.news'|trans }}</p><h2>{{ settings.value('home_news_title_' ~ locale, 'village.news_title'|trans) }}</h2><p class="section-note">{{ 'home.news_intro'|trans }}</p></div></div>
         <div class="village-news-grid">
             {% for event in events %}<article class="village-news-item">
-                {% if event.imageUrl %}<a class="news-image" href="{{ path('app_news_show', {_locale: locale, slug: event.slug}) }}"><img src="{{ event.imageUrl|webp_image }}" alt="{{ event.localizedTitle(locale) }}" loading="lazy" decoding="async" width="640" height="400"></a>{% endif %}
+                {% if event.imageUrl %}<a class="news-image" href="{{ path('app_news_show', {_locale: locale, slug: event.slug}) }}"><img src="{{ event.imageUrl|webp_image|available_image }}" alt="{{ event.localizedTitle(locale) }}" loading="lazy" decoding="async" width="640" height="400"></a>{% endif %}
                 <div><p class="news-meta"><bdi>{{ event.category }}</bdi>{% if event.eventDate %}<time datetime="{{ event.eventDate|date('Y-m-d') }}">{{ event.eventDate|date('d.m.Y') }}</time>{% endif %}</p><h3><a href="{{ path('app_news_show', {_locale: locale, slug: event.slug}) }}">{{ event.localizedTitle(locale) }}</a></h3><p>{{ event.localizedExcerpt(locale) }}</p><a class="text-link" href="{{ path('app_news_show', {_locale: locale, slug: event.slug}) }}">{{ 'read_more'|trans }} <span aria-hidden="true">{% if locale == 'ar' %}&nwarr;{% else %}&nearr;{% endif %}</span></a></div>
             </article>{% else %}<p class="empty-state">{{ 'no_news'|trans }}</p>{% endfor %}
         </div>
     </section>
     <section class="village-section village-photos">
         <div class="editorial-heading"><div><p class="eyebrow"><bdi dir="ltr">03</bdi> / {{ 'nav.gallery'|trans }}</p><h2>{{ settings.value('home_images_title_' ~ locale, 'village.photos_title'|trans) }}</h2><p class="section-note">{{ 'home.gallery_intro'|trans }}</p></div><a class="text-link" href="{{ path('app_gallery', {_locale: locale}) }}">{{ 'village.all_photos'|trans }} {% if locale == 'ar' %}&nwarr;{% else %}&nearr;{% endif %}</a></div>
-        <div class="village-photo-grid">{% for image in images|slice(0, 4) %}<a href="{{ path('app_gallery', {_locale: locale}) }}"><figure><img src="{{ image.imageUrl|webp_image }}" alt="{{ image.localizedTitle(locale) }}" loading="lazy" decoding="async" width="700" height="520"><figcaption>{{ image.localizedTitle(locale) }} <span aria-hidden="true">{% if locale == 'ar' %}&nwarr;{% else %}&nearr;{% endif %}</span></figcaption></figure></a>{% else %}<p class="empty-state">{{ 'gallery.empty'|trans }}</p>{% endfor %}</div>
+        <div class="village-photo-grid">{% for image in images|slice(0, 4) %}<a href="{{ path('app_gallery', {_locale: locale}) }}"><figure><img src="{{ image.imageUrl|webp_image|available_image }}" alt="{{ image.localizedTitle(locale) }}" loading="lazy" decoding="async" width="700" height="520"><figcaption>{{ image.localizedTitle(locale) }} <span aria-hidden="true">{% if locale == 'ar' %}&nwarr;{% else %}&nearr;{% endif %}</span></figcaption></figure></a>{% else %}<p class="empty-state">{{ 'gallery.empty'|trans }}</p>{% endfor %}</div>
     </section>
     <section id="associations" class="village-section village-community">
         <div class="editorial-heading"><div><p class="eyebrow"><bdi dir="ltr">04</bdi> / {{ 'nav.associations'|trans }}</p><h2>{{ settings.value('home_associations_title_' ~ locale, 'village.community_title'|trans) }}</h2><p class="section-note">{{ 'home.associations_intro'|trans }}</p></div></div>
@@ -56,6 +62,6 @@
         <div class="editorial-heading"><div><p class="eyebrow">{{ 'village.together'|trans }}</p><h2>{{ settings.value('home_social_title_' ~ locale, 'village.social_title'|trans) }}</h2><p class="section-note">{{ 'home.social_intro'|trans }}</p></div></div>
         <div class="village-social-links">{% for link in socialLinks %}<a href="{{ link.url }}" target="_blank" rel="noopener noreferrer"><span><small><bdi>{{ link.platform }}</bdi></small><strong>{{ link.localizedTitle(locale) }}</strong></span><span aria-hidden="true">{% if locale == 'ar' %}&nwarr;{% else %}&nearr;{% endif %}</span></a>{% else %}<p>{{ 'village.empty_social'|trans }}</p>{% endfor %}</div>
     </section>
-    {% if teamMembers|default([])|length %}<section class="village-section"><div class="editorial-heading"><div><p class="eyebrow">{{ 'team.eyebrow'|trans }}</p><h2>{{ settings.value('home_team_title_' ~ locale, 'team.title'|trans) }}</h2><p class="section-note">{{ 'home.team_intro'|trans }}</p></div></div><div class="village-team">{% for member in teamMembers %}<article>{% if member.profileImageUrl %}<img src="{{ member.profileImageUrl|webp_image }}" alt="{{ member.name }}" loading="lazy" width="80" height="80">{% endif %}<div><h3>{{ member.name ?: member.initials }}</h3><p>{{ member.profession ?: 'team.moderator'|trans }}</p>{% if member.facebookUrl %}<a class="text-link" href="{{ member.facebookUrl }}" target="_blank" rel="noopener noreferrer">{{ 'team.facebook'|trans }} {% if locale == 'ar' %}&nwarr;{% else %}&nearr;{% endif %}</a>{% endif %}</div></article>{% endfor %}</div></section>{% endif %}
+    {% if teamMembers|default([])|length %}<section class="village-section"><div class="editorial-heading"><div><p class="eyebrow">{{ 'team.eyebrow'|trans }}</p><h2>{{ settings.value('home_team_title_' ~ locale, 'team.title'|trans) }}</h2><p class="section-note">{{ 'home.team_intro'|trans }}</p></div></div><div class="village-team">{% for member in teamMembers %}<article>{% if member.profileImageUrl %}<img src="{{ member.profileImageUrl|webp_image|available_image }}" alt="{{ member.name }}" loading="lazy" width="80" height="80">{% endif %}<div><h3>{{ member.name ?: member.initials }}</h3><p>{{ member.profession ?: 'team.moderator'|trans }}</p>{% if member.facebookUrl %}<a class="text-link" href="{{ member.facebookUrl }}" target="_blank" rel="noopener noreferrer">{{ 'team.facebook'|trans }} {% if locale == 'ar' %}&nwarr;{% else %}&nearr;{% endif %}</a>{% endif %}</div></article>{% endfor %}</div></section>{% endif %}
 </main>
 {% endblock %}

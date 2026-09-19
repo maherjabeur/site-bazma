@@ -3,7 +3,7 @@
 {% block title %}{{ 'nav.gallery'|trans }} - {{ 'brand'|trans }}{% endblock %}
 {% block meta_description %}{{ 'gallery.meta_description'|trans }}{% endblock %}
 {% block canonical_url %}{{ url('app_gallery', {_locale: locale}) }}{% endblock %}
-{% block og_image %}{{ absolute_url((featuredImage ? featuredImage.imageUrl : '/assets/bazma-hero.webp')|webp_image) }}{% endblock %}
+{% block og_image %}{{ absolute_url((featuredImage ? featuredImage.imageUrl : '/assets/bazma-hero.webp')|webp_image|available_image) }}{% endblock %}
 {% block alternate_links %}
     <link rel="alternate" hreflang="ar" href="{{ url('app_gallery', {_locale: 'ar'}) }}">
     <link rel="alternate" hreflang="fr" href="{{ url('app_gallery', {_locale: 'fr'}) }}">
@@ -99,7 +99,7 @@
 {% endblock %}
 
 {% block content %}
-{% set heroImage = (featuredImage ? featuredImage.imageUrl : '/assets/bazma-hero.webp')|webp_image %}
+{% set heroImage = (featuredImage ? featuredImage.imageUrl : '/assets/bazma-hero.webp')|webp_image|available_image %}
 
 <main id="main-content" class="gallery-page">
     <section class="gallery-hero" style="background-image: linear-gradient({{ locale == 'ar' ? '270deg' : '90deg' }}, rgba(19,35,29,.9), rgba(19,35,29,.34)), url('{{ heroImage }}')">
@@ -129,7 +129,7 @@
         <div class="gallery-masonry">
             {% for image in images %}
                 {% set title = image.localizedTitle(locale) %}
-                {% set imageSrc = image.imageUrl|webp_image %}
+                {% set imageSrc = image.imageUrl|webp_image|available_image %}
                 <figure class="gallery-photo {{ loop.first ? 'is-featured' : '' }}">
                     <button
                         type="button"

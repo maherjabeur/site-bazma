@@ -15,7 +15,23 @@ class ImageExtension extends AbstractExtension
     {
         return [
             new TwigFilter('webp_image', $this->webpImage(...)),
+            new TwigFilter('available_image', $this->availableImage(...)),
         ];
+    }
+
+    public function availableImage(?string $url, string $fallback = '/assets/image-placeholder.svg'): string
+    {
+        if (!$url) {
+            return $fallback;
+        }
+        // Only check local media; remote URLs are owned by their source server.
+        if (str_starts_with($url, '/uploads/') || str_starts_with($url, '/assets/')) {
+            $path = parse_url($url, PHP_URL_PATH);
+            if (!is_file($this->projectDir . '/public' . $path)) {
+                return $fallback;
+            }
+        }
+        return $url;
     }
 
     public function webpImage(?string $url): string
