@@ -54,7 +54,7 @@ class PublicController extends AbstractController
     public function page(Request $request, string $slug, PageRepository $pages, PageMediaRepository $media): Response
     {
         if ($slug === Page::DONATION_SLUG) {
-            return $this->redirectToRoute('app_donation', ['_locale' => $request->getLocale()], Response::HTTP_MOVED_PERMANENTLY);
+            throw $this->createNotFoundException('Page introuvable');
         }
 
         $page = $pages->findOneBy(['slug' => $slug, 'published' => true]);
@@ -66,22 +66,6 @@ class PublicController extends AbstractController
             'locale' => $request->getLocale(),
             'page' => $page,
             'media' => $media->findForPage($page),
-        ]);
-    }
-
-    #[Route('/{_locale}/don', name: 'app_donation', requirements: ['_locale' => 'ar|fr|en'])]
-    public function donation(Request $request, PageRepository $pages, PageMediaRepository $media): Response
-    {
-        $page = $pages->findOneBy(['slug' => Page::DONATION_SLUG, 'published' => true]);
-        if (!$page) {
-            throw $this->createNotFoundException('Page de don introuvable');
-        }
-
-        return $this->render('public/page.html.twig', [
-            'locale' => $request->getLocale(),
-            'page' => $page,
-            'media' => $media->findForPage($page),
-            'canonicalRoute' => 'app_donation',
         ]);
     }
 
@@ -150,7 +134,6 @@ class PublicController extends AbstractController
         foreach (['ar', 'fr', 'en'] as $locale) {
             $urls[] = $this->generateUrl('app_home', ['_locale' => $locale], UrlGeneratorInterface::ABSOLUTE_URL);
             $urls[] = $this->generateUrl('app_gallery', ['_locale' => $locale], UrlGeneratorInterface::ABSOLUTE_URL);
-            $urls[] = $this->generateUrl('app_donation', ['_locale' => $locale], UrlGeneratorInterface::ABSOLUTE_URL);
             foreach ($events->findPublishedActive() as $event) {
                 $urls[] = $this->generateUrl('app_news_show', ['_locale' => $locale, 'slug' => $event->getSlug()], UrlGeneratorInterface::ABSOLUTE_URL);
             }

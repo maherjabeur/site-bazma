@@ -30,7 +30,7 @@
 <footer class="village-footer">
     <div class="footer-intro"><a href="{{ path('app_home', {_locale: locale}) }}">{{ locale == 'ar' ? 'بازمة' : 'Bazma' }}<span>.</span></a><p>{{ settings is defined ? settings.value('footer_text_' ~ locale, 'village.footer'|trans) : 'village.footer'|trans }}</p></div>
     <div><h2>{{ 'nav.discover'|trans }}</h2><a href="{{ path('app_home', {_locale: locale}) }}#decouvrir">{{ 'village.village'|trans }}</a><a href="{{ path('app_gallery', {_locale: locale}) }}">{{ 'nav.gallery'|trans }}</a><a href="{{ path('app_home', {_locale: locale}) }}#actualites">{{ 'nav.news'|trans }}</a></div>
-    <div><h2>{{ 'village.together'|trans }}</h2><a href="{{ path('app_home', {_locale: locale}) }}#associations">{{ 'nav.associations'|trans }}</a><a href="{{ path('app_home', {_locale: locale}) }}#reseaux">{{ 'nav.social'|trans }}</a><a href="{{ path('app_donation', {_locale: locale}) }}">{{ 'donation.title'|trans }}</a></div>
+    <div><h2>{{ 'village.together'|trans }}</h2><a href="{{ path('app_home', {_locale: locale}) }}#associations">{{ 'nav.associations'|trans }}</a><a href="{{ path('app_home', {_locale: locale}) }}#reseaux">{{ 'nav.social'|trans }}</a></div>
     <div class="footer-bottom"><span>&copy; <bdi>{{ 'now'|date('Y') }}</bdi> {{ locale == 'ar' ? 'بازمة' : 'Bazma' }} · {{ 'village.location'|trans }}</span><a href="#main-content">{{ 'village.top'|trans }} &uarr;</a></div>
 </footer>
 {% endblock %}

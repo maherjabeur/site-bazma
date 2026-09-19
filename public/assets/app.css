@@ -466,40 +466,6 @@ footer p {
 .footer-brand {
     max-width: 360px;
 }
-.footer-donation {
-    display: grid;
-    gap: 6px;
-    width: min(480px, 100%);
-    padding: 18px;
-    border: 1px solid rgba(255,255,255,.16);
-    border-radius: 8px;
-    background: rgba(255,255,255,.08);
-    box-shadow: 0 14px 34px rgba(0,0,0,.12);
-    transition: transform .18s ease, background .18s ease, border-color .18s ease;
-}
-.footer-donation:hover {
-    transform: translateY(-2px);
-    border-color: rgba(215,155,50,.5);
-    background: rgba(255,255,255,.12);
-}
-.footer-donation span {
-    color: var(--sun);
-    font-size: 12px;
-    font-weight: 850;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-}
-.footer-donation strong {
-    margin: 0;
-    color: #fff;
-    font-size: 22px;
-    line-height: 1.2;
-}
-.footer-donation p {
-    max-width: none;
-    font-size: 14px;
-    line-height: 1.55;
-}
 .footer-links {
     justify-content: flex-end;
     max-width: 520px;
@@ -3599,7 +3565,6 @@ footer,
     }
 
     .footer-brand,
-    .footer-donation,
     .footer-links {
         width: 100%;
         max-width: none;
