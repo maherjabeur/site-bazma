@@ -75,6 +75,9 @@ html[dir="rtl"] .village-hero::before { transform: scaleX(-1); }
 .community-list small { color: var(--accent); font-size: 11px; }
 .community-list h3 { margin: 4px 0 10px; font-size: 21px; }
 .community-list p { color: var(--muted); max-width: 800px; margin: 0; font-size: 14px; }
+.community-list .rich-text { color: var(--muted); max-width: 800px; font-size: 14px; line-height: 1.75; }
+.community-list .rich-text p { margin: 0 0 10px; }
+.community-list .rich-text p:last-child { margin-bottom: 0; }
 .village-social { background: #194b40; color: #fff; }
 .village-social .eyebrow { color: #eed28f; }
 .village-social .editorial-heading > p { color: #d2e0d7; }

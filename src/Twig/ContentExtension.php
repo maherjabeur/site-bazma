@@ -20,6 +20,8 @@ class ContentExtension extends AbstractExtension
             return '';
         }
 
+        $content = $this->decodeEscapedHtml($content);
+
         if (!preg_match('/<[a-z][\s\S]*>/i', $content)) {
             return nl2br(htmlspecialchars($content, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'));
         }
@@ -32,5 +34,14 @@ class ContentExtension extends AbstractExtension
         $html = preg_replace('/\sstyle\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $html) ?? $html;
 
         return $html;
+    }
+
+    private function decodeEscapedHtml(string $content): string
+    {
+        if (!preg_match('/&lt;\/?[a-z][\s\S]*?&gt;/i', $content)) {
+            return $content;
+        }
+
+        return html_entity_decode($content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
 }

@@ -16,12 +16,23 @@
             const mediaUploadToken = '{{ csrf_token('editor_media_upload') }}';
             const mediaLibrary = {{ editorMediaLibrary|default([])|json_encode|raw }};
 
-            const toHtml = (value) => {
-                if (/<[a-z][\s\S]*>/i.test(value)) {
-                    return value;
+            const decodeEscapedHtml = (value) => {
+                const text = String(value || '');
+                if (!/&lt;\/?[a-z][\s\S]*?&gt;/i.test(text)) {
+                    return text;
                 }
 
-                return value
+                const parser = new DOMParser();
+                return parser.parseFromString(text, 'text/html').documentElement.textContent || text;
+            };
+
+            const toHtml = (value) => {
+                const decodedValue = decodeEscapedHtml(value);
+                if (/<[a-z][\s\S]*>/i.test(decodedValue)) {
+                    return decodedValue;
+                }
+
+                return decodedValue
                     .split(/\n{2,}/)
                     .map((paragraph) => paragraph.trim())
                     .filter(Boolean)
