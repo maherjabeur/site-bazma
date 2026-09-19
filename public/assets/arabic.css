@@ -48,6 +48,7 @@ html[lang="ar"] .editorial-heading { align-items: center; }
 html[lang="ar"] .editorial-heading > div { min-width: 0; max-width: 670px; }
 html[lang="ar"] .editorial-heading h2, html[lang="ar"] .village-site .gallery-toolbar h2 { font-size: 34px; line-height: 1.7; font-weight: 600; }
 html[lang="ar"] .editorial-heading > p { max-width: 380px; font-size: 16px; line-height: 2; }
+html[lang="ar"] .section-note { max-width: 650px; font-size: 16px; line-height: 2; }
 html[lang="ar"] .village-story h3, html[lang="ar"] .community-list h3 { font-size: 21px; line-height: 1.75; }
 html[lang="ar"] .village-news-item h3 { font-size: 24px; line-height: 1.7; }
 html[lang="ar"] :is(.village-story p,.village-news-item p:not(.news-meta),.community-list p) { font-size: 16px; line-height: 2; }

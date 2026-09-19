@@ -46,6 +46,7 @@ html[dir="rtl"] .village-hero::before { transform: scaleX(-1); }
 .editorial-heading > div { max-width: 670px; }
 .editorial-heading h2, .village-site .gallery-toolbar h2 { font: 400 42px/1.18 Georgia, 'Times New Roman', serif; margin: 0; }
 .editorial-heading > p { max-width: 350px; margin: 0 0 3px; font-size: 14px; color: var(--muted); }
+.section-note { max-width: 620px; margin: 16px 0 0; color: var(--muted); font-size: 15px; line-height: 1.75; }
 .village-stories { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 38px 28px; }
 .village-story { min-width: 0; }
 .story-image { overflow: hidden; aspect-ratio: 4 / 3; background: #edf3ef; }
