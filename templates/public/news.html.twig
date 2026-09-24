@@ -3,8 +3,29 @@
 {% block title %}{{ event.localizedTitle(locale) }} - {{ 'brand'|trans }}{% endblock %}
 {% block meta_description %}{{ event.localizedExcerpt(locale) }}{% endblock %}
 {% block canonical_url %}{{ url('app_news_show', {_locale: locale, slug: event.slug}) }}{% endblock %}
+{% block alternate_links %}
+    {% for language in ['ar', 'fr', 'en'] %}<link rel="alternate" hreflang="{{ language }}" href="{{ url('app_news_show', {_locale: language, slug: event.slug}) }}">{% endfor %}
+    <link rel="alternate" hreflang="x-default" href="{{ url('app_news_show', {_locale: 'ar', slug: event.slug}) }}">
+{% endblock %}
 {% block og_type %}article{% endblock %}
 {% block og_image %}{{ absolute_url((event.imageUrl ?: '/assets/bazma-hero.webp')|webp_image|available_image) }}{% endblock %}
+{% block structured_data %}
+    <script type="application/ld+json">{{ {
+        '@context': 'https://schema.org',
+        '@type': 'NewsArticle',
+        headline: event.localizedTitle(locale),
+        description: event.localizedExcerpt(locale),
+        image: block('og_image'),
+        mainEntityOfPage: block('canonical_url'),
+        datePublished: event.eventDate ? event.eventDate|date('c') : null,
+        dateModified: event.eventDate ? event.eventDate|date('c') : null,
+        inLanguage: locale,
+        publisher: {
+            '@type': 'Organization',
+            name: 'Bazma Kebili'
+        }
+    }|filter(value => value is not null)|json_encode(constant('JSON_UNESCAPED_SLASHES'))|raw }}</script>
+{% endblock %}
 
 {% block content %}
 

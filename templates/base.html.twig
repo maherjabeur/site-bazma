@@ -16,6 +16,7 @@
         <meta property="og:url" content="{{ app.request.uri }}">
         <meta property="og:image" content="{% block og_image %}{{ absolute_url('/assets/bazma-hero.webp') }}{% endblock %}">
         <meta name="twitter:card" content="summary_large_image">
+        {% block structured_data %}{% endblock %}
         {% block fonts %}
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

@@ -9,6 +9,30 @@
     {% for language in ['ar', 'fr', 'en'] %}<link rel="alternate" hreflang="{{ language }}" href="{{ url('app_home', {_locale: language}) }}">{% endfor %}
     <link rel="alternate" hreflang="x-default" href="{{ url('app_home', {_locale: 'ar'}) }}">
 {% endblock %}
+{% block structured_data %}
+    <script type="application/ld+json">{{ {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'Bazma Kebili',
+        url: url('app_home', {_locale: locale}),
+        inLanguage: locale,
+        description: block('meta_description')
+    }|json_encode(constant('JSON_UNESCAPED_SLASHES'))|raw }}</script>
+    <script type="application/ld+json">{{ {
+        '@context': 'https://schema.org',
+        '@type': 'Place',
+        name: 'Bazma',
+        address: {
+            '@type': 'PostalAddress',
+            addressLocality: 'Bazma',
+            addressRegion: 'Kebili',
+            addressCountry: 'TN'
+        },
+        url: url('app_home', {_locale: locale}),
+        image: block('og_image'),
+        description: block('meta_description')
+    }|json_encode(constant('JSON_UNESCAPED_SLASHES'))|raw }}</script>
+{% endblock %}
 {% block content %}
 <main id="main-content">
     {% set primaryUrl = settings.value('hero_primary_url_' ~ locale, settings.value('hero_primary_url', '#decouvrir')) %}
@@ -75,7 +99,22 @@
     </section>
     <section id="associations" class="village-section village-community">
         <div class="editorial-heading"><div><p class="eyebrow"><bdi dir="ltr">04</bdi> / {{ 'nav.associations'|trans }}</p><h2>{{ settings.value('home_associations_title_' ~ locale, 'village.community_title'|trans) }}</h2><p class="section-note">{{ 'home.associations_intro'|trans }}</p></div></div>
-        <div class="community-list">{% for organization in organizations %}<article><span class="community-number">{{ '%02d'|format(loop.index) }}</span><div><small><bdi>{{ organization.type }}</bdi></small><h3>{{ organization.localizedName(locale) }}</h3><div class="rich-text">{{ organization.localizedDescription(locale)|rich_content }}</div></div>{% if organization.url %}<a class="text-link" href="{{ organization.url }}" target="_blank" rel="noopener noreferrer">{{ 'gallery.source'|trans }} {% if locale == 'ar' %}&nwarr;{% else %}&nearr;{% endif %}</a>{% endif %}</article>{% else %}<p class="empty-state">{{ 'village.empty_organizations'|trans }}</p>{% endfor %}</div>
+        <div class="community-list">
+            {% for organization in organizations %}
+                {% set organizationImage = organization.imageUrl|available_image('') %}
+                <article>
+                    <div class="community-logo">
+                        {% if organizationImage %}
+                            <img src="{{ organizationImage }}" alt="{{ organization.localizedName(locale) }}" loading="lazy" decoding="async" width="112" height="112">
+                        {% else %}
+                            <span class="community-number" aria-hidden="true">{{ '%02d'|format(loop.index) }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="community-details"><small><bdi>{{ organization.type }}</bdi></small><h3>{{ organization.localizedName(locale) }}</h3><div class="rich-text">{{ organization.localizedDescription(locale)|rich_content }}</div></div>
+                    {% if organization.url %}<a class="text-link" href="{{ organization.url }}" target="_blank" rel="noopener noreferrer">{{ 'gallery.source'|trans }} {% if locale == 'ar' %}&nwarr;{% else %}&nearr;{% endif %}</a>{% endif %}
+                </article>
+            {% else %}<p class="empty-state">{{ 'village.empty_organizations'|trans }}</p>{% endfor %}
+        </div>
     </section>
     <section id="reseaux" class="village-section village-social">
         <div class="editorial-heading"><div><p class="eyebrow">{{ 'village.together'|trans }}</p><h2>{{ settings.value('home_social_title_' ~ locale, 'village.social_title'|trans) }}</h2><p class="section-note">{{ 'home.social_intro'|trans }}</p></div></div>

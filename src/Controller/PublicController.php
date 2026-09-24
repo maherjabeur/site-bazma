@@ -130,28 +130,86 @@ class PublicController extends AbstractController
     #[Route('/sitemap.xml', name: 'app_sitemap', format: 'xml')]
     public function sitemap(PageRepository $pages, EventRepository $events): Response
     {
-        $urls = [];
+        $entries = [];
         foreach (['ar', 'fr', 'en'] as $locale) {
-            $urls[] = $this->generateUrl('app_home', ['_locale' => $locale], UrlGeneratorInterface::ABSOLUTE_URL);
-            $urls[] = $this->generateUrl('app_gallery', ['_locale' => $locale], UrlGeneratorInterface::ABSOLUTE_URL);
+            $this->addSitemapEntry($entries, 'app_home', ['_locale' => $locale], 'daily', '1.0');
+            $this->addSitemapEntry($entries, 'app_gallery', ['_locale' => $locale], 'weekly', '0.7');
             foreach ($events->findPublishedActive() as $event) {
-                $urls[] = $this->generateUrl('app_news_show', ['_locale' => $locale, 'slug' => $event->getSlug()], UrlGeneratorInterface::ABSOLUTE_URL);
+                $this->addSitemapEntry(
+                    $entries,
+                    'app_news_show',
+                    ['_locale' => $locale, 'slug' => $event->getSlug()],
+                    'weekly',
+                    '0.8',
+                    $event->getEventDate()
+                );
             }
             foreach ($pages->findPublished() as $page) {
                 if ($page->isSystemPage()) {
                     continue;
                 }
-                $urls[] = $this->generateUrl('app_page', ['_locale' => $locale, 'slug' => $page->getSlug()], UrlGeneratorInterface::ABSOLUTE_URL);
+                $this->addSitemapEntry(
+                    $entries,
+                    'app_page',
+                    ['_locale' => $locale, 'slug' => $page->getSlug()],
+                    'monthly',
+                    '0.7'
+                );
             }
         }
 
         $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-        $xml .= "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n";
-        foreach (array_unique($urls) as $url) {
-            $xml .= "  <url><loc>".htmlspecialchars($url, ENT_XML1)."</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>\n";
+        $xml .= "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">\n";
+        foreach ($entries as $entry) {
+            $xml .= "  <url>\n";
+            $xml .= "    <loc>".$this->escapeXml($entry['url'])."</loc>\n";
+            foreach ($entry['alternates'] as $language => $alternateUrl) {
+                $xml .= "    <xhtml:link rel=\"alternate\" hreflang=\"".$this->escapeXml($language)."\" href=\"".$this->escapeXml($alternateUrl)."\" />\n";
+            }
+            if ($entry['lastmod']) {
+                $xml .= "    <lastmod>".$this->escapeXml($entry['lastmod'])."</lastmod>\n";
+            }
+            $xml .= "    <changefreq>".$this->escapeXml($entry['changefreq'])."</changefreq>\n";
+            $xml .= "    <priority>".$this->escapeXml($entry['priority'])."</priority>\n";
+            $xml .= "  </url>\n";
         }
         $xml .= "</urlset>\n";
 
         return new Response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
+    }
+
+    /**
+     * @param array<string, array{url: string, alternates: array<string, string>, lastmod: ?string, changefreq: string, priority: string}> $entries
+     * @param array<string, string> $parameters
+     */
+    private function addSitemapEntry(array &$entries, string $route, array $parameters, string $changefreq, string $priority, ?\DateTimeInterface $lastmod = null): void
+    {
+        $url = $this->generateUrl($route, $parameters, UrlGeneratorInterface::ABSOLUTE_URL);
+        if (isset($entries[$url])) {
+            return;
+        }
+
+        $alternates = [];
+        foreach (['ar', 'fr', 'en'] as $language) {
+            $alternates[$language] = $this->generateUrl(
+                $route,
+                array_replace($parameters, ['_locale' => $language]),
+                UrlGeneratorInterface::ABSOLUTE_URL
+            );
+        }
+        $alternates['x-default'] = $alternates['ar'];
+
+        $entries[$url] = [
+            'url' => $url,
+            'alternates' => $alternates,
+            'lastmod' => $lastmod?->format('Y-m-d'),
+            'changefreq' => $changefreq,
+            'priority' => $priority,
+        ];
+    }
+
+    private function escapeXml(string $value): string
+    {
+        return htmlspecialchars($value, ENT_XML1 | ENT_QUOTES, 'UTF-8');
     }
 }

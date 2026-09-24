@@ -13,9 +13,25 @@
         <link rel="alternate" hreflang="fr" href="{{ url('app_page', {_locale: 'fr', slug: page.slug}) }}">
         <link rel="alternate" hreflang="en" href="{{ url('app_page', {_locale: 'en', slug: page.slug}) }}">
     {% endif %}
+    <link rel="alternate" hreflang="x-default" href="{{ canonicalRoute|default(null) ? url(canonicalRoute, {_locale: 'ar'}) : url('app_page', {_locale: 'ar', slug: page.slug}) }}">
 {% endblock %}
 {% block og_type %}article{% endblock %}
 {% block og_image %}{{ absolute_url((page.imageUrl ?: '/assets/bazma-hero.webp')|webp_image|available_image) }}{% endblock %}
+{% block structured_data %}
+    <script type="application/ld+json">{{ {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: page.localizedTitle(locale),
+        description: page.localizedSummary(locale),
+        image: block('og_image'),
+        mainEntityOfPage: block('canonical_url'),
+        inLanguage: locale,
+        publisher: {
+            '@type': 'Organization',
+            name: 'Bazma Kebili'
+        }
+    }|json_encode(constant('JSON_UNESCAPED_SLASHES'))|raw }}</script>
+{% endblock %}
 
 {% block content %}
 <main id="main-content" class="article-page">

@@ -8,6 +8,18 @@
     <link rel="alternate" hreflang="ar" href="{{ url('app_gallery', {_locale: 'ar'}) }}">
     <link rel="alternate" hreflang="fr" href="{{ url('app_gallery', {_locale: 'fr'}) }}">
     <link rel="alternate" hreflang="en" href="{{ url('app_gallery', {_locale: 'en'}) }}">
+    <link rel="alternate" hreflang="x-default" href="{{ url('app_gallery', {_locale: 'ar'}) }}">
+{% endblock %}
+{% block structured_data %}
+    <script type="application/ld+json">{{ {
+        '@context': 'https://schema.org',
+        '@type': 'ImageGallery',
+        name: block('title'),
+        description: block('meta_description'),
+        url: block('canonical_url'),
+        inLanguage: locale,
+        image: images|slice(0, 12)|map(image => absolute_url(image.imageUrl|webp_image|available_image))
+    }|json_encode(constant('JSON_UNESCAPED_SLASHES'))|raw }}</script>
 {% endblock %}
 
 {% block javascripts %}
