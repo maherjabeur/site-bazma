@@ -18,7 +18,7 @@ services:
       - key: APP_SECRET
         generateValue: true
       - key: DEFAULT_URI
-        sync: false
+        value: "https://bazma.tn"
       - key: PORT
         value: "10000"
       - key: DATABASE_URL

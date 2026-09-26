@@ -13,6 +13,7 @@ use App\Repository\PageRepository;
 use App\Repository\SiteSettingRepository;
 use App\Repository\SocialLinkRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -120,23 +121,27 @@ class PublicController extends AbstractController
     }
 
     #[Route('/robots.txt', name: 'app_robots', format: 'txt')]
-    public function robots(): Response
+    public function robots(#[Autowire('%env(DEFAULT_URI)%')] string $siteUrl): Response
     {
-        $content = "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /login\nSitemap: ".$this->generateUrl('app_sitemap', [], UrlGeneratorInterface::ABSOLUTE_URL)."\n";
+        $content = "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /login\nSitemap: ".$this->canonicalUrl($siteUrl, '/sitemap.xml')."\n";
 
-        return new Response($content, 200, ['Content-Type' => 'text/plain; charset=UTF-8']);
+        return new Response($content, 200, [
+            'Content-Type' => 'text/plain; charset=UTF-8',
+            'Cache-Control' => 'public, max-age=3600',
+        ]);
     }
 
     #[Route('/sitemap.xml', name: 'app_sitemap', format: 'xml')]
-    public function sitemap(PageRepository $pages, EventRepository $events): Response
+    public function sitemap(PageRepository $pages, EventRepository $events, #[Autowire('%env(DEFAULT_URI)%')] string $siteUrl): Response
     {
         $entries = [];
         foreach (['ar', 'fr', 'en'] as $locale) {
-            $this->addSitemapEntry($entries, 'app_home', ['_locale' => $locale], 'daily', '1.0');
-            $this->addSitemapEntry($entries, 'app_gallery', ['_locale' => $locale], 'weekly', '0.7');
+            $this->addSitemapEntry($entries, $siteUrl, 'app_home', ['_locale' => $locale], 'daily', '1.0');
+            $this->addSitemapEntry($entries, $siteUrl, 'app_gallery', ['_locale' => $locale], 'weekly', '0.7');
             foreach ($events->findPublishedActive() as $event) {
                 $this->addSitemapEntry(
                     $entries,
+                    $siteUrl,
                     'app_news_show',
                     ['_locale' => $locale, 'slug' => $event->getSlug()],
                     'weekly',
@@ -150,6 +155,7 @@ class PublicController extends AbstractController
                 }
                 $this->addSitemapEntry(
                     $entries,
+                    $siteUrl,
                     'app_page',
                     ['_locale' => $locale, 'slug' => $page->getSlug()],
                     'monthly',
@@ -175,26 +181,32 @@ class PublicController extends AbstractController
         }
         $xml .= "</urlset>\n";
 
-        return new Response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
+        return new Response($xml, 200, [
+            'Content-Type' => 'application/xml; charset=UTF-8',
+            'Cache-Control' => 'public, max-age=3600',
+        ]);
     }
 
     /**
      * @param array<string, array{url: string, alternates: array<string, string>, lastmod: ?string, changefreq: string, priority: string}> $entries
      * @param array<string, string> $parameters
      */
-    private function addSitemapEntry(array &$entries, string $route, array $parameters, string $changefreq, string $priority, ?\DateTimeInterface $lastmod = null): void
+    private function addSitemapEntry(array &$entries, string $siteUrl, string $route, array $parameters, string $changefreq, string $priority, ?\DateTimeInterface $lastmod = null): void
     {
-        $url = $this->generateUrl($route, $parameters, UrlGeneratorInterface::ABSOLUTE_URL);
+        $url = $this->canonicalUrl($siteUrl, $this->generateUrl($route, $parameters, UrlGeneratorInterface::ABSOLUTE_PATH));
         if (isset($entries[$url])) {
             return;
         }
 
         $alternates = [];
         foreach (['ar', 'fr', 'en'] as $language) {
-            $alternates[$language] = $this->generateUrl(
-                $route,
-                array_replace($parameters, ['_locale' => $language]),
-                UrlGeneratorInterface::ABSOLUTE_URL
+            $alternates[$language] = $this->canonicalUrl(
+                $siteUrl,
+                $this->generateUrl(
+                    $route,
+                    array_replace($parameters, ['_locale' => $language]),
+                    UrlGeneratorInterface::ABSOLUTE_PATH
+                )
             );
         }
         $alternates['x-default'] = $alternates['ar'];
@@ -211,5 +223,10 @@ class PublicController extends AbstractController
     private function escapeXml(string $value): string
     {
         return htmlspecialchars($value, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+    }
+
+    private function canonicalUrl(string $siteUrl, string $path): string
+    {
+        return rtrim($siteUrl, '/').'/'.ltrim($path, '/');
     }
 }
