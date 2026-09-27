@@ -6,7 +6,7 @@
     {% else %}<link rel="preload" href="{{ asset('assets/fonts/alexandria-latin-wght-normal.woff2') }}" as="font" type="font/woff2" crossorigin>{% endif %}
 {% endblock %}
 {% block stylesheets %}
-    <link rel="stylesheet" href="{{ asset('assets/village.css') }}?v=2">
+    <link rel="stylesheet" href="{{ asset('assets/village.css') }}?v=3">
     {% if locale == 'ar' %}<link rel="stylesheet" href="{{ asset('assets/arabic.css') }}?v=1">{% endif %}
     <link rel="stylesheet" href="{{ asset('assets/oasis.css') }}?v=3">
 {% endblock %}
@@ -33,6 +33,12 @@
     <div class="footer-intro"><a href="{{ path('app_home', {_locale: locale}) }}">{{ locale == 'ar' ? 'بازمة' : 'Bazma' }}<span>.</span></a><p>{{ settings is defined ? settings.value('footer_text_' ~ locale, 'village.footer'|trans) : 'village.footer'|trans }}</p></div>
     <div><h2>{{ 'nav.discover'|trans }}</h2><a href="{{ path('app_home', {_locale: locale}) }}#decouvrir">{{ 'village.village'|trans }}</a><a href="{{ path('app_gallery', {_locale: locale}) }}">{{ 'nav.gallery'|trans }}</a><a href="{{ path('app_home', {_locale: locale}) }}#actualites">{{ 'nav.news'|trans }}</a></div>
     <div><h2>{{ 'village.together'|trans }}</h2><a href="{{ path('app_home', {_locale: locale}) }}#associations">{{ 'nav.associations'|trans }}</a><a href="{{ path('app_home', {_locale: locale}) }}#reseaux">{{ 'nav.social'|trans }}</a></div>
-    <div class="footer-bottom"><span>&copy; <bdi>{{ 'now'|date('Y') }}</bdi> {{ locale == 'ar' ? 'بازمة' : 'Bazma' }} · {{ 'village.location'|trans }}</span><a href="#main-content">{{ 'village.top'|trans }} &uarr;</a></div>
+    <div class="footer-bottom">
+        <div class="footer-credits">
+            <span>&copy; <bdi>{{ 'now'|date('Y') }}</bdi> {{ locale == 'ar' ? 'بازمة' : 'Bazma' }} · {{ 'village.location'|trans }}</span>
+            <span class="footer-developer">{{ 'footer.developed_by'|trans }} <a href="https://www.linkedin.com/in/maher-jaber-110b14b8/" target="_blank" rel="noopener noreferrer"><bdi>Maher Jaber</bdi><span aria-hidden="true">↗</span></a></span>
+        </div>
+        <a href="#main-content">{{ 'village.top'|trans }} &uarr;</a>
+    </div>
 </footer>
 {% endblock %}

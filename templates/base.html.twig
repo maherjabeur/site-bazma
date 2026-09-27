@@ -6,7 +6,11 @@
         <title>{% block title %}{{ 'brand'|trans }}{% endblock %}</title>
         <meta name="description" content="{% block meta_description %}{{ 'meta.description'|trans }}{% endblock %}">
         <meta name="robots" content="{% block meta_robots %}index,follow,max-image-preview:large{% endblock %}">
-        <meta name="theme-color" content="#087c66">
+        <meta name="theme-color" content="#1d342c">
+        <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+        <link rel="icon" href="{{ asset('favicon-32x32.png') }}" type="image/png" sizes="32x32">
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+        <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}" sizes="180x180">
         <link rel="canonical" href="{% block canonical_url %}{{ app.request.uri }}{% endblock %}">
         {% block alternate_links %}{% endblock %}
         <meta property="og:type" content="{% block og_type %}website{% endblock %}">
