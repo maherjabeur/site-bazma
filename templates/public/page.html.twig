@@ -36,7 +36,7 @@
 {% block content %}
 <main id="main-content" class="article-page">
     {% if page.imageUrl %}
-        <img class="article-hero" src="{{ page.imageUrl|webp_image|available_image }}" alt="{{ page.localizedTitle(locale) }}">
+        <img class="article-hero" src="{{ page.imageUrl|webp_image|available_image }}" alt="{{ page.localizedTitle(locale) }}" width="1600" height="900" fetchpriority="high" decoding="async">
     {% endif %}
     <article class="article-body">
         <p class="eyebrow">{{ 'article.discover'|trans }}</p>
@@ -49,7 +49,7 @@
                 <div class="gallery-grid">
                     {% for item in media %}
                         <figure>
-                            <img src="{{ item.imageUrl|webp_image|available_image }}" alt="{{ item.title }}">
+                            <img src="{{ item.imageUrl|webp_image|available_image }}" alt="{{ item.title }}" width="800" height="600" loading="lazy" decoding="async">
                             <figcaption><strong>{{ item.title }}</strong>{% if item.caption %}<span>{{ item.caption }}</span>{% endif %}</figcaption>
                         </figure>
                     {% endfor %}

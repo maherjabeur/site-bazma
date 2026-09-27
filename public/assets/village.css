@@ -4,6 +4,7 @@
 .village-site h1, .village-site h2, .village-site h3, .village-site p { overflow-wrap: anywhere; }
 .village-site a, .village-site button { -webkit-tap-highlight-color: transparent; }
 .village-site a:focus-visible, .village-site button:focus-visible { outline: 3px solid #bf771b; outline-offset: 5px; }
+.village-site button { touch-action: manipulation; }
 .village-site section[id], #main-content { scroll-margin-top: 100px; }
 .skip-link { position: fixed; top: -100px; inset-inline-start: 20px; z-index: 100; background: #fff; padding: 12px 20px; }
 .skip-link:focus { top: 12px; }
@@ -173,3 +174,14 @@ html[lang="ar"] .editorial-heading h2 { font-family: var(--font-arabic-heading);
     html[lang="ar"] .editorial-heading h2 { font-size: 27px; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .village-site *, .village-site *::before, .village-site *::after { transition: none !important; animation: none !important; } }
+@media (forced-colors: active) {
+    .village-site a:focus-visible, .village-site button:focus-visible { outline: 3px solid CanvasText; }
+    .brand-mark, .village-site .button, .story-filters button.is-active { border: 1px solid CanvasText; }
+}
+@media print {
+    .village-topline, .village-header, .village-footer, .hero-slider-controls, .scroll-progress, .story-filters { display: none !important; }
+    .village-site, .village-site .article-page, .village-site .article-body { background: #fff !important; color: #000 !important; }
+    .village-site .article-body { width: 100%; padding: 24px 0; }
+    .village-site a { color: #000; text-decoration: underline; }
+    .village-site .article-hero { max-height: 320px; }
+}

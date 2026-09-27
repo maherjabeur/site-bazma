@@ -154,6 +154,8 @@
                         <img
                             src="{{ imageSrc }}"
                             alt="{{ title }}"
+                            width="1200"
+                            height="900"
                             loading="{{ loop.index <= 3 ? 'eager' : 'lazy' }}"
                             decoding="async"
                             {% if loop.first %}fetchpriority="high"{% endif %}
@@ -173,7 +175,7 @@
         </div>
     </section>
 
-    <div class="gallery-lightbox" data-gallery-lightbox role="dialog" aria-modal="true" aria-label="{{ 'nav.gallery'|trans }}" hidden>
+    <div class="gallery-lightbox" data-gallery-lightbox role="dialog" aria-modal="true" aria-labelledby="gallery-lightbox-title" hidden>
         <div class="gallery-lightbox-frame">
             <button class="gallery-lightbox-close" type="button" data-gallery-close aria-label="{{ 'gallery.close'|trans }}">&times;</button>
             <button class="gallery-lightbox-arrow" type="button" data-gallery-prev aria-label="{{ 'gallery.previous'|trans }}">{% if locale == 'ar' %}&rsaquo;{% else %}&lsaquo;{% endif %}</button>
@@ -181,7 +183,7 @@
             <button class="gallery-lightbox-arrow" type="button" data-gallery-next aria-label="{{ 'gallery.next'|trans }}">{% if locale == 'ar' %}&lsaquo;{% else %}&rsaquo;{% endif %}</button>
             <div class="gallery-lightbox-caption">
                 <span data-gallery-lightbox-counter dir="ltr"></span>
-                <strong data-gallery-lightbox-title></strong>
+                <strong id="gallery-lightbox-title" data-gallery-lightbox-title></strong>
                 <p data-gallery-lightbox-credit></p>
             </div>
         </div>

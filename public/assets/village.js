@@ -11,13 +11,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const open = toggle.getAttribute('aria-expanded') !== 'true';
             toggle.setAttribute('aria-expanded', String(open));
             navigation.classList.toggle('is-open', open);
+            if (open) navigation.querySelector('a')?.focus({preventScroll: true});
         });
         navigation.addEventListener('click', event => { if (event.target.closest('a')) close(); });
         document.addEventListener('keydown', event => {
             if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') { close(); toggle.focus(); }
         });
         document.addEventListener('click', event => { if (!event.target.closest('.village-header')) close(); });
-        window.matchMedia('(min-width: 961px)').addEventListener('change', close);
+        const desktopQuery = window.matchMedia('(min-width: 961px)');
+        if (desktopQuery.addEventListener) desktopQuery.addEventListener('change', close);
+        else desktopQuery.addListener(close);
     }
     const lightbox = document.querySelector('[data-gallery-lightbox]');
     if (lightbox) {
@@ -64,6 +67,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         slider.addEventListener('mouseenter', () => window.clearInterval(timer));
         slider.addEventListener('mouseleave', schedule);
+        slider.addEventListener('focusin', () => window.clearInterval(timer));
+        slider.addEventListener('focusout', event => { if (!slider.contains(event.relatedTarget)) schedule(); });
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) window.clearInterval(timer);
+            else schedule();
+        });
         show(0);
         schedule();
     }

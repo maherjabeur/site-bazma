@@ -41,9 +41,9 @@
     {% set heroSlides = [heroImage] %}
     {% for image in images|slice(0, 4) %}{% if image.imageUrl not in heroSlides %}{% set heroSlides = heroSlides|merge([image.imageUrl]) %}{% endif %}{% endfor %}
     <section class="village-hero">
-        <div class="hero-visual" data-hero-slider aria-roledescription="carousel" aria-label="{{ 'interactive.hero_label'|trans }}">
-            <div class="hero-slides">{% for slide in heroSlides %}<img class="village-hero-image{{ loop.first ? ' is-active' : '' }}" src="{{ slide|webp_image|available_image('/uploads/galerie-508827300-24067667929588022-5905114708121139324-n-06cc27679f.webp') }}" alt="{{ loop.first ? 'village.landscape'|trans : 'interactive.slide_alt'|trans({'%number%': loop.index}) }}" {{ loop.first ? 'fetchpriority="high"' : 'loading="lazy"' }} width="1600" height="1000" data-hero-slide>{% endfor %}</div>
-            <span class="hero-photo-label"><span data-slide-number>01</span> / {{ '%02d'|format(heroSlides|length) }} · {{ 'village.location'|trans }}</span>
+        <div class="hero-visual" data-hero-slider role="region" aria-roledescription="carousel" aria-label="{{ 'interactive.hero_label'|trans }}">
+            <div class="hero-slides">{% for slide in heroSlides %}<img class="village-hero-image{{ loop.first ? ' is-active' : '' }}" src="{{ slide|webp_image|available_image('/uploads/galerie-508827300-24067667929588022-5905114708121139324-n-06cc27679f.webp') }}" alt="{{ loop.first ? 'village.landscape'|trans : 'interactive.slide_alt'|trans({'%number%': loop.index}) }}" {{ loop.first ? 'fetchpriority="high"' : 'loading="lazy" decoding="async"' }} width="1600" height="1000" data-hero-slide>{% endfor %}</div>
+            <span class="hero-photo-label" aria-live="off"><span data-slide-number>01</span> / {{ '%02d'|format(heroSlides|length) }} · {{ 'village.location'|trans }}</span>
             {% if heroSlides|length > 1 %}<div class="hero-slider-controls"><button type="button" data-slide-prev aria-label="{{ 'interactive.previous'|trans }}">←</button><button type="button" data-slide-toggle aria-label="{{ 'interactive.pause'|trans }}" data-pause-label="{{ 'interactive.pause'|trans }}" data-play-label="{{ 'interactive.play'|trans }}">Ⅱ</button><button type="button" data-slide-next aria-label="{{ 'interactive.next'|trans }}">→</button></div>{% endif %}
             <span class="oasis-seal" aria-hidden="true">بازمة<br><small>BAZMA</small></span>
         </div>

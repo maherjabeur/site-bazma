@@ -6,11 +6,11 @@
     {% else %}<link rel="preload" href="{{ asset('assets/fonts/alexandria-latin-wght-normal.woff2') }}" as="font" type="font/woff2" crossorigin>{% endif %}
 {% endblock %}
 {% block stylesheets %}
-    <link rel="stylesheet" href="{{ asset('assets/village.css') }}?v=3">
+    <link rel="stylesheet" href="{{ asset('assets/village.css') }}?v=4">
     {% if locale == 'ar' %}<link rel="stylesheet" href="{{ asset('assets/arabic.css') }}?v=1">{% endif %}
     <link rel="stylesheet" href="{{ asset('assets/oasis.css') }}?v=3">
 {% endblock %}
-{% block javascripts %}<script src="{{ asset('assets/village.js') }}?v=2" defer></script>{% endblock %}
+{% block javascripts %}<script src="{{ asset('assets/village.js') }}?v=3" defer></script>{% endblock %}
 {% block body %}
 <a class="skip-link" href="#main-content">{{ 'village.skip'|trans }}</a>
 <div class="village-topline"><span>{{ 'oasis.welcome'|trans }}</span><span>{{ 'village.location'|trans }} <span aria-hidden="true">✳</span></span></div>
@@ -24,7 +24,7 @@
         <a href="{{ path('app_home', {_locale: locale}) }}#associations">{{ 'nav.associations'|trans }}</a>
         <span class="village-languages" aria-label="{{ 'village.languages'|trans }}">
             {% set route = app.request.attributes.get('_route') %}{% set params = app.request.attributes.get('_route_params')|default({}) %}
-            {% for language, label in {fr: 'FR', ar: 'العربية', en: 'EN'} %}<a href="{{ path(route, params|merge({_locale: language})) }}" lang="{{ language }}" dir="{{ language == 'ar' ? 'rtl' : 'ltr' }}" hreflang="{{ language }}" aria-label="{{ {fr: 'Français', ar: 'العربية', en: 'English'}[language] }}" {% if locale == language %}aria-current="true"{% endif %}>{{ label }}</a>{% endfor %}
+            {% for language, label in {fr: 'FR', ar: 'العربية', en: 'EN'} %}<a href="{{ path(route, params|merge({_locale: language})) }}" lang="{{ language }}" dir="{{ language == 'ar' ? 'rtl' : 'ltr' }}" hreflang="{{ language }}" aria-label="{{ {fr: 'Français', ar: 'العربية', en: 'English'}[language] }}" {% if locale == language %}aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}
         </span>
     </nav>
 </header>

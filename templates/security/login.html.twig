@@ -11,12 +11,12 @@
     <form method="post" class="panel">
         <h1>Connexion CMS</h1>
         {% if error %}
-            <p class="alert">{{ error.messageKey|trans(error.messageData, 'security') }}</p>
+            <p class="alert" role="alert">{{ error.messageKey|trans(error.messageData, 'security') }}</p>
         {% endif %}
-        <label>Email</label>
-        <input type="email" value="{{ last_username }}" name="_username" autocomplete="email" required autofocus>
-        <label>Mot de passe</label>
-        <input type="password" name="_password" autocomplete="current-password" required>
+        <label for="login-email">Email</label>
+        <input id="login-email" type="email" value="{{ last_username }}" name="_username" autocomplete="username" inputmode="email" required autofocus>
+        <label for="login-password">Mot de passe</label>
+        <input id="login-password" type="password" name="_password" autocomplete="current-password" required>
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
         <button type="submit">Entrer</button>
     </form>
