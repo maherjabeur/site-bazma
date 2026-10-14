@@ -8,9 +8,9 @@
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('assets/village.css') }}?v=4">
     {% if locale == 'ar' %}<link rel="stylesheet" href="{{ asset('assets/arabic.css') }}?v=1">{% endif %}
-    <link rel="stylesheet" href="{{ asset('assets/oasis.css') }}?v=4">
+    <link rel="stylesheet" href="{{ asset('assets/oasis.css') }}?v=5">
 {% endblock %}
-{% block javascripts %}<script src="{{ asset('assets/village.js') }}?v=3" defer></script>{% endblock %}
+{% block javascripts %}<script src="{{ asset('assets/village.js') }}?v=4" defer></script>{% endblock %}
 {% block body %}
 <a class="skip-link" href="#main-content">{{ 'village.skip'|trans }}</a>
 <div class="village-topline{{ app.request.attributes.get('_route') == 'app_home' ? ' has-map' : '' }}">

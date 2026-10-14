@@ -92,6 +92,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }));
 
+    document.querySelectorAll('[data-facebook-share]').forEach(link => {
+        link.addEventListener('click', event => {
+            if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+            event.preventDefault();
+            const width = 680;
+            const height = 600;
+            const left = Math.max(0, Math.round(window.screenX + (window.outerWidth - width) / 2));
+            const top = Math.max(0, Math.round(window.screenY + (window.outerHeight - height) / 2));
+            const popup = window.open(link.href, 'facebook-share', `popup=yes,width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+            if (popup) popup.focus();
+            else window.location.assign(link.href);
+        });
+    });
+
     const animatedItems = document.querySelectorAll('.village-section > *, .oasis-introduction > *, .village-pulse > div');
     if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         document.documentElement.classList.add('has-reveal');
