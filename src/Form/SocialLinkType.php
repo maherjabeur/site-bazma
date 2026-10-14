@@ -19,10 +19,10 @@ class SocialLinkType extends AbstractType
         $builder
             ->add('platform', TextType::class, ['label' => 'Plateforme'])
             ->add('category', TextType::class, ['label' => 'Catégorie'])
-            ->add('title', TextType::class, ['label' => 'Titre FR'])
+            ->add('title', TextType::class, ['label' => 'Titre FR', 'required' => false, 'empty_data' => ''])
             ->add('titleEn', TextType::class, ['label' => 'Titre EN', 'required' => false])
             ->add('titleAr', TextType::class, ['label' => 'Titre AR', 'required' => false, 'attr' => ['dir' => 'rtl']])
-            ->add('summary', TextareaType::class, ['label' => 'Résumé FR', 'attr' => ['rows' => 4]])
+            ->add('summary', TextareaType::class, ['label' => 'Résumé FR', 'required' => false, 'empty_data' => '', 'attr' => ['rows' => 4]])
             ->add('summaryEn', TextareaType::class, ['label' => 'Résumé EN', 'required' => false, 'attr' => ['rows' => 4]])
             ->add('summaryAr', TextareaType::class, ['label' => 'Résumé AR', 'required' => false, 'attr' => ['rows' => 4, 'dir' => 'rtl']])
             ->add('url', TextType::class, ['label' => 'Adresse du lien'])

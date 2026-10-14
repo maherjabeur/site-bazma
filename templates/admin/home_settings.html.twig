@@ -29,6 +29,8 @@
         <form class="admin-form" method="post" enctype="multipart/form-data">
             <input type="hidden" name="_token" value="{{ csrf_token('homepage_settings') }}">
 
+            <p class="cms-translation-note"><strong>Traduction automatique activée.</strong> Pour chaque texte, remplissez seulement le français, l’anglais ou l’arabe. Les deux autres versions seront créées lors de l’enregistrement.</p>
+
             <div class="homepage-preview">
                 <img src="{{ (values.hero_image ?: '/assets/bazma-hero.webp')|webp_image }}" alt="">
                 <div>

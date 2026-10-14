@@ -16,7 +16,7 @@ class GalleryImageType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('title', TextType::class, ['label' => 'Titre FR'])
+            ->add('title', TextType::class, ['label' => 'Titre FR', 'required' => false, 'empty_data' => ''])
             ->add('titleEn', TextType::class, ['label' => 'Titre EN', 'required' => false])
             ->add('titleAr', TextType::class, ['label' => 'Titre AR', 'required' => false, 'attr' => ['dir' => 'rtl']])
             ->add('imageUrl', TextType::class, ['label' => 'Chemin image local', 'required' => false, 'help' => 'Front public: utilisez /uploads/... ou /assets/.... Les URLs externes ne sont pas affichées dans la galerie.'])

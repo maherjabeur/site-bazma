@@ -17,11 +17,11 @@ class CommunityOrganizationType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('name', TextType::class, ['label' => 'Nom FR'])
+            ->add('name', TextType::class, ['label' => 'Nom FR', 'required' => false, 'empty_data' => ''])
             ->add('nameEn', TextType::class, ['label' => 'Nom EN', 'required' => false])
             ->add('nameAr', TextType::class, ['label' => 'Nom AR', 'required' => false, 'attr' => ['dir' => 'rtl']])
             ->add('type', TextType::class, ['label' => 'Type'])
-            ->add('description', TextareaType::class, ['label' => 'Description FR', 'attr' => ['rows' => 5]])
+            ->add('description', TextareaType::class, ['label' => 'Description FR', 'required' => false, 'empty_data' => '', 'attr' => ['rows' => 5]])
             ->add('descriptionEn', TextareaType::class, ['label' => 'Description EN', 'required' => false, 'attr' => ['rows' => 5]])
             ->add('descriptionAr', TextareaType::class, ['label' => 'Description AR', 'required' => false, 'attr' => ['rows' => 5, 'dir' => 'rtl']])
             ->add('url', TextType::class, ['label' => 'Lien source', 'required' => false])

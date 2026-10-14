@@ -30,22 +30,27 @@ use App\Repository\PageRepository;
 use App\Repository\SiteSettingRepository;
 use App\Repository\SocialLinkRepository;
 use App\Service\ContentApprovalManager;
+use App\Service\AutomaticTranslationService;
 use App\Service\ImageUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\String\Slugger\AsciiSlugger;
 
 #[Route('/admin')]
 class AdminController extends AbstractController
 {
-    public function __construct(private readonly ImageUploader $imageUploader)
-    {
+    public function __construct(
+        private readonly ImageUploader $imageUploader,
+        private readonly AutomaticTranslationService $automaticTranslation,
+    ) {
     }
 
     #[Route('', name: 'admin_dashboard')]
@@ -375,6 +380,14 @@ class AdminController extends AbstractController
                 $pendingSettings[$key] = trim((string) $request->request->get($key, ''));
             }
 
+            try {
+                $translationCount = $this->completeHomepageTranslations($pendingSettings);
+            } catch (\Throwable $exception) {
+                $this->addFlash('error', $exception->getMessage());
+
+                return $this->redirectToRoute('admin_home_settings');
+            }
+
             if ($this->approvalRequired($em)) {
                 $this->persistApprovalRequest($em, $this->approvalManager($em)->settingsGroupRequest($pendingSettings, $this->currentAdminUser()));
                 $this->addFlash('success', 'Demande envoyee au super administrateur pour validation.');
@@ -389,6 +402,9 @@ class AdminController extends AbstractController
             }
 
             $em->flush();
+            if ($translationCount > 0) {
+                $this->addFlash('success', sprintf('%d traduction%s générée%s automatiquement.', $translationCount, $translationCount > 1 ? 's' : '', $translationCount > 1 ? 's' : ''));
+            }
             $this->addFlash('success', 'Accueil enregistré.');
 
             return $this->redirectToRoute('admin_home_settings');
@@ -655,6 +671,16 @@ class AdminController extends AbstractController
         $form = $this->createForm($type, $entity, $formOptions);
         $form->handleRequest($request);
 
+        $translationCount = 0;
+        if ($form->isSubmitted() && $form->isValid()) {
+            try {
+                $translationCount = $this->completeEntityTranslations($entity);
+                $this->generateSlugWhenMissing($em, $entity);
+            } catch (\Throwable $exception) {
+                $form->addError(new FormError($exception->getMessage()));
+            }
+        }
+
         if ($form->isSubmitted() && $form->isValid()) {
             if ($entity instanceof Page && $entity->isSystemPage()) {
                 $entity->setSlug(Page::DONATION_SLUG)->setPublished(true);
@@ -708,6 +734,9 @@ class AdminController extends AbstractController
                     $this->addFlash('success', sprintf('%d ancienne actualite%s archivee%s automatiquement.', $archivedCount, $archivedCount > 1 ? 's' : '', $archivedCount > 1 ? 's' : ''));
                 }
             }
+            if ($translationCount > 0) {
+                $this->addFlash('success', sprintf('%d traduction%s générée%s automatiquement.', $translationCount, $translationCount > 1 ? 's' : '', $translationCount > 1 ? 's' : ''));
+            }
             $this->addFlash('success', 'Contenu enregistré.');
 
             if ((string) $request->request->get('_action') === 'save_stay') {
@@ -727,6 +756,128 @@ class AdminController extends AbstractController
             'context' => $this->getFormContext($entity) + ['backParams' => $this->dashboardParams($entity)],
             'editorMediaLibrary' => $this->getEditorMediaLibrary($em, $entity),
         ] + $extra);
+    }
+
+    private function completeEntityTranslations(object $entity): int
+    {
+        $groups = match (true) {
+            $entity instanceof Page => [
+                'Titre' => ['fr' => $entity->getTitle(), 'en' => $entity->getTitleEn(), 'ar' => $entity->getTitleAr()],
+                'Résumé' => ['fr' => $entity->getSummary(), 'en' => $entity->getSummaryEn(), 'ar' => $entity->getSummaryAr()],
+                'Contenu' => ['fr' => $entity->getBody(), 'en' => $entity->getBodyEn(), 'ar' => $entity->getBodyAr()],
+            ],
+            $entity instanceof Event => [
+                'Titre' => ['fr' => $entity->getTitle(), 'en' => $entity->getTitleEn(), 'ar' => $entity->getTitleAr()],
+                'Contenu' => ['fr' => $entity->getDescription(), 'en' => $entity->getDescriptionEn(), 'ar' => $entity->getDescriptionAr()],
+            ],
+            $entity instanceof GalleryImage => [
+                'Titre' => ['fr' => $entity->getTitle(), 'en' => $entity->getTitleEn(), 'ar' => $entity->getTitleAr()],
+            ],
+            $entity instanceof CommunityOrganization => [
+                'Nom' => ['fr' => $entity->getName(), 'en' => $entity->getNameEn(), 'ar' => $entity->getNameAr()],
+                'Description' => ['fr' => $entity->getDescription(), 'en' => $entity->getDescriptionEn(), 'ar' => $entity->getDescriptionAr()],
+            ],
+            $entity instanceof SocialLink => [
+                'Titre' => ['fr' => $entity->getTitle(), 'en' => $entity->getTitleEn(), 'ar' => $entity->getTitleAr()],
+                'Résumé' => ['fr' => $entity->getSummary(), 'en' => $entity->getSummaryEn(), 'ar' => $entity->getSummaryAr()],
+            ],
+            default => [],
+        };
+
+        if ($entity instanceof Event && array_filter([$entity->getExcerpt(), $entity->getExcerptEn(), $entity->getExcerptAr()], fn ($value): bool => trim((string) $value) !== '')) {
+            $groups['Résumé court'] = ['fr' => $entity->getExcerpt(), 'en' => $entity->getExcerptEn(), 'ar' => $entity->getExcerptAr()];
+        }
+
+        if ($groups === []) {
+            return 0;
+        }
+
+        $result = $this->automaticTranslation->completeGroups($groups);
+        $completed = $result['groups'];
+
+        if ($entity instanceof Page) {
+            $entity
+                ->setTitle($completed['Titre']['fr'])->setTitleEn($completed['Titre']['en'])->setTitleAr($completed['Titre']['ar'])
+                ->setSummary($completed['Résumé']['fr'])->setSummaryEn($completed['Résumé']['en'])->setSummaryAr($completed['Résumé']['ar'])
+                ->setBody($completed['Contenu']['fr'])->setBodyEn($completed['Contenu']['en'])->setBodyAr($completed['Contenu']['ar']);
+        } elseif ($entity instanceof Event) {
+            $entity
+                ->setTitle($completed['Titre']['fr'])->setTitleEn($completed['Titre']['en'])->setTitleAr($completed['Titre']['ar'])
+                ->setDescription($completed['Contenu']['fr'])->setDescriptionEn($completed['Contenu']['en'])->setDescriptionAr($completed['Contenu']['ar']);
+            if (isset($completed['Résumé court'])) {
+                $entity->setExcerpt($completed['Résumé court']['fr'])->setExcerptEn($completed['Résumé court']['en'])->setExcerptAr($completed['Résumé court']['ar']);
+            }
+        } elseif ($entity instanceof GalleryImage) {
+            $entity->setTitle($completed['Titre']['fr'])->setTitleEn($completed['Titre']['en'])->setTitleAr($completed['Titre']['ar']);
+        } elseif ($entity instanceof CommunityOrganization) {
+            $entity
+                ->setName($completed['Nom']['fr'])->setNameEn($completed['Nom']['en'])->setNameAr($completed['Nom']['ar'])
+                ->setDescription($completed['Description']['fr'])->setDescriptionEn($completed['Description']['en'])->setDescriptionAr($completed['Description']['ar']);
+        } elseif ($entity instanceof SocialLink) {
+            $entity
+                ->setTitle($completed['Titre']['fr'])->setTitleEn($completed['Titre']['en'])->setTitleAr($completed['Titre']['ar'])
+                ->setSummary($completed['Résumé']['fr'])->setSummaryEn($completed['Résumé']['en'])->setSummaryAr($completed['Résumé']['ar']);
+        }
+
+        return $result['translated'];
+    }
+
+    /** @param array<string, string> $settings */
+    private function completeHomepageTranslations(array &$settings): int
+    {
+        $labels = [
+            'eyebrow' => 'Petit texte',
+            'title' => 'Grand titre',
+            'intro' => 'Texte d’introduction',
+            'primary_label' => 'Bouton principal',
+            'secondary_label' => 'Bouton secondaire',
+        ];
+        $groups = [];
+        foreach ($labels as $key => $label) {
+            $values = [
+                'fr' => $settings['hero_'.$key.'_fr'] ?? '',
+                'en' => $settings['hero_'.$key.'_en'] ?? '',
+                'ar' => $settings['hero_'.$key.'_ar'] ?? '',
+            ];
+            if (array_filter($values, fn (string $value): bool => trim($value) !== '')) {
+                $groups[$label] = $values;
+            }
+        }
+
+        if ($groups === []) {
+            return 0;
+        }
+
+        $result = $this->automaticTranslation->completeGroups($groups);
+        $keys = array_flip($labels);
+        foreach ($result['groups'] as $label => $values) {
+            foreach ($values as $language => $value) {
+                $settings['hero_'.$keys[$label].'_'.$language] = $value;
+            }
+        }
+
+        return $result['translated'];
+    }
+
+    private function generateSlugWhenMissing(EntityManagerInterface $em, object $entity): void
+    {
+        if (!($entity instanceof Page || $entity instanceof Event) || trim($entity->getSlug()) !== '') {
+            return;
+        }
+
+        $base = (new AsciiSlugger())->slug(strip_tags($entity->getTitleEn() ?: $entity->getTitle()))->lower()->toString();
+        $base = $base !== '' ? $base : 'contenu';
+        $candidate = $base;
+        $suffix = 2;
+        do {
+            $existing = $em->getRepository($entity::class)->findOneBy(['slug' => $candidate]);
+            if ($existing === null || $existing === $entity) {
+                break;
+            }
+            $candidate = $base.'-'.$suffix++;
+        } while (true);
+
+        $entity->setSlug($candidate);
     }
 
     private function dashboardParams(object $entity): array

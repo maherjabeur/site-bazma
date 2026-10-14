@@ -487,6 +487,9 @@
             {% if form_errors(form) %}
                 <div class="admin-form-errors">{{ form_errors(form) }}</div>
             {% endif %}
+            {% if attribute(form, 'titleEn') is defined or attribute(form, 'nameEn') is defined %}
+                <p class="cms-translation-note"><strong>Traduction automatique activée.</strong> Saisissez chaque texte dans une seule langue (français, anglais ou arabe). Les deux champs vides seront traduits à l’enregistrement ; une traduction déjà saisie ne sera jamais remplacée.</p>
+            {% endif %}
             <div class="admin-form-grid">
                 {% set richFieldNames = ['body', 'bodyEn', 'bodyAr', 'description', 'descriptionEn', 'descriptionAr'] %}
                 {% for child in form %}

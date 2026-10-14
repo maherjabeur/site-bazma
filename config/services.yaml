@@ -34,5 +34,12 @@ services:
         arguments:
             $projectDir: '%kernel.project_dir%'
 
+    App\Service\AutomaticTranslationService:
+        arguments:
+            $cache: '@cache.app'
+            $provider: '%env(TRANSLATION_PROVIDER)%'
+            $endpoint: '%env(TRANSLATION_API_URL)%'
+            $apiKey: '%env(TRANSLATION_API_KEY)%'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

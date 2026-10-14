@@ -84,6 +84,7 @@
 .cms .admin-editor-aside { position: static; width: 100%; max-width: none; margin-bottom: 25px; }
 .cms .admin-editor-aside > a { display: inline-block; font-size: 12px; margin-top: 12px; color: var(--muted); }
 .cms .admin-form { max-width: 1080px; }
+.cms .cms-translation-note { margin: 0 0 20px; padding: 14px 16px; border-left: 3px solid var(--accent); border-radius: 4px; background: #e8f2ed; color: #38554d; font-size: 12px; line-height: 1.6; }
 .cms .admin-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
 .cms .admin-field { min-width: 0; }
 .cms .admin-field label { font-size: 12px; font-weight: 650; color: var(--ink); }

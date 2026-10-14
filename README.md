@@ -143,6 +143,18 @@ L'espace CMS est disponible sur `/admin`.
 
 Les comptes sont crees en base et les permissions sont gerees depuis l'ecran `Moderateurs`.
 
+### Traduction automatique FR / EN / AR
+
+Dans les formulaires multilingues, il suffit de remplir une seule version d'un texte. Lors de l'enregistrement, le CMS complète uniquement les langues vides et conserve toujours les traductions saisies manuellement. Le fournisseur par défaut ne demande ni compte ni clé API et les résultats sont mis en cache pendant un an.
+
+La traduction peut aussi utiliser une instance LibreTranslate auto-hébergée, gratuite et open source :
+
+```text
+TRANSLATION_PROVIDER=libretranslate
+TRANSLATION_API_URL=http://libretranslate:5000/translate
+TRANSLATION_API_KEY=
+```
+
 ## Images Et Videos
 
 Le CMS accepte JPG, PNG et WebP. Les images importees sont converties automatiquement en WebP et stockees dans `public/uploads`.

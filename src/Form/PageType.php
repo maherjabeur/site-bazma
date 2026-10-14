@@ -17,14 +17,14 @@ class PageType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('title', TextType::class, ['label' => 'Titre FR'])
+            ->add('title', TextType::class, ['label' => 'Titre FR', 'required' => false, 'empty_data' => ''])
             ->add('titleEn', TextType::class, ['label' => 'Titre EN', 'required' => false])
             ->add('titleAr', TextType::class, ['label' => 'Titre AR', 'required' => false, 'attr' => ['dir' => 'rtl']])
-            ->add('slug', TextType::class, ['label' => 'Adresse de la page', 'help' => $options['protected_page'] ? 'Adresse protégée pour cette page système.' : 'Exemple: histoire-bazma', 'disabled' => $options['protected_page']])
-            ->add('summary', TextType::class, ['label' => 'Résumé FR'])
+            ->add('slug', TextType::class, ['label' => 'Adresse de la page', 'required' => false, 'empty_data' => '', 'help' => $options['protected_page'] ? 'Adresse protégée pour cette page système.' : 'Facultatif : généré automatiquement depuis le titre.', 'disabled' => $options['protected_page']])
+            ->add('summary', TextType::class, ['label' => 'Résumé FR', 'required' => false, 'empty_data' => ''])
             ->add('summaryEn', TextType::class, ['label' => 'Résumé EN', 'required' => false])
             ->add('summaryAr', TextType::class, ['label' => 'Résumé AR', 'required' => false, 'attr' => ['dir' => 'rtl']])
-            ->add('body', TextareaType::class, ['label' => 'Contenu FR', 'attr' => ['rows' => 12]])
+            ->add('body', TextareaType::class, ['label' => 'Contenu FR', 'required' => false, 'empty_data' => '', 'attr' => ['rows' => 12]])
             ->add('bodyEn', TextareaType::class, ['label' => 'Contenu EN', 'required' => false, 'attr' => ['rows' => 8]])
             ->add('bodyAr', TextareaType::class, ['label' => 'Contenu AR', 'required' => false, 'attr' => ['rows' => 8, 'dir' => 'rtl']])
             ->add('imageUrl', TextType::class, ['label' => 'Image WebP', 'required' => false, 'help' => 'Chemin conseillé: /assets/nom-image.webp'])

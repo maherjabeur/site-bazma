@@ -18,10 +18,10 @@ class EventType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('title', TextType::class, ['label' => 'Titre FR'])
+            ->add('title', TextType::class, ['label' => 'Titre FR', 'required' => false, 'empty_data' => ''])
             ->add('titleEn', TextType::class, ['label' => 'Titre EN', 'required' => false])
             ->add('titleAr', TextType::class, ['label' => 'Titre AR', 'required' => false, 'attr' => ['dir' => 'rtl']])
-            ->add('slug', TextType::class, ['label' => 'Adresse publique', 'help' => 'Exemple: fete-du-village-2026'])
+            ->add('slug', TextType::class, ['label' => 'Adresse publique', 'required' => false, 'empty_data' => '', 'help' => 'Facultatif : généré automatiquement depuis le titre.'])
             ->add('category', TextType::class, ['label' => 'Rubrique', 'help' => 'Exemples: Jeunesse, Sport, Associations, Mémoire'])
             ->add('eventDate', DateType::class, ['label' => 'Date de l’actualité', 'required' => false, 'widget' => 'single_text'])
             ->add('location', TextType::class, ['label' => 'Lieu', 'help' => 'Exemple: Bazma, Maison des jeunes, terrain de sport...'])
@@ -30,7 +30,7 @@ class EventType extends AbstractType
             ->add('excerpt', TextareaType::class, ['label' => 'Résumé court FR', 'required' => false, 'help' => 'Deux lignes maximum pour le slider et les cartes publiques.', 'attr' => ['rows' => 3]])
             ->add('excerptEn', TextareaType::class, ['label' => 'Résumé court EN', 'required' => false, 'attr' => ['rows' => 3]])
             ->add('excerptAr', TextareaType::class, ['label' => 'Résumé court AR', 'required' => false, 'attr' => ['rows' => 3, 'dir' => 'rtl']])
-            ->add('description', TextareaType::class, ['label' => 'Contenu complet FR', 'help' => 'Ajoutez les détails, le contexte, les personnes ou structures concernées, puis les médias utiles.', 'attr' => ['rows' => 8]])
+            ->add('description', TextareaType::class, ['label' => 'Contenu complet FR', 'required' => false, 'empty_data' => '', 'help' => 'Ajoutez les détails, le contexte, les personnes ou structures concernées, puis les médias utiles.', 'attr' => ['rows' => 8]])
             ->add('descriptionEn', TextareaType::class, ['label' => 'Description EN', 'required' => false, 'attr' => ['rows' => 6]])
             ->add('descriptionAr', TextareaType::class, ['label' => 'Description AR', 'required' => false, 'attr' => ['rows' => 6, 'dir' => 'rtl']])
             ->add('sourceUrl', TextType::class, ['label' => 'Lien source', 'required' => false])
