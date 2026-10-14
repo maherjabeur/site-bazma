@@ -10,7 +10,7 @@ Site Symfony avec CMS prive pour gerer l'accueil, les pages, la mediatheque, les
 composer install --no-dev --optimize-autoloader
 ```
 
-2. Configurer les variables d'environnement du serveur a partir de `.env.prod.example`.
+2. Configurer l'unique fichier `.env` à la racine du projet avec les valeurs de production. Aucun `.env.local`, `.env.prod` ou `.env.local.php` n'est nécessaire.
 
 3. Preparer la base:
 
@@ -30,6 +30,12 @@ php bin/console app:create-admin-user email@domaine.tn "MotDePasseFort" "Adminis
 ```bash
 php bin/console cache:clear --env=prod --no-debug
 php bin/console cache:warmup --env=prod --no-debug
+```
+
+6. Vérifier toute la configuration sans afficher les secrets :
+
+```bash
+php bin/console app:production-check --env=prod --no-debug
 ```
 
 6. Pointer le serveur web vers le dossier `public/`.
@@ -103,7 +109,7 @@ http://localhost:8000
 http://127.0.0.1:8000
 ```
 
-La configuration locale par defaut utilise:
+Pour basculer temporairement vers une base MySQL locale, modifier le même fichier `.env` avec :
 
 ```text
 DATABASE_URL="mysql://root:@127.0.0.1:3306/bazma?serverVersion=8.4.7&charset=utf8mb4"
@@ -121,7 +127,9 @@ Ce projet doit etre deploye sur Render avec le runtime `Docker`, pas avec un run
 
 Si un service Render existe deja avec un mauvais runtime, recreer le service en choisissant `Docker` dans le champ `Language`.
 
-Pour une base PostgreSQL Render, renseigner:
+Render utilise lui aussi l'unique fichier `.env` inclus dans l'image. Supprimer dans le panneau Render les anciennes variables applicatives qui portent les mêmes noms, car elles auraient priorité sur le fichier.
+
+Pour utiliser une base PostgreSQL Render à la place de la base configurée actuellement, modifier dans `.env` :
 
 ```text
 APP_ENV=prod
@@ -130,12 +138,14 @@ APP_SECRET=<long-secret-aleatoire>
 DEFAULT_URI=https://ton-domaine-render-ou-ton-domaine-final
 DATABASE_URL=<Internal Database URL de Render>
 DB_SERVER_VERSION=18.0.0
-RUN_MIGRATIONS=1
+TRANSLATION_PROVIDER=google
+TRANSLATION_API_URL=https://translate.googleapis.com/translate_a/single
+TRANSLATION_API_KEY=
 ```
 
-Utiliser l'`Internal Database URL` si le service web est aussi sur Render. L'`External Database URL` fonctionne aussi, mais elle passe par l'acces public.
+Utiliser l'`Internal Database URL` si le service web et PostgreSQL sont dans le même compte Render. L'`External Database URL` fonctionne aussi, mais elle passe par l'accès public.
 
-Si Render affiche `Invalid platform version "" specified`, verifier dans `Environment` que `DB_SERVER_VERSION` n'est pas vide. Pour PostgreSQL 18, la valeur recommandee est `18.0.0`. Si `DATABASE_URL` contient un parametre `serverVersion`, il doit etre `serverVersion=18.0.0`, jamais `serverVersion=`.
+Le dépôt ou l'archive de déploiement doit rester privé puisque ce mode à fichier unique conserve les secrets dans `.env`.
 
 ## Administration
 

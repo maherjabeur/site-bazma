@@ -8,8 +8,11 @@
     "require": {
         "php": ">=8.2",
         "ext-ctype": "*",
+        "ext-curl": "*",
         "ext-gd": "*",
         "ext-iconv": "*",
+        "ext-pdo": "*",
+        "ext-pdo_mysql": "*",
         "composer/ca-bundle": "^1.5.14",
         "doctrine/doctrine-bundle": "^2.18",
         "doctrine/doctrine-migrations-bundle": "^3.7",

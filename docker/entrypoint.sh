@@ -5,8 +5,7 @@ APP_PORT="${PORT:-10000}"
 
 APP_ENV="${APP_ENV:-prod}"
 APP_DEBUG="${APP_DEBUG:-0}"
-DEFAULT_URI="${DEFAULT_URI:-https://www.bazma.tn}"
-export APP_ENV APP_DEBUG DEFAULT_URI
+export APP_ENV APP_DEBUG
 
 echo "Listen ${APP_PORT}" > /etc/apache2/ports.conf
 sed "s/__PORT__/${APP_PORT}/g" /etc/apache2/sites-available/000-default.conf.template > /etc/apache2/sites-available/000-default.conf
@@ -50,12 +49,15 @@ elif [ -n "${DB_HOST:-}" ]; then
 fi
 
 {
-    printf 'SetEnv APP_ENV "%s"\n' "${APP_ENV}"
-    printf 'SetEnv APP_DEBUG "%s"\n' "${APP_DEBUG}"
-    printf 'SetEnv APP_SECRET "%s"\n' "${APP_SECRET:-}"
-    printf 'SetEnv DEFAULT_URI "%s"\n' "${DEFAULT_URI}"
-    printf 'SetEnv DATABASE_URL "%s"\n' "${DATABASE_URL:-}"
-    printf 'SetEnv DB_SERVER_VERSION "%s"\n' "${DB_SERVER_VERSION:-}"
+    printf 'PassEnv APP_ENV\n'
+    printf 'PassEnv APP_DEBUG\n'
+    [ -z "${APP_SECRET+x}" ] || printf 'PassEnv APP_SECRET\n'
+    [ -z "${DEFAULT_URI+x}" ] || printf 'PassEnv DEFAULT_URI\n'
+    [ -z "${DATABASE_URL+x}" ] || printf 'PassEnv DATABASE_URL\n'
+    [ -z "${DB_SERVER_VERSION+x}" ] || printf 'PassEnv DB_SERVER_VERSION\n'
+    [ -z "${TRANSLATION_PROVIDER+x}" ] || printf 'PassEnv TRANSLATION_PROVIDER\n'
+    [ -z "${TRANSLATION_API_URL+x}" ] || printf 'PassEnv TRANSLATION_API_URL\n'
+    [ -z "${TRANSLATION_API_KEY+x}" ] || printf 'PassEnv TRANSLATION_API_KEY\n'
 } > /etc/apache2/conf-available/app-env.conf
 a2enconf app-env >/dev/null
 
@@ -86,7 +88,7 @@ elif [ -n "${DB_HOST:-}" ]; then
     done
 fi
 
-if [ "${RUN_MIGRATIONS:-0}" = "1" ]; then
+if [ "${RUN_MIGRATIONS:-1}" = "1" ]; then
     php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
 fi
 

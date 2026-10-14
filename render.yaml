@@ -5,25 +5,4 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     plan: free
-    healthCheckPath: /
-    envVars:
-      - key: APP_ENV
-        value: prod
-      - key: APP_DEBUG
-        value: "0"
-      - key: PHP_VERSION
-        value: "8.3.0"
-      - key: COMPOSER_PLATFORM_PHP
-        value: "8.3.0"
-      - key: APP_SECRET
-        generateValue: true
-      - key: DEFAULT_URI
-        value: "https://bazma.tn"
-      - key: PORT
-        value: "10000"
-      - key: DATABASE_URL
-        sync: false
-      - key: DB_SERVER_VERSION
-        value: "18.0.0"
-      - key: RUN_MIGRATIONS
-        value: "1"
+    healthCheckPath: /healthz

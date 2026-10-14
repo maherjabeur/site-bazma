@@ -4,13 +4,14 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$env:APP_ENV = "prod"
-$env:APP_DEBUG = "0"
 
 Push-Location (Join-Path $PSScriptRoot "..")
 try {
     & $Composer install --no-dev --optimize-autoloader --no-interaction
     if ($LASTEXITCODE -ne 0) { throw "Installation Composer echouee." }
+
+    & $Php bin/console app:production-check --env=prod --no-debug
+    if ($LASTEXITCODE -ne 0) { throw "Configuration de production invalide. Verifiez uniquement le fichier .env." }
 
     & $Php bin/console doctrine:query:sql "SELECT 1" --env=prod --no-debug
     if ($LASTEXITCODE -ne 0) { throw "Connexion impossible. Verifiez DATABASE_URL sur le serveur." }

@@ -8,12 +8,24 @@
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('assets/village.css') }}?v=4">
     {% if locale == 'ar' %}<link rel="stylesheet" href="{{ asset('assets/arabic.css') }}?v=1">{% endif %}
-    <link rel="stylesheet" href="{{ asset('assets/oasis.css') }}?v=3">
+    <link rel="stylesheet" href="{{ asset('assets/oasis.css') }}?v=4">
 {% endblock %}
 {% block javascripts %}<script src="{{ asset('assets/village.js') }}?v=3" defer></script>{% endblock %}
 {% block body %}
 <a class="skip-link" href="#main-content">{{ 'village.skip'|trans }}</a>
-<div class="village-topline"><span>{{ 'oasis.welcome'|trans }}</span><span>{{ 'village.location'|trans }} <span aria-hidden="true">✳</span></span></div>
+<div class="village-topline{{ app.request.attributes.get('_route') == 'app_home' ? ' has-map' : '' }}">
+    <span>{{ 'oasis.welcome'|trans }}</span>
+    <span class="village-topline-location">
+        <span>{{ 'village.location'|trans }} <span class="topline-star" aria-hidden="true">✳</span></span>
+        {% if app.request.attributes.get('_route') == 'app_home' %}
+            <a class="village-map-link" href="https://www.google.com/maps/search/?api=1&amp;query=33.66583%2C9.01167" target="_blank" rel="noopener noreferrer" aria-label="{{ 'nav.map'|trans }} — {{ 'village.location'|trans }}">
+                <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 21s7-6.08 7-13a7 7 0 1 0-14 0c0 6.92 7 13 7 13Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="8" r="2.4" fill="currentColor"/></svg>
+                {{ 'nav.map'|trans }}
+                <span aria-hidden="true">↗</span>
+            </a>
+        {% endif %}
+    </span>
+</div>
 <header class="village-header">
     <a class="village-brand" href="{{ path('app_home', {_locale: locale}) }}" aria-label="{{ 'nav.home'|trans }}"><span class="brand-mark" aria-hidden="true">B.</span><span><strong>{{ locale == 'ar' ? 'بازمة' : 'Bazma' }}</strong><small>{{ 'village.location'|trans }}</small></span></a>
     <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="village-navigation" aria-label="{{ 'village.menu'|trans }}" title="{{ 'village.menu'|trans }}" hidden><span></span><span></span><span></span></button>
