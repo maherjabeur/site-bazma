@@ -16,25 +16,25 @@ class Page
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 120)]
+    #[ORM\Column(type: Types::TEXT)]
     private string $title = '';
 
-    #[ORM\Column(length: 120, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $titleEn = null;
 
-    #[ORM\Column(length: 120, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $titleAr = null;
 
     #[ORM\Column(length: 140, unique: true)]
     private string $slug = '';
 
-    #[ORM\Column(length: 180)]
+    #[ORM\Column(type: Types::TEXT)]
     private string $summary = '';
 
-    #[ORM\Column(length: 180, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $summaryEn = null;
 
-    #[ORM\Column(length: 180, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $summaryAr = null;
 
     #[ORM\Column(type: Types::TEXT)]
@@ -46,7 +46,7 @@ class Page
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $bodyAr = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $imageUrl = null;
 
     #[ORM\Column]

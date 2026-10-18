@@ -14,13 +14,13 @@ class CommunityOrganization
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 160)]
+    #[ORM\Column(type: Types::TEXT)]
     private string $name = '';
 
-    #[ORM\Column(length: 160, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $nameEn = null;
 
-    #[ORM\Column(length: 160, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $nameAr = null;
 
     #[ORM\Column(length: 80)]
@@ -35,10 +35,10 @@ class CommunityOrganization
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $descriptionAr = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $url = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: Types::TEXT)]
     private string $imageUrl = '/assets/bazma-memory.webp';
 
     #[ORM\Column]

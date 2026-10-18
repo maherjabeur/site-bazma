@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\AdminUserRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -19,7 +20,7 @@ class AdminUser implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180, unique: true)]
     private string $email = '';
 
-    #[ORM\Column(length: 120)]
+    #[ORM\Column(type: Types::TEXT)]
     private string $name = '';
 
     /**
@@ -34,13 +35,13 @@ class AdminUser implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private bool $active = true;
 
-    #[ORM\Column(length: 160, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $profession = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $facebookUrl = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $profileImageUrl = null;
 
     public function getId(): ?int { return $this->id; }

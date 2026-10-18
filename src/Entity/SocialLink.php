@@ -17,13 +17,13 @@ class SocialLink
     #[ORM\Column(length: 80)]
     private string $platform = 'Facebook';
 
-    #[ORM\Column(length: 160)]
+    #[ORM\Column(type: Types::TEXT)]
     private string $title = '';
 
-    #[ORM\Column(length: 160, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $titleEn = null;
 
-    #[ORM\Column(length: 160, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $titleAr = null;
 
     #[ORM\Column(type: Types::TEXT)]
@@ -35,10 +35,10 @@ class SocialLink
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $summaryAr = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: Types::TEXT)]
     private string $url = '';
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: Types::TEXT)]
     private string $imageUrl = '';
 
     #[ORM\Column(length: 80)]

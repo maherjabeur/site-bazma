@@ -27,7 +27,7 @@ class ContentApprovalRequest
     #[ORM\Column(nullable: true)]
     private ?int $entityId = null;
 
-    #[ORM\Column(length: 180)]
+    #[ORM\Column(type: Types::TEXT)]
     private string $entityLabel = '';
 
     #[ORM\Column(type: Types::JSON)]

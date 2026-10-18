@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\PageMediaRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PageMediaRepository::class)]
@@ -17,13 +18,13 @@ class PageMedia
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Page $page = null;
 
-    #[ORM\Column(length: 180)]
+    #[ORM\Column(type: Types::TEXT)]
     private string $title = '';
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: Types::TEXT)]
     private string $imageUrl = '';
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $caption = null;
 
     #[ORM\Column]

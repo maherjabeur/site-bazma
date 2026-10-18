@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\GalleryImageRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: GalleryImageRepository::class)]
@@ -13,22 +14,22 @@ class GalleryImage
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 160)]
+    #[ORM\Column(type: Types::TEXT)]
     private string $title = '';
 
-    #[ORM\Column(length: 160, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $titleEn = null;
 
-    #[ORM\Column(length: 160, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $titleAr = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: Types::TEXT)]
     private string $imageUrl = '';
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $credit = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $sourceUrl = null;
 
     #[ORM\Column]
